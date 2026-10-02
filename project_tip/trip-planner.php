@@ -76,14 +76,14 @@ $places_data = [];
 
 // ใช้รูปจริงที่เก็บไว้ในโปรเจกต์ เพื่อให้รูปแสดงบน Railway ได้แน่นอน
 $place_images = [
-    'thi-lo-su' => 'images/places/thi-lo-su.jpg',
-    'doi-musoe' => 'images/places/doi-musoe.jpg',
-    'bhumibol-dam' => 'images/places/bhumibol-dam.jpg',
-    'mae-sot-market' => 'images/places/mae-sot-market.jpg',
-    'lan-sang' => 'images/places/lan-sang.jpg',
-    'taksin-maharat' => 'images/places/taksin-maharat.jpg',
-    'wat-borommathat' => 'images/places/wat-borommathat.jpg',
-    'friendship-bridge' => 'images/places/friendship-bridge.jpg',
+    'thi-lo-su' => '/images/places/thi-lo-su.jpg',
+    'doi-musoe' => '/images/places/doi-musoe.jpg',
+    'bhumibol-dam' => '/images/places/bhumibol-dam.jpg',
+    'mae-sot-market' => '/images/places/mae-sot-market.jpg',
+    'lan-sang' => '/images/places/lan-sang.jpg',
+    'taksin-maharat' => '/images/places/taksin-maharat.jpg',
+    'wat-borommathat' => '/images/places/wat-borommathat.jpg',
+    'friendship-bridge' => '/images/places/friendship-bridge.jpg',
 ];
 
 $query_places = "SELECT place_key, name_place, location_place, lat_place, lng_place, image_place FROM place ORDER BY id_place";
@@ -1092,7 +1092,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         const card = document.createElement('div');
         card.className = 'place-card';
         card.innerHTML = `
-            <div class="photo" style="background-image:url('${place.img}')"></div>
+            <div class="photo" style="background-image:url('${place.img}')" role="img" aria-label="${escapeHtml(place.name)}"></div>
             <div class="info">
                 <h3>${place.name}</h3>
                 <p class="meta">${place.loc}</p>
