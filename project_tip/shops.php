@@ -182,6 +182,7 @@ if($result_shops){
 
     footer{ border-top: 1px solid var(--line); padding: 2rem 0 2.5rem; color: var(--ink-soft); font-size: 0.85rem; }
 </style>
+    <link rel="stylesheet" href="modern.css">
 </head>
 <body>
 

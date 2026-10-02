@@ -78,6 +78,7 @@ $count_accounts = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) AS 
     .action-card .go{ display: inline-block; margin-top: 0.9rem; font-size: 0.85rem; color: var(--green-deep); font-weight: 600; }
     .action-card:hover{ outline: 1px solid var(--green); }
 </style>
+    <link rel="stylesheet" href="modern.css">
 </head>
 <body>
 
