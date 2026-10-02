@@ -73,6 +73,19 @@ $username_account = $who['username_account'] ?? '';
 
 // ดึงสถานที่เที่ยวทั้งหมดจากฐานข้อมูล (แทนของเดิมที่ hardcode ไว้ในไฟล์)
 $places_data = [];
+
+// ใช้รูปจริงที่เก็บไว้ในโปรเจกต์ เพื่อให้รูปแสดงบน Railway ได้แน่นอน
+$place_images = [
+    'thi-lo-su' => 'images/places/thi-lo-su.jpg',
+    'doi-musoe' => 'images/places/doi-musoe.jpg',
+    'bhumibol-dam' => 'images/places/bhumibol-dam.jpg',
+    'mae-sot-market' => 'images/places/mae-sot-market.jpg',
+    'lan-sang' => 'images/places/lan-sang.jpg',
+    'taksin-maharat' => 'images/places/taksin-maharat.jpg',
+    'wat-borommathat' => 'images/places/wat-borommathat.jpg',
+    'friendship-bridge' => 'images/places/friendship-bridge.jpg',
+];
+
 $query_places = "SELECT place_key, name_place, location_place, lat_place, lng_place, image_place FROM place ORDER BY id_place";
 $result_places = mysqli_query($connect, $query_places);
 while($row = mysqli_fetch_assoc($result_places)){
@@ -82,7 +95,7 @@ while($row = mysqli_fetch_assoc($result_places)){
         'loc'  => $row['location_place'],
         'lat'  => (float) $row['lat_place'],
         'lng'  => (float) $row['lng_place'],
-        'img'  => $row['image_place'],
+        'img'  => $place_images[$row['place_key']] ?? ($row['image_place'] ?? ''),
     ];
 }
 
