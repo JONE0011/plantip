@@ -449,7 +449,7 @@
         <div class="dest-grid">
 
             <article class="dest-card" data-place="thi-lo-su">
-                <div class="photo" style="background-image:url('images/dest-thilosu.jpg')">
+                <div class="photo" style="background-image:url('images/places/thi-lo-su.jpg')">
                     <span class="tag">ยอดฮิต</span>
                     <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มน้ำตกทีลอซูลงในทริป">
                         <span class="plus">+</span>
@@ -466,7 +466,7 @@
             </article>
 
             <article class="dest-card" data-place="doi-musoe">
-                <div class="photo" style="background-image:url('images/dest-doimusoe.jpg')">
+                <div class="photo" style="background-image:url('images/places/doi-musoe.jpg')">
                     <span class="tag">ทะเลหมอก</span>
                     <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มดอยมูเซอลงในทริป">
                         <span class="plus">+</span>
@@ -483,7 +483,7 @@
             </article>
 
             <article class="dest-card" data-place="bhumibol-dam">
-                <div class="photo" style="background-image:url('images/dest-bhumibol.jpg')">
+                <div class="photo" style="background-image:url('images/places/bhumibol-dam.jpg')">
                     <span class="tag">ธรรมชาติ</span>
                     <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มเขื่อนภูมิพลลงในทริป">
                         <span class="plus">+</span>
@@ -500,7 +500,7 @@
             </article>
 
             <article class="dest-card" data-place="mae-sot-market">
-                <div class="photo" style="background-image:url('images/dest-maesot.jpg')">
+                <div class="photo" style="background-image:url('images/places/mae-sot-market.jpg')">
                     <span class="tag">ชายแดน</span>
                     <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มตลาดริมเมยลงในทริป">
                         <span class="plus">+</span>
