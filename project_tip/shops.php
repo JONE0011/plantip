@@ -7,7 +7,7 @@ $is_logged_in = isset($_SESSION['id_account']);
 
 // ดึงร้านทั้งหมดที่แสดงผลอยู่ (status_shop = 1) พร้อมชื่อคนเพิ่ม
 $shops_data = [];
-$query_shops = "SELECT s.id_shop, s.name_shop, s.category_shop, s.description_shop,
+$query_shops = "SELECT s.id_shop, s.id_account, s.name_shop, s.category_shop, s.description_shop,
                         s.address_shop, s.lat_shop, s.lng_shop, s.image_shop,
                         a.username_account
                  FROM shop s
@@ -19,6 +19,7 @@ if($result_shops){
     while($row = mysqli_fetch_assoc($result_shops)){
         $shops_data[] = [
             'id'       => (int) $row['id_shop'],
+            'owner'    => (int) $row['id_account'],
             'name'     => $row['name_shop'],
             'category' => $row['category_shop'],
             'desc'     => $row['description_shop'],
@@ -165,6 +166,8 @@ if($result_shops){
     }
     .shop-card .addr{ margin: 0; font-size: 0.78rem; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .shop-card .by{ margin: 0.2rem 0 0; font-size: 0.72rem; color: var(--ink-soft); opacity: 0.8; }
+    .shop-edit{display:inline-block;margin-top:.35rem;color:var(--green);font-size:.72rem;font-weight:600;text-decoration:none;border:1px solid rgba(36,89,63,.18);border-radius:999px;padding:.18rem .55rem;background:#f3f7f1}
+    .shop-edit:hover{background:var(--green);color:#fff}
 
     #map{ height: 620px; border-radius: var(--radius); overflow: hidden; }
     .leaflet-div-icon{ background: transparent; border: none; }
@@ -213,6 +216,10 @@ if($result_shops){
 
     <?php if(isset($_GET['added'])): ?>
         <div class="success-box">เพิ่มร้านสำเร็จแล้ว ขอบคุณที่ช่วยเติมข้อมูลให้เพื่อน ๆ นักเดินทางคนอื่นครับ 🙌</div>
+    <?php elseif(isset($_GET['edited'])): ?>
+        <div class="success-box">แก้ไขข้อมูลร้านของคุณเรียบร้อยแล้วครับ ✨</div>
+    <?php elseif(isset($_GET['error']) && $_GET['error']==='edit'): ?>
+        <div class="success-box" style="background:#fdeceb;border-color:#f2b8b5;color:#8a2c25">แก้ไขข้อมูลร้านไม่สำเร็จ กรุณาตรวจสอบข้อมูลแล้วลองใหม่</div>
     <?php endif; ?>
 
     <div class="filters" id="filters">
@@ -276,6 +283,7 @@ if($result_shops){
                     <h3>${shop.name}</h3>
                     <p class="addr">${shop.address || 'ไม่ระบุที่อยู่'}</p>
                     <p class="by">เพิ่มโดย ${shop.by}</p>
+                    ${<?php echo $is_logged_in ? 'true' : 'false'; ?> && shop.owner === <?php echo $is_logged_in ? (int)$_SESSION['id_account'] : 0; ?> ? `<a class="shop-edit" href="edit-shop.php?id=${shop.id}" onclick="event.stopPropagation()">แก้ไขข้อมูล</a>` : ''}
                 </div>`;
             card.addEventListener('click', () => {
                 map.setView([shop.lat, shop.lng], 15);
