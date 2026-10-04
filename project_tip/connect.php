@@ -34,6 +34,13 @@ if (!mysqli_real_connect(
 
 mysqli_set_charset($connect, 'utf8mb4');
 
+// รองรับทริปที่มีทั้งสถานที่เที่ยวและร้านอาหาร/คาเฟ่/ร้านค้า
+@mysqli_query($connect, "ALTER TABLE trip_place MODIFY id_place INT(11) NULL");
+@mysqli_query($connect, "ALTER TABLE trip_place ADD COLUMN item_type VARCHAR(20) NOT NULL DEFAULT 'place' AFTER id_account");
+@mysqli_query($connect, "ALTER TABLE trip_place ADD COLUMN id_shop INT(11) NULL AFTER id_place");
+@mysqli_query($connect, "ALTER TABLE trip_place ADD KEY idx_trip_shop (id_shop)");
+@mysqli_query($connect, "ALTER TABLE trip_place ADD CONSTRAINT trip_place_shop_fk FOREIGN KEY (id_shop) REFERENCES shop(id_shop) ON DELETE CASCADE");
+
 // เก็บประวัติสถานที่ที่สมาชิกเคยเพิ่มเข้าทริป แยกจากทริปปัจจุบัน
 mysqli_query($connect, "CREATE TABLE IF NOT EXISTS place_history (
     id_history BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
