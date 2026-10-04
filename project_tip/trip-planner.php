@@ -3,7 +3,7 @@ session_start();
 $open_connect = 1;
 require('connect.php');
 
-// ห�T�?า�Tี�?�.�?อ�?�?�,�?าสู�^ระ�s�sก�^อ�T �?�zราะ�-ริ�>�oูกกั�s id_account
+// หน้านี้ต้องเข้าสู่ระบบก่อน เพราะทริปผูกกับ id_account
 if(!isset($_SESSION['id_account'])){
     die(header('Location: form-login.php'));
 }elseif(isset($_GET['logout'])){
@@ -13,14 +13,14 @@ if(!isset($_SESSION['id_account'])){
 
 $id_account = (int) $_SESSION['id_account'];
 
-// �sั�T�-ึกลำ�"ั�s�-ริ�>�f�T�"�Yล�O�Tี�?�?ลย �"ม�^�.�?อ�?�f�S�? save-trip.php
-// รั�s JSON: {"places":["place_key1","place_key2",...]}
+// บันทึกลำดับทริปในไฟล์นี้เลย ไม่ต้องใช้ save-trip.php
+// รับ JSON: {"places":["place_key1","place_key2",...]}
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_trip'){
     header('Content-Type: application/json; charset=utf-8');
     $input = json_decode(file_get_contents('php://input'), true);
     $places = isset($input['places']) && is_array($input['places']) ? $input['places'] : [];
 
-    // รอ�?รั�s�-ั�?�? place:ส�-า�T�-ี�^�?�-ี�^ยว และ shop:ร�?า�Tอาหาร/�"า�?�Y�^/ร�?า�T�"�?า
+    // ทำความสะอาด id และตัดค่าซ้ำ โดยคงลำดับเดิม
     $clean = [];
     foreach($places as $item){
         $item = trim((string)$item);
@@ -99,10 +99,10 @@ $result_who = mysqli_query($connect, $query_who);
 $who = mysqli_fetch_assoc($result_who);
 $username_account = $who['username_account'] ?? '';
 
-// �"ึ�?ส�-า�T�-ี�^�?�-ี�^ยว�-ั�?�?หม�"�^ากฐา�T�,�?อมูล (แ�-�T�,อ�?�?�"ิม�-ี�^ hardcode �"ว�?�f�T�"�Yล�O)
+// ดึงสถานที่เที่ยวทั้งหมดจากฐานข้อมูล (แทนของเดิมที่ hardcode ไว้ในไฟล์)
 $places_data = [];
 
-// �f�S�?รู�>�^ริ�?�-ี�^�?ก�?�s�"ว�?�f�T�,�>ร�?�^ก�.�O �?�zื�^อ�fห�?รู�>แส�"�?�s�T Railway �"�"�?แ�T�^�Tอ�T
+// ใช้รูปจริงที่เก็บไว้ในโปรเจกต์ เพื่อให้รูปแสดงบน Railway ได้แน่นอน
 $place_images = [
     'thi-lo-su' => '/images/places/thi-lo-su.jpg',
     'doi-musoe' => '/images/places/doi-musoe.jpg',
@@ -118,18 +118,17 @@ $query_places = "SELECT place_key, name_place, location_place, lat_place, lng_pl
 $result_places = mysqli_query($connect, $query_places);
 while($row = mysqli_fetch_assoc($result_places)){
     $places_data[] = [
-        'id'       => 'place:' . $row['place_key'],
+        'id'       => $row['place_key'],
         'name'     => $row['name_place'],
         'loc'      => $row['location_place'],
         'lat'      => (float) $row['lat_place'],
         'lng'      => (float) $row['lng_place'],
         'img'      => $place_images[$row['place_key']] ?? ($row['image_place'] ?? ''),
-        'category' => 'ส�-า�T�-ี�^�?�-ี�^ยว',
+        'category' => 'สถานที่เที่ยว',
         'type'     => 'place',
     ];
 }
 
-// �"ึ�?ร�?า�T�-ี�^สมา�Sิก�?�zิ�^ม�"ว�?มา�?�>�?�Tหมว�"ร�?า�Tอาหาร/�"า�?�Y�^/ร�?า�T�"�?า�f�T�.ัววา�?แ�o�T�-ริ�>
 $query_shops = "SELECT id_shop, name_shop, category_shop, description_shop, address_shop, lat_shop, lng_shop, image_shop
                 FROM shop
                 WHERE status_shop = 1
@@ -139,7 +138,7 @@ while($row = mysqli_fetch_assoc($result_shops)){
     $places_data[] = [
         'id'       => 'shop:' . (int)$row['id_shop'],
         'name'     => $row['name_shop'],
-        'loc'      => $row['address_shop'] ?: ($row['description_shop'] ?: '�.าก'),
+        'loc'      => $row['address_shop'] ?: ($row['description_shop'] ?: 'ตาก'),
         'lat'      => (float) $row['lat_shop'],
         'lng'      => (float) $row['lng_shop'],
         'img'      => $row['image_shop'] ?: '',
@@ -148,7 +147,7 @@ while($row = mysqli_fetch_assoc($result_shops)){
     ];
 }
 
-// �"ึ�?�-ริ�>�-ี�^�sั�T�-ึก�"ว�?�,อ�?�sัญ�Sี�Tี�? �?รีย�?�.ามลำ�"ั�s�-ี�^�^ั�"�"ว�?
+// ดึงทริปที่บันทึกไว้ของบัญชีนี้ เรียงตามลำดับที่จัดไว้
 $trip_data = [];
 $query_trip = "SELECT tp.item_type, p.place_key, s.id_shop
                 FROM trip_place tp
@@ -161,7 +160,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     if(($row['item_type'] ?? 'place') === 'shop' && $row['id_shop']){
         $trip_data[] = 'shop:' . (int)$row['id_shop'];
     }elseif($row['place_key']){
-        $trip_data[] = 'place:' . $row['place_key'];
+        $trip_data[] = $row['place_key'];
     }
 }
 
@@ -172,7 +171,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>วา�?แ�o�T�-ริ�> | �?�-ี�^ยว�.าก</title>
+<title>วางแผนทริป | เที่ยวตาก</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -254,7 +253,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         border-radius: 0;
     }
 
-    /* �^ุ�"สำหรั�sลาก�>รั�s�"วามสู�?�,อ�?แ�o�T�-ี�^ */
+    /* จุดสำหรับลากปรับความสูงของแผนที่ */
     .map-resize-handle{
         position: absolute;
         left: 0;
@@ -400,6 +399,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
     }
 
     /* Horizontal cards, matching the reference composition */
+    .category-tabs{display:flex;gap:.55rem;flex-wrap:wrap;margin:0 0 1rem;padding:.15rem 0}
+    .category-tab{border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:999px;padding:.48rem .85rem;font:500 .72rem 'Prompt',sans-serif;cursor:pointer;transition:.2s ease}
+    .category-tab:hover{border-color:var(--green);color:var(--green);transform:translateY(-1px)}
+    .category-tab.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 5px 14px rgba(36,89,63,.18)}
+    .place-card .category-badge{display:inline-block;margin-bottom:.28rem;padding:.18rem .45rem;border-radius:999px;background:#edf3ed;color:var(--green);font-size:.58rem;font-weight:600}
+    .place-card .photo.placeholder{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#dfe6dc,#cbd5c8);color:#718071;font-size:2rem}
+    .no-results{grid-column:1/-1;padding:2rem;text-align:center;color:var(--ink-soft)}
     .place-grid{
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -408,15 +414,6 @@ while($row = mysqli_fetch_assoc($result_trip)){
         scrollbar-width: thin;
         padding-bottom: .15rem;
     }
-
-
-    .category-tabs{display:flex;gap:.55rem;flex-wrap:wrap;margin:0 0 1rem;padding:.15rem 0}
-    .category-tab{border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:999px;padding:.48rem .85rem;font:500 .72rem 'Prompt',sans-serif;cursor:pointer;transition:.2s ease}
-    .category-tab:hover{border-color:var(--green);color:var(--green);transform:translateY(-1px)}
-    .category-tab.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 5px 14px rgba(36,89,63,.18)}
-    .place-card .category-badge{display:inline-block;margin-bottom:.28rem;padding:.18rem .45rem;border-radius:999px;background:#edf3ed;color:var(--green);font-size:.58rem;font-weight:600}
-    .place-card .photo.placeholder{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#dfe6dc,#cbd5c8);color:#718071;font-size:2rem}
-    .no-results{grid-column:1/-1;text-align:center;padding:2rem 1rem;color:var(--ink-soft);background:#fff;border-radius:14px;border:1px dashed var(--line);font-size:.8rem}
 
     .place-card{
         min-width: 0;
@@ -469,8 +466,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     .place-card button:hover{ background: var(--green-deep); }
     .place-card button.added{ background: var(--ink); }
-    .place-card button.added::after{ content: "อยู�^�f�T�-ริ�>แล�?ว · �?อาออก"; }
-    .place-card button:not(.added)::after{ content: "+ �?�zิ�^ม�?�,�?า�-ริ�>"; }
+    .place-card button.added::after{ content: "อยู่ในทริปแล้ว · เอาออก"; }
+    .place-card button:not(.added)::after{ content: "+ เพิ่มเข้าทริป"; }
 
     /* Right trip panel */
     .trip-panel{
@@ -1030,18 +1027,18 @@ while($row = mysqli_fetch_assoc($result_trip)){
             class="map-resize-handle"
             id="map-resize-handle"
             role="separator"
-            aria-label="ลาก�?�zื�^อ�>รั�s�"วามสู�?แ�o�T�-ี�^"
-            title="ลาก�,ึ�?�Tล�?�?�zื�^อ�>รั�s�"วามสู�?แ�o�T�-ี�^">
+            aria-label="ลากเพื่อปรับความสูงแผนที่"
+            title="ลากขึ้นลงเพื่อปรับความสูงแผนที่">
         </div>
     </section>
 
     <nav class="nav">
         <div class="wrap">
             <ul class="nav-links">
-                <li><a href="home.php">ห�T�?าแรก</a></li>
-                <li><a href="home.php#destinations">ส�-า�T�-ี�^�?�-ี�^ยว</a></li>
-                <li><a href="shops.php">ร�?า�Tอาหาร &amp; �"า�?�Y�^</a></li>
-                <li><a href="trip-planner.php" class="active">วา�?แ�o�T�-ริ�></a></li>
+                <li><a href="home.php">หน้าแรก</a></li>
+                <li><a href="home.php#destinations">สถานที่เที่ยว</a></li>
+                <li><a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a></li>
+                <li><a href="trip-planner.php" class="active">วางแผนทริป</a></li>
             </ul>
 
             <div class="nav-actions">
@@ -1054,29 +1051,29 @@ while($row = mysqli_fetch_assoc($result_trip)){
         <div class="dashboard">
 
             <section class="panel-card places-panel">
-                <h2>?????????????</h2>
-                <p class="sub">????????????????????? ???????????????????????</p>
+                <h2>สถานที่เที่ยว</h2>
+                <p class="sub">เลือกสถานที่ที่อยากไป แล้วเพิ่มเข้าทริปของคุณ</p>
                 <div class="category-tabs" id="category-tabs">
-                    <button type="button" class="category-tab active" data-category="all">???????</button>
-                    <button type="button" class="category-tab" data-category="?????????????">??? ?????????????</button>
-                    <button type="button" class="category-tab" data-category="?????????">?? ?????????</button>
-                    <button type="button" class="category-tab" data-category="?????">? ?????</button>
-                    <button type="button" class="category-tab" data-category="???????">??? ???????</button>
-                    <button type="button" class="category-tab" data-category="?????">?? ???? ?</button>
+                    <button type="button" class="category-tab active" data-category="all">ทั้งหมด</button>
+                    <button type="button" class="category-tab" data-category="สถานที่เที่ยว">🏞️ สถานที่เที่ยว</button>
+                    <button type="button" class="category-tab" data-category="ร้านอาหาร">🍜 ร้านอาหาร</button>
+                    <button type="button" class="category-tab" data-category="คาเฟ่">☕ คาเฟ่</button>
+                    <button type="button" class="category-tab" data-category="ร้านค้า">🛍️ ร้านค้า</button>
+                    <button type="button" class="category-tab" data-category="อื่นๆ">📍 อื่น ๆ</button>
                 </div>
                 <div class="place-grid" id="place-grid"></div>
             </section>
 
             <aside class="panel-card trip-panel">
-                <h2>ลำ�"ั�s�-ริ�>�,อ�?�"ุ�"</h2>
-                <p class="sub">ลากรายการ�?�zื�^อ�^ั�"ลำ�"ั�s�fหม�^</p>
+                <h2>ลำดับทริปของคุณ</h2>
+                <p class="sub">ลากรายการเพื่อจัดลำดับใหม่</p>
                 <ul id="trip-list"></ul>
 
                 <div class="trip-actions">
                     <button class="share-trip-btn" id="share-trip-btn" type="button">
-                        �-� แ�Sร�O�-ริ�>�"�?วย QR Code
+                        ▣ แชร์ทริปด้วย QR Code
                     </button>
-                    <button class="clear-btn" id="clear-trip">ล�?า�?�-ริ�>�-ั�?�?หม�"</button>
+                    <button class="clear-btn" id="clear-trip">ล้างทริปทั้งหมด</button>
                 </div>
             </aside>
 
@@ -1087,9 +1084,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
     <div class="qr-modal" id="qr-modal" aria-hidden="true">
         <div class="qr-backdrop" id="qr-backdrop"></div>
         <div class="qr-dialog" role="dialog" aria-modal="true" aria-labelledby="qr-title">
-            <button class="qr-close" id="qr-close" type="button" aria-label="�>ิ�"">�-</button>
-            <h2 id="qr-title">สแก�T�?�zื�^อ�"ู�-ริ�>�f�Tมือ�-ือ</h2>
-            <p class="qr-subtitle">ลำ�"ั�sส�-า�T�-ี�^�>ั�^�^ุ�sั�T�,อ�?�"ุ�"�^ะ�-ูก�?�>ิ�"�f�Tมือ�-ือ และแ�.�^ละส�-า�T�-ี�^สามาร�-ก�"�"�> Google Maps �"�"�?</p>
+            <button class="qr-close" id="qr-close" type="button" aria-label="ปิด">×</button>
+            <h2 id="qr-title">สแกนเพื่อดูทริปในมือถือ</h2>
+            <p class="qr-subtitle">ลำดับสถานที่ปัจจุบันของคุณจะถูกเปิดในมือถือ และแต่ละสถานที่สามารถกดไป Google Maps ได้</p>
 
             <div class="qr-box" id="qrcode"></div>
 
@@ -1097,19 +1094,19 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
             <div class="qr-url-wrap">
                 <input id="share-url" type="text" readonly>
-                <button id="copy-share-url" type="button">�"ั�"ลอกลิ�?ก�O</button>
+                <button id="copy-share-url" type="button">คัดลอกลิงก์</button>
             </div>
 
             <p class="qr-note">
-                �-�?า�?�>ิ�"�?ว�?�s�"�?วย <b>localhost</b> �,�-รศั�z�-�O�^ะ�?�>ิ�"ลิ�?ก�O�"ม�^�"�"�?
-                �fห�?�?�>ิ�"�?ว�?�s�o�^า�T IP �,อ�?�"อม�f�T Wi�?'Fi �?�"ียวกั�T �?�S�^�T
+                ถ้าเปิดเว็บด้วย <b>localhost</b> โทรศัพท์จะเปิดลิงก์ไม่ได้
+                ให้เปิดเว็บผ่าน IP ของคอมใน Wi‑Fi เดียวกัน เช่น
                 <b>192.168.1.xxx/project_tip/trip-planner.php</b>
             </p>
         </div>
     </div>
 
     <footer>
-        <div class="wrap">© <?php echo date('Y'); ?> �?�-ี�^ยว�.าก · แ�zล�.�Yอร�Oมวา�?แ�o�T�-�^อ�?�?�-ี�^ยว�^ั�?หวั�"�.าก</div>
+        <div class="wrap">© <?php echo date('Y'); ?> เที่ยวตาก · แพลตฟอร์มวางแผนท่องเที่ยวจังหวัดตาก</div>
     </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1117,30 +1114,30 @@ while($row = mysqli_fetch_assoc($result_trip)){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     // ---------- Master place data ----------
-    // �"ึ�?มา�^ากฐา�T�,�?อมูล�^ริ�?�o�^า�T PHP �"�?า�T�s�T (�.ารา�? place) แ�-�T�,อ�?�?�"ิม�-ี�^ hardcode �"ว�?
+    // ดึงมาจากฐานข้อมูลจริงผ่าน PHP ด้านบน (ตาราง place) แทนของเดิมที่ hardcode ไว้
     const PLACES = <?php echo json_encode($places_data, JSON_UNESCAPED_UNICODE); ?>;
     const PLACES_BY_ID = Object.fromEntries(PLACES.map(p => [p.id, p]));
 
-    // �-ริ�>�-ี�^�sั�T�-ึก�"ว�?�f�Tฐา�T�,�?อมูล�,อ�?�sัญ�Sี�Tี�? (�?รีย�?�.ามลำ�"ั�s�-ี�^�^ั�"�"ว�?แล�?ว)
+    // ทริปที่บันทึกไว้ในฐานข้อมูลของบัญชีนี้ (เรียงตามลำดับที่จัดไว้แล้ว)
     let trip = <?php echo json_encode($trip_data, JSON_UNESCAPED_UNICODE); ?>;
 
-    // �-�?ายั�?�"ม�^�?�"ยมี�-ริ�>�f�Tฐา�T�,�?อมูล�?ลย แ�.�^�?�"ย�?ลือก�"ว�?�.อ�Tยั�?�"ม�^ login (�?ก�?�s�f�T localStorage
-    // �^ากห�T�?า home.php) �fห�?�"ึ�?มา�f�S�?�"รั�?�?แรก แล�?ว�?�<�Y�?�,�?าฐา�T�,�?อมูล�-ั�T�-ี�?�zื�^อ�"ม�^�fห�?�,�?อมูลหาย
+    // ถ้ายังไม่เคยมีทริปในฐานข้อมูลเลย แต่เคยเลือกไว้ตอนยังไม่ login (เก็บใน localStorage
+    // จากหน้า home.php) ให้ดึงมาใช้ครั้งแรก แล้วเซฟเข้าฐานข้อมูลทันทีเพื่อไม่ให้ข้อมูลหาย
     const STORAGE_KEY = 'takTripPlaces';
     if(trip.length === 0){
         try{
             const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            trip = local.map(id => String(id).includes(':') ? String(id) : 'place:' + String(id)).filter(id => PLACES_BY_ID[id]);
+            trip = local.filter(id => PLACES_BY_ID[id]);
             if(trip.length > 0) saveTrip();
-        }catch(e){ /* �"ม�^มี�,�?อมูล�?ก�^า �"ม�^�.�?อ�?�-ำอะ�"ร */ }
+        }catch(e){ /* ไม่มีข้อมูลเก่า ไม่ต้องทำอะไร */ }
     }
 
     let saveTimer = null;
     function saveTrip(){
-        // �?ก�?�sสำรอ�?�"ว�?�f�T localStorage �"�?วย �?�oื�^อ request �"�>�?�<ิร�O�Y�?วอร�Oล�^ม
+        // เก็บสำรองไว้ใน localStorage ด้วย เผื่อ request ไปเซิร์ฟเวอร์ล่ม
         localStorage.setItem(STORAGE_KEY, JSON.stringify(trip));
 
-        // �"ี�sาว�<�Oการยิ�? request กั�Tก�"รัว �? �.อ�Tลาก�^ั�"ลำ�"ั�s
+        // ดีบาวซ์การยิง request กันกดรัว ๆ ตอนลากจัดลำดับ
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
             fetch('trip-planner.php?action=save_trip', {
@@ -1150,9 +1147,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
             })
             .then(res => res.json())
             .then(data => {
-                if(!data.success) console.error('�sั�T�-ึก�-ริ�>�"ม�^สำ�?ร�?�^:', data.message);
+                if(!data.success) console.error('บันทึกทริปไม่สำเร็จ:', data.message);
             })
-            .catch(err => console.error('�?�Sื�^อม�.�^อ�?�<ิร�O�Y�?วอร�O�"ม�^�"�"�?:', err));
+            .catch(err => console.error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้:', err));
         }, 400);
     }
 
@@ -1168,7 +1165,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             : PLACES.filter(place => place.category === activeCategory);
 
         if(visible.length === 0){
-            grid.innerHTML = '<div class="no-results">???????????????????????</div>';
+            grid.innerHTML = '<div class="no-results">ยังไม่มีข้อมูลในหมวดนี้</div>';
             return;
         }
 
@@ -1177,10 +1174,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
             card.className = 'place-card';
             const photo = place.img
                 ? '<div class="photo" style="background-image:url(\'' + escapeHtml(place.img) + '\')" role="img" aria-label="' + escapeHtml(place.name) + '"></div>'
-                : '<div class="photo placeholder" role="img" aria-label="' + escapeHtml(place.name) + '">??</div>';
+                : '<div class="photo placeholder" role="img" aria-label="' + escapeHtml(place.name) + '">📍</div>';
             card.innerHTML = photo + `
                 <div class="info">
-                    <span class="category-badge">${escapeHtml(place.category || '?????')}</span>
+                    <span class="category-badge">${escapeHtml(place.category || 'อื่นๆ')}</span>
                     <h3>${escapeHtml(place.name)}</h3>
                     <p class="meta">${escapeHtml(place.loc)}</p>
                     <button type="button" data-id="${escapeHtml(place.id)}"></button>
@@ -1199,10 +1196,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
     });
 
     function refreshGridButtons(){
-        grid.querySelectorAll('button[data-id]').forEach(btn => {
+        grid.querySelectorAll('button').forEach(btn => {
             btn.classList.toggle('added', trip.includes(btn.dataset.id));
         });
     }
+
     grid.addEventListener('click', e => {
         const btn = e.target.closest('button');
         if(!btn) return;
@@ -1222,7 +1220,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function renderTripList(){
         tripListEl.innerHTML = '';
         if(trip.length === 0){
-            tripListEl.innerHTML = '<li class="empty-hint">ยั�?�"ม�^�"�"�?�?ลือกส�-า�T�-ี�^ �?" �?�zิ�^ม�^ากรายการ�-า�?�<�?าย�"�"�?�?ลย</li>';
+            tripListEl.innerHTML = '<li class="empty-hint">ยังไม่ได้เลือกสถานที่ — เพิ่มจากรายการทางซ้ายได้เลย</li>';
             return;
         }
         trip.forEach((id, index) => {
@@ -1234,7 +1232,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
                 <span class="drag-handle">⠿</span>
                 <span class="badge">${index + 1}</span>
                 <span class="name">${place.name}<br><span class="loc">${place.loc}</span></span>
-                <button class="remove" type="button" aria-label="�?อา${place.name}ออก�^าก�-ริ�>">�-</button>`;
+                <button class="remove" type="button" aria-label="เอา${place.name}ออกจากทริป">×</button>`;
             tripListEl.appendChild(li);
         });
     }
@@ -1277,7 +1275,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
 
     // ---------- Resize map vertically ----------
-    // ลากแ�-�s�"�?า�Tล�^า�?�,อ�?แ�o�T�-ี�^�,ึ�?�T/ล�?
+    // ลากแถบด้านล่างของแผนที่ขึ้น/ลง
     const mapHero = document.getElementById('map-hero');
     const mapElement = document.getElementById('map');
     const resizeHandle = document.getElementById('map-resize-handle');
@@ -1289,11 +1287,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function applyMapHeight(height){
         const safeHeight = Math.round(height);
 
-        // �?�>ลี�^ย�T�-ั�?�?กล�^อ�?และ #map �,�"ย�.ร�? �?�zื�^อ�fห�? Leaflet �?ห�?�T�,�Tา�"�fหม�^แ�T�^�Tอ�T
+        // เปลี่ยนทั้งกล่องและ #map โดยตรง เพื่อให้ Leaflet เห็นขนาดใหม่แน่นอน
         mapHero.style.height = safeHeight + 'px';
         mapElement.style.height = safeHeight + 'px';
 
-        // รอ�fห�? browser layout �?สร�?�^แล�?ว�"�^อยสั�^�? Leaflet �"ำ�Tว�"�fหม�^
+        // รอให้ browser layout เสร็จแล้วค่อยสั่ง Leaflet คำนวณใหม่
         requestAnimationFrame(() => {
             map.invalidateSize({ pan: false, animate: false });
         });
@@ -1345,7 +1343,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             resizeHandle.releasePointerCapture(event.pointerId);
         }
 
-        // �fห�? Leaflet วา�" tile �fหม�^หลั�?�^�sการลาก
+        // ให้ Leaflet วาด tile ใหม่หลังจบการลาก
         setTimeout(() => {
             map.invalidateSize({ pan: false, animate: false });
         }, 50);
@@ -1362,7 +1360,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
     });
 
-    // �-�?ามีการ�?�>ลี�^ย�T�,�Tา�"�^าก CSS/ห�T�?า�.�^า�? �fห�? Leaflet �.าม�"�?วย
+    // ถ้ามีการเปลี่ยนขนาดจาก CSS/หน้าต่าง ให้ Leaflet ตามด้วย
     const mapResizeObserver = new ResizeObserver(() => {
         if(!resizingMap){
             const h = mapHero.getBoundingClientRect().height;
@@ -1433,17 +1431,17 @@ while($row = mysqli_fetch_assoc($result_trip)){
     const shareUrlEl = document.getElementById('share-url');
     const copyShareUrlBtn = document.getElementById('copy-share-url');
 
-    // QR �^ะ�zก place_key �.ามลำ�"ั�s�"�>�"�?วย�,�"ย�.ร�?
-    // �^ึ�?�"ม�^�.�?อ�?มี trip-share-config.php และ�"ม�^�.�?อ�?�zึ�^�? save-trip.php
+    // QR จะพก place_key ตามลำดับไปด้วยโดยตรง
+    // จึงไม่ต้องมี trip-share-config.php และไม่ต้องพึ่ง save-trip.php
     function getShareUrl(){
         const url = new URL('trip-view.php', window.location.href);
-        url.searchParams.set('places', trip.filter(id => id.startsWith('place:')).map(id => id.slice(6)).join(','));
+        url.searchParams.set('places', trip.join(','));
         return url.href;
     }
 
     function openQrModal(){
         if(trip.length === 0){
-            alert('กรุ�"า�?ลือกส�-า�T�-ี�^อย�^า�?�T�?อย 1 แห�^�?ก�^อ�Tสร�?า�? QR Code');
+            alert('กรุณาเลือกสถานที่อย่างน้อย 1 แห่งก่อนสร้าง QR Code');
             return;
         }
 
@@ -1502,13 +1500,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
     copyShareUrlBtn.addEventListener('click', async () => {
         try{
             await navigator.clipboard.writeText(shareUrlEl.value);
-            copyShareUrlBtn.textContent = '�"ั�"ลอกแล�?ว �o"';
-            setTimeout(() => copyShareUrlBtn.textContent = '�"ั�"ลอกลิ�?ก�O', 1500);
+            copyShareUrlBtn.textContent = 'คัดลอกแล้ว ✓';
+            setTimeout(() => copyShareUrlBtn.textContent = 'คัดลอกลิงก์', 1500);
         }catch(e){
             shareUrlEl.select();
             document.execCommand('copy');
-            copyShareUrlBtn.textContent = '�"ั�"ลอกแล�?ว �o"';
-            setTimeout(() => copyShareUrlBtn.textContent = '�"ั�"ลอกลิ�?ก�O', 1500);
+            copyShareUrlBtn.textContent = 'คัดลอกแล้ว ✓';
+            setTimeout(() => copyShareUrlBtn.textContent = 'คัดลอกลิงก์', 1500);
         }
     });
 
