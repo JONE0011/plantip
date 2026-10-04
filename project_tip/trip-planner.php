@@ -3,7 +3,7 @@ session_start();
 $open_connect = 1;
 require('connect.php');
 
-// à¸«à¸™à¹‰à¸²à¸™à¸µà¹‰à¸•à¹‰à¸­à¸‡à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¸à¹ˆà¸­à¸™ à¹€à¸žà¸£à¸²à¸°à¸—à¸£à¸´à¸›à¸œà¸¹à¸à¸à¸±à¸š id_account
+// ห�T�?า�Tี�?�.�?อ�?�?�,�?าสู�^ระ�s�sก�^อ�T �?�zราะ�-ริ�>�oูกกั�s id_account
 if(!isset($_SESSION['id_account'])){
     die(header('Location: form-login.php'));
 }elseif(isset($_GET['logout'])){
@@ -13,14 +13,14 @@ if(!isset($_SESSION['id_account'])){
 
 $id_account = (int) $_SESSION['id_account'];
 
-// à¸šà¸±à¸™à¸—à¸¶à¸à¸¥à¸³à¸”à¸±à¸šà¸—à¸£à¸´à¸›à¹ƒà¸™à¹„à¸Ÿà¸¥à¹Œà¸™à¸µà¹‰à¹€à¸¥à¸¢ à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¹ƒà¸Šà¹‰ save-trip.php
-// à¸£à¸±à¸š JSON: {"places":["place_key1","place_key2",...]}
+// �sั�T�-ึกลำ�"ั�s�-ริ�>�f�T�"�Yล�O�Tี�?�?ลย �"ม�^�.�?อ�?�f�S�? save-trip.php
+// รั�s JSON: {"places":["place_key1","place_key2",...]}
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_trip'){
     header('Content-Type: application/json; charset=utf-8');
     $input = json_decode(file_get_contents('php://input'), true);
     $places = isset($input['places']) && is_array($input['places']) ? $input['places'] : [];
 
-    // à¸£à¸­à¸‡à¸£à¸±à¸šà¸—à¸±à¹‰à¸‡ place:à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§ à¹à¸¥à¸° shop:à¸£à¹‰à¸²à¸™à¸­à¸²à¸«à¸²à¸£/à¸„à¸²à¹€à¸Ÿà¹ˆ/à¸£à¹‰à¸²à¸™à¸„à¹‰à¸²
+    // รอ�?รั�s�-ั�?�? place:ส�-า�T�-ี�^�?�-ี�^ยว และ shop:ร�?า�Tอาหาร/�"า�?�Y�^/ร�?า�T�"�?า
     $clean = [];
     foreach($places as $item){
         $item = trim((string)$item);
@@ -99,10 +99,10 @@ $result_who = mysqli_query($connect, $query_who);
 $who = mysqli_fetch_assoc($result_who);
 $username_account = $who['username_account'] ?? '';
 
-// à¸”à¸¶à¸‡à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”à¸ˆà¸²à¸à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ (à¹à¸—à¸™à¸‚à¸­à¸‡à¹€à¸”à¸´à¸¡à¸—à¸µà¹ˆ hardcode à¹„à¸§à¹‰à¹ƒà¸™à¹„à¸Ÿà¸¥à¹Œ)
+// �"ึ�?ส�-า�T�-ี�^�?�-ี�^ยว�-ั�?�?หม�"�^ากฐา�T�,�?อมูล (แ�-�T�,อ�?�?�"ิม�-ี�^ hardcode �"ว�?�f�T�"�Yล�O)
 $places_data = [];
 
-// à¹ƒà¸Šà¹‰à¸£à¸¹à¸›à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¹€à¸à¹‡à¸šà¹„à¸§à¹‰à¹ƒà¸™à¹‚à¸›à¸£à¹€à¸ˆà¸à¸•à¹Œ à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰à¸£à¸¹à¸›à¹à¸ªà¸”à¸‡à¸šà¸™ Railway à¹„à¸”à¹‰à¹à¸™à¹ˆà¸™à¸­à¸™
+// �f�S�?รู�>�^ริ�?�-ี�^�?ก�?�s�"ว�?�f�T�,�>ร�?�^ก�.�O �?�zื�^อ�fห�?รู�>แส�"�?�s�T Railway �"�"�?แ�T�^�Tอ�T
 $place_images = [
     'thi-lo-su' => '/images/places/thi-lo-su.jpg',
     'doi-musoe' => '/images/places/doi-musoe.jpg',
@@ -124,12 +124,12 @@ while($row = mysqli_fetch_assoc($result_places)){
         'lat'      => (float) $row['lat_place'],
         'lng'      => (float) $row['lng_place'],
         'img'      => $place_images[$row['place_key']] ?? ($row['image_place'] ?? ''),
-        'category' => 'à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§',
+        'category' => 'ส�-า�T�-ี�^�?�-ี�^ยว',
         'type'     => 'place',
     ];
 }
 
-// à¸”à¸¶à¸‡à¸£à¹‰à¸²à¸™à¸—à¸µà¹ˆà¸ªà¸¡à¸²à¸Šà¸´à¸à¹€à¸žà¸´à¹ˆà¸¡à¹„à¸§à¹‰à¸¡à¸²à¹€à¸›à¹‡à¸™à¸«à¸¡à¸§à¸”à¸£à¹‰à¸²à¸™à¸­à¸²à¸«à¸²à¸£/à¸„à¸²à¹€à¸Ÿà¹ˆ/à¸£à¹‰à¸²à¸™à¸„à¹‰à¸²à¹ƒà¸™à¸•à¸±à¸§à¸§à¸²à¸‡à¹à¸œà¸™à¸—à¸£à¸´à¸›
+// �"ึ�?ร�?า�T�-ี�^สมา�Sิก�?�zิ�^ม�"ว�?มา�?�>�?�Tหมว�"ร�?า�Tอาหาร/�"า�?�Y�^/ร�?า�T�"�?า�f�T�.ัววา�?แ�o�T�-ริ�>
 $query_shops = "SELECT id_shop, name_shop, category_shop, description_shop, address_shop, lat_shop, lng_shop, image_shop
                 FROM shop
                 WHERE status_shop = 1
@@ -139,7 +139,7 @@ while($row = mysqli_fetch_assoc($result_shops)){
     $places_data[] = [
         'id'       => 'shop:' . (int)$row['id_shop'],
         'name'     => $row['name_shop'],
-        'loc'      => $row['address_shop'] ?: ($row['description_shop'] ?: 'à¸•à¸²à¸'),
+        'loc'      => $row['address_shop'] ?: ($row['description_shop'] ?: '�.าก'),
         'lat'      => (float) $row['lat_shop'],
         'lng'      => (float) $row['lng_shop'],
         'img'      => $row['image_shop'] ?: '',
@@ -148,7 +148,7 @@ while($row = mysqli_fetch_assoc($result_shops)){
     ];
 }
 
-// à¸”à¸¶à¸‡à¸—à¸£à¸´à¸›à¸—à¸µà¹ˆà¸šà¸±à¸™à¸—à¸¶à¸à¹„à¸§à¹‰à¸‚à¸­à¸‡à¸šà¸±à¸à¸Šà¸µà¸™à¸µà¹‰ à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸¥à¸³à¸”à¸±à¸šà¸—à¸µà¹ˆà¸ˆà¸±à¸”à¹„à¸§à¹‰
+// �"ึ�?�-ริ�>�-ี�^�sั�T�-ึก�"ว�?�,อ�?�sัญ�Sี�Tี�? �?รีย�?�.ามลำ�"ั�s�-ี�^�^ั�"�"ว�?
 $trip_data = [];
 $query_trip = "SELECT tp.item_type, p.place_key, s.id_shop
                 FROM trip_place tp
@@ -172,7 +172,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>à¸§à¸²à¸‡à¹à¸œà¸™à¸—à¸£à¸´à¸› | à¹€à¸—à¸µà¹ˆà¸¢à¸§à¸•à¸²à¸</title>
+<title>วา�?แ�o�T�-ริ�> | �?�-ี�^ยว�.าก</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -254,7 +254,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         border-radius: 0;
     }
 
-    /* à¸ˆà¸¸à¸”à¸ªà¸³à¸«à¸£à¸±à¸šà¸¥à¸²à¸à¸›à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¸‚à¸­à¸‡à¹à¸œà¸™à¸—à¸µà¹ˆ */
+    /* �^ุ�"สำหรั�sลาก�>รั�s�"วามสู�?�,อ�?แ�o�T�-ี�^ */
     .map-resize-handle{
         position: absolute;
         left: 0;
@@ -469,8 +469,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     .place-card button:hover{ background: var(--green-deep); }
     .place-card button.added{ background: var(--ink); }
-    .place-card button.added::after{ content: "à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸—à¸£à¸´à¸›à¹à¸¥à¹‰à¸§ Â· à¹€à¸­à¸²à¸­à¸­à¸"; }
-    .place-card button:not(.added)::after{ content: "+ à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸‚à¹‰à¸²à¸—à¸£à¸´à¸›"; }
+    .place-card button.added::after{ content: "อยู�^�f�T�-ริ�>แล�?ว · �?อาออก"; }
+    .place-card button:not(.added)::after{ content: "+ �?�zิ�^ม�?�,�?า�-ริ�>"; }
 
     /* Right trip panel */
     .trip-panel{
@@ -1030,18 +1030,18 @@ while($row = mysqli_fetch_assoc($result_trip)){
             class="map-resize-handle"
             id="map-resize-handle"
             role="separator"
-            aria-label="à¸¥à¸²à¸à¹€à¸žà¸·à¹ˆà¸­à¸›à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹à¸œà¸™à¸—à¸µà¹ˆ"
-            title="à¸¥à¸²à¸à¸‚à¸¶à¹‰à¸™à¸¥à¸‡à¹€à¸žà¸·à¹ˆà¸­à¸›à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹à¸œà¸™à¸—à¸µà¹ˆ">
+            aria-label="ลาก�?�zื�^อ�>รั�s�"วามสู�?แ�o�T�-ี�^"
+            title="ลาก�,ึ�?�Tล�?�?�zื�^อ�>รั�s�"วามสู�?แ�o�T�-ี�^">
         </div>
     </section>
 
     <nav class="nav">
         <div class="wrap">
             <ul class="nav-links">
-                <li><a href="home.php">à¸«à¸™à¹‰à¸²à¹à¸£à¸</a></li>
-                <li><a href="home.php#destinations">à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§</a></li>
-                <li><a href="shops.php">à¸£à¹‰à¸²à¸™à¸­à¸²à¸«à¸²à¸£ &amp; à¸„à¸²à¹€à¸Ÿà¹ˆ</a></li>
-                <li><a href="trip-planner.php" class="active">à¸§à¸²à¸‡à¹à¸œà¸™à¸—à¸£à¸´à¸›</a></li>
+                <li><a href="home.php">ห�T�?าแรก</a></li>
+                <li><a href="home.php#destinations">ส�-า�T�-ี�^�?�-ี�^ยว</a></li>
+                <li><a href="shops.php">ร�?า�Tอาหาร &amp; �"า�?�Y�^</a></li>
+                <li><a href="trip-planner.php" class="active">วา�?แ�o�T�-ริ�></a></li>
             </ul>
 
             <div class="nav-actions">
@@ -1054,29 +1054,29 @@ while($row = mysqli_fetch_assoc($result_trip)){
         <div class="dashboard">
 
             <section class="panel-card places-panel">
-                <h2>สถานที่เที่ยว</h2>
-                <p class="sub">เลือกสถานที่ที่อยากไป แล้วเพิ่มเข้าทริปของคุณ</p>
+                <h2>?????????????</h2>
+                <p class="sub">????????????????????? ???????????????????????</p>
                 <div class="category-tabs" id="category-tabs">
-                    <button type="button" class="category-tab active" data-category="all">ทั้งหมด</button>
-                    <button type="button" class="category-tab" data-category="สถานที่เที่ยว">🏞️ สถานที่เที่ยว</button>
-                    <button type="button" class="category-tab" data-category="ร้านอาหาร">🍜 ร้านอาหาร</button>
-                    <button type="button" class="category-tab" data-category="คาเฟ่">☕ คาเฟ่</button>
-                    <button type="button" class="category-tab" data-category="ร้านค้า">🛍️ ร้านค้า</button>
-                    <button type="button" class="category-tab" data-category="อื่นๆ">📍 อื่น ๆ</button>
+                    <button type="button" class="category-tab active" data-category="all">???????</button>
+                    <button type="button" class="category-tab" data-category="?????????????">??? ?????????????</button>
+                    <button type="button" class="category-tab" data-category="?????????">?? ?????????</button>
+                    <button type="button" class="category-tab" data-category="?????">? ?????</button>
+                    <button type="button" class="category-tab" data-category="???????">??? ???????</button>
+                    <button type="button" class="category-tab" data-category="?????">?? ???? ?</button>
                 </div>
                 <div class="place-grid" id="place-grid"></div>
             </section>
 
             <aside class="panel-card trip-panel">
-                <h2>à¸¥à¸³à¸”à¸±à¸šà¸—à¸£à¸´à¸›à¸‚à¸­à¸‡à¸„à¸¸à¸“</h2>
-                <p class="sub">à¸¥à¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¹€à¸žà¸·à¹ˆà¸­à¸ˆà¸±à¸”à¸¥à¸³à¸”à¸±à¸šà¹ƒà¸«à¸¡à¹ˆ</p>
+                <h2>ลำ�"ั�s�-ริ�>�,อ�?�"ุ�"</h2>
+                <p class="sub">ลากรายการ�?�zื�^อ�^ั�"ลำ�"ั�s�fหม�^</p>
                 <ul id="trip-list"></ul>
 
                 <div class="trip-actions">
                     <button class="share-trip-btn" id="share-trip-btn" type="button">
-                        â–£ à¹à¸Šà¸£à¹Œà¸—à¸£à¸´à¸›à¸”à¹‰à¸§à¸¢ QR Code
+                        �-� แ�Sร�O�-ริ�>�"�?วย QR Code
                     </button>
-                    <button class="clear-btn" id="clear-trip">à¸¥à¹‰à¸²à¸‡à¸—à¸£à¸´à¸›à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</button>
+                    <button class="clear-btn" id="clear-trip">ล�?า�?�-ริ�>�-ั�?�?หม�"</button>
                 </div>
             </aside>
 
@@ -1087,9 +1087,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
     <div class="qr-modal" id="qr-modal" aria-hidden="true">
         <div class="qr-backdrop" id="qr-backdrop"></div>
         <div class="qr-dialog" role="dialog" aria-modal="true" aria-labelledby="qr-title">
-            <button class="qr-close" id="qr-close" type="button" aria-label="à¸›à¸´à¸”">Ã—</button>
-            <h2 id="qr-title">à¸ªà¹à¸à¸™à¹€à¸žà¸·à¹ˆà¸­à¸”à¸¹à¸—à¸£à¸´à¸›à¹ƒà¸™à¸¡à¸·à¸­à¸–à¸·à¸­</h2>
-            <p class="qr-subtitle">à¸¥à¸³à¸”à¸±à¸šà¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸ˆà¸°à¸–à¸¹à¸à¹€à¸›à¸´à¸”à¹ƒà¸™à¸¡à¸·à¸­à¸–à¸·à¸­ à¹à¸¥à¸°à¹à¸•à¹ˆà¸¥à¸°à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸à¸”à¹„à¸› Google Maps à¹„à¸”à¹‰</p>
+            <button class="qr-close" id="qr-close" type="button" aria-label="�>ิ�"">�-</button>
+            <h2 id="qr-title">สแก�T�?�zื�^อ�"ู�-ริ�>�f�Tมือ�-ือ</h2>
+            <p class="qr-subtitle">ลำ�"ั�sส�-า�T�-ี�^�>ั�^�^ุ�sั�T�,อ�?�"ุ�"�^ะ�-ูก�?�>ิ�"�f�Tมือ�-ือ และแ�.�^ละส�-า�T�-ี�^สามาร�-ก�"�"�> Google Maps �"�"�?</p>
 
             <div class="qr-box" id="qrcode"></div>
 
@@ -1097,19 +1097,19 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
             <div class="qr-url-wrap">
                 <input id="share-url" type="text" readonly>
-                <button id="copy-share-url" type="button">à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œ</button>
+                <button id="copy-share-url" type="button">�"ั�"ลอกลิ�?ก�O</button>
             </div>
 
             <p class="qr-note">
-                à¸–à¹‰à¸²à¹€à¸›à¸´à¸”à¹€à¸§à¹‡à¸šà¸”à¹‰à¸§à¸¢ <b>localhost</b> à¹‚à¸—à¸£à¸¨à¸±à¸žà¸—à¹Œà¸ˆà¸°à¹€à¸›à¸´à¸”à¸¥à¸´à¸‡à¸à¹Œà¹„à¸¡à¹ˆà¹„à¸”à¹‰
-                à¹ƒà¸«à¹‰à¹€à¸›à¸´à¸”à¹€à¸§à¹‡à¸šà¸œà¹ˆà¸²à¸™ IP à¸‚à¸­à¸‡à¸„à¸­à¸¡à¹ƒà¸™ Wiâ€‘Fi à¹€à¸”à¸µà¸¢à¸§à¸à¸±à¸™ à¹€à¸Šà¹ˆà¸™
+                �-�?า�?�>ิ�"�?ว�?�s�"�?วย <b>localhost</b> �,�-รศั�z�-�O�^ะ�?�>ิ�"ลิ�?ก�O�"ม�^�"�"�?
+                �fห�?�?�>ิ�"�?ว�?�s�o�^า�T IP �,อ�?�"อม�f�T Wi�?'Fi �?�"ียวกั�T �?�S�^�T
                 <b>192.168.1.xxx/project_tip/trip-planner.php</b>
             </p>
         </div>
     </div>
 
     <footer>
-        <div class="wrap">Â© <?php echo date('Y'); ?> à¹€à¸—à¸µà¹ˆà¸¢à¸§à¸•à¸²à¸ Â· à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡à¸§à¸²à¸‡à¹à¸œà¸™à¸—à¹ˆà¸­à¸‡à¹€à¸—à¸µà¹ˆà¸¢à¸§à¸ˆà¸±à¸‡à¸«à¸§à¸±à¸”à¸•à¸²à¸</div>
+        <div class="wrap">© <?php echo date('Y'); ?> �?�-ี�^ยว�.าก · แ�zล�.�Yอร�Oมวา�?แ�o�T�-�^อ�?�?�-ี�^ยว�^ั�?หวั�"�.าก</div>
     </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1117,30 +1117,30 @@ while($row = mysqli_fetch_assoc($result_trip)){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     // ---------- Master place data ----------
-    // à¸”à¸¶à¸‡à¸¡à¸²à¸ˆà¸²à¸à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸£à¸´à¸‡à¸œà¹ˆà¸²à¸™ PHP à¸”à¹‰à¸²à¸™à¸šà¸™ (à¸•à¸²à¸£à¸²à¸‡ place) à¹à¸—à¸™à¸‚à¸­à¸‡à¹€à¸”à¸´à¸¡à¸—à¸µà¹ˆ hardcode à¹„à¸§à¹‰
+    // �"ึ�?มา�^ากฐา�T�,�?อมูล�^ริ�?�o�^า�T PHP �"�?า�T�s�T (�.ารา�? place) แ�-�T�,อ�?�?�"ิม�-ี�^ hardcode �"ว�?
     const PLACES = <?php echo json_encode($places_data, JSON_UNESCAPED_UNICODE); ?>;
     const PLACES_BY_ID = Object.fromEntries(PLACES.map(p => [p.id, p]));
 
-    // à¸—à¸£à¸´à¸›à¸—à¸µà¹ˆà¸šà¸±à¸™à¸—à¸¶à¸à¹„à¸§à¹‰à¹ƒà¸™à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸‚à¸­à¸‡à¸šà¸±à¸à¸Šà¸µà¸™à¸µà¹‰ (à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸¥à¸³à¸”à¸±à¸šà¸—à¸µà¹ˆà¸ˆà¸±à¸”à¹„à¸§à¹‰à¹à¸¥à¹‰à¸§)
+    // �-ริ�>�-ี�^�sั�T�-ึก�"ว�?�f�Tฐา�T�,�?อมูล�,อ�?�sัญ�Sี�Tี�? (�?รีย�?�.ามลำ�"ั�s�-ี�^�^ั�"�"ว�?แล�?ว)
     let trip = <?php echo json_encode($trip_data, JSON_UNESCAPED_UNICODE); ?>;
 
-    // à¸–à¹‰à¸²à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸„à¸¢à¸¡à¸µà¸—à¸£à¸´à¸›à¹ƒà¸™à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸¥à¸¢ à¹à¸•à¹ˆà¹€à¸„à¸¢à¹€à¸¥à¸·à¸­à¸à¹„à¸§à¹‰à¸•à¸­à¸™à¸¢à¸±à¸‡à¹„à¸¡à¹ˆ login (à¹€à¸à¹‡à¸šà¹ƒà¸™ localStorage
-    // à¸ˆà¸²à¸à¸«à¸™à¹‰à¸² home.php) à¹ƒà¸«à¹‰à¸”à¸¶à¸‡à¸¡à¸²à¹ƒà¸Šà¹‰à¸„à¸£à¸±à¹‰à¸‡à¹à¸£à¸ à¹à¸¥à¹‰à¸§à¹€à¸‹à¸Ÿà¹€à¸‚à¹‰à¸²à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸±à¸™à¸—à¸µà¹€à¸žà¸·à¹ˆà¸­à¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸«à¸²à¸¢
+    // �-�?ายั�?�"ม�^�?�"ยมี�-ริ�>�f�Tฐา�T�,�?อมูล�?ลย แ�.�^�?�"ย�?ลือก�"ว�?�.อ�Tยั�?�"ม�^ login (�?ก�?�s�f�T localStorage
+    // �^ากห�T�?า home.php) �fห�?�"ึ�?มา�f�S�?�"รั�?�?แรก แล�?ว�?�<�Y�?�,�?าฐา�T�,�?อมูล�-ั�T�-ี�?�zื�^อ�"ม�^�fห�?�,�?อมูลหาย
     const STORAGE_KEY = 'takTripPlaces';
     if(trip.length === 0){
         try{
             const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
             trip = local.map(id => String(id).includes(':') ? String(id) : 'place:' + String(id)).filter(id => PLACES_BY_ID[id]);
             if(trip.length > 0) saveTrip();
-        }catch(e){ /* à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸à¹ˆà¸² à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸—à¸³à¸­à¸°à¹„à¸£ */ }
+        }catch(e){ /* �"ม�^มี�,�?อมูล�?ก�^า �"ม�^�.�?อ�?�-ำอะ�"ร */ }
     }
 
     let saveTimer = null;
     function saveTrip(){
-        // à¹€à¸à¹‡à¸šà¸ªà¸³à¸£à¸­à¸‡à¹„à¸§à¹‰à¹ƒà¸™ localStorage à¸”à¹‰à¸§à¸¢ à¹€à¸œà¸·à¹ˆà¸­ request à¹„à¸›à¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œà¸¥à¹ˆà¸¡
+        // �?ก�?�sสำรอ�?�"ว�?�f�T localStorage �"�?วย �?�oื�^อ request �"�>�?�<ิร�O�Y�?วอร�Oล�^ม
         localStorage.setItem(STORAGE_KEY, JSON.stringify(trip));
 
-        // à¸”à¸µà¸šà¸²à¸§à¸‹à¹Œà¸à¸²à¸£à¸¢à¸´à¸‡ request à¸à¸±à¸™à¸à¸”à¸£à¸±à¸§ à¹† à¸•à¸­à¸™à¸¥à¸²à¸à¸ˆà¸±à¸”à¸¥à¸³à¸”à¸±à¸š
+        // �"ี�sาว�<�Oการยิ�? request กั�Tก�"รัว �? �.อ�Tลาก�^ั�"ลำ�"ั�s
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
             fetch('trip-planner.php?action=save_trip', {
@@ -1150,9 +1150,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
             })
             .then(res => res.json())
             .then(data => {
-                if(!data.success) console.error('à¸šà¸±à¸™à¸—à¸¶à¸à¸—à¸£à¸´à¸›à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ:', data.message);
+                if(!data.success) console.error('�sั�T�-ึก�-ริ�>�"ม�^สำ�?ร�?�^:', data.message);
             })
-            .catch(err => console.error('à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œà¹„à¸¡à¹ˆà¹„à¸”à¹‰:', err));
+            .catch(err => console.error('�?�Sื�^อม�.�^อ�?�<ิร�O�Y�?วอร�O�"ม�^�"�"�?:', err));
         }, 400);
     }
 
@@ -1168,7 +1168,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             : PLACES.filter(place => place.category === activeCategory);
 
         if(visible.length === 0){
-            grid.innerHTML = '<div class="no-results">ยังไม่มีข้อมูลในหมวดนี้</div>';
+            grid.innerHTML = '<div class="no-results">???????????????????????</div>';
             return;
         }
 
@@ -1177,10 +1177,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
             card.className = 'place-card';
             const photo = place.img
                 ? '<div class="photo" style="background-image:url(\'' + escapeHtml(place.img) + '\')" role="img" aria-label="' + escapeHtml(place.name) + '"></div>'
-                : '<div class="photo placeholder" role="img" aria-label="' + escapeHtml(place.name) + '">📍</div>';
+                : '<div class="photo placeholder" role="img" aria-label="' + escapeHtml(place.name) + '">??</div>';
             card.innerHTML = photo + `
                 <div class="info">
-                    <span class="category-badge">${escapeHtml(place.category || 'อื่นๆ')}</span>
+                    <span class="category-badge">${escapeHtml(place.category || '?????')}</span>
                     <h3>${escapeHtml(place.name)}</h3>
                     <p class="meta">${escapeHtml(place.loc)}</p>
                     <button type="button" data-id="${escapeHtml(place.id)}"></button>
@@ -1222,7 +1222,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function renderTripList(){
         tripListEl.innerHTML = '';
         if(trip.length === 0){
-            tripListEl.innerHTML = '<li class="empty-hint">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸¥à¸·à¸­à¸à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆ â€” à¹€à¸žà¸´à¹ˆà¸¡à¸ˆà¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¸—à¸²à¸‡à¸‹à¹‰à¸²à¸¢à¹„à¸”à¹‰à¹€à¸¥à¸¢</li>';
+            tripListEl.innerHTML = '<li class="empty-hint">ยั�?�"ม�^�"�"�?�?ลือกส�-า�T�-ี�^ �?" �?�zิ�^ม�^ากรายการ�-า�?�<�?าย�"�"�?�?ลย</li>';
             return;
         }
         trip.forEach((id, index) => {
@@ -1231,10 +1231,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
             li.className = 'trip-item';
             li.dataset.id = id;
             li.innerHTML = `
-                <span class="drag-handle">â ¿</span>
+                <span class="drag-handle">⠿</span>
                 <span class="badge">${index + 1}</span>
                 <span class="name">${place.name}<br><span class="loc">${place.loc}</span></span>
-                <button class="remove" type="button" aria-label="à¹€à¸­à¸²${place.name}à¸­à¸­à¸à¸ˆà¸²à¸à¸—à¸£à¸´à¸›">Ã—</button>`;
+                <button class="remove" type="button" aria-label="�?อา${place.name}ออก�^าก�-ริ�>">�-</button>`;
             tripListEl.appendChild(li);
         });
     }
@@ -1277,7 +1277,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
 
     // ---------- Resize map vertically ----------
-    // à¸¥à¸²à¸à¹à¸–à¸šà¸”à¹‰à¸²à¸™à¸¥à¹ˆà¸²à¸‡à¸‚à¸­à¸‡à¹à¸œà¸™à¸—à¸µà¹ˆà¸‚à¸¶à¹‰à¸™/à¸¥à¸‡
+    // ลากแ�-�s�"�?า�Tล�^า�?�,อ�?แ�o�T�-ี�^�,ึ�?�T/ล�?
     const mapHero = document.getElementById('map-hero');
     const mapElement = document.getElementById('map');
     const resizeHandle = document.getElementById('map-resize-handle');
@@ -1289,11 +1289,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function applyMapHeight(height){
         const safeHeight = Math.round(height);
 
-        // à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸—à¸±à¹‰à¸‡à¸à¸¥à¹ˆà¸­à¸‡à¹à¸¥à¸° #map à¹‚à¸”à¸¢à¸•à¸£à¸‡ à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰ Leaflet à¹€à¸«à¹‡à¸™à¸‚à¸™à¸²à¸”à¹ƒà¸«à¸¡à¹ˆà¹à¸™à¹ˆà¸™à¸­à¸™
+        // �?�>ลี�^ย�T�-ั�?�?กล�^อ�?และ #map �,�"ย�.ร�? �?�zื�^อ�fห�? Leaflet �?ห�?�T�,�Tา�"�fหม�^แ�T�^�Tอ�T
         mapHero.style.height = safeHeight + 'px';
         mapElement.style.height = safeHeight + 'px';
 
-        // à¸£à¸­à¹ƒà¸«à¹‰ browser layout à¹€à¸ªà¸£à¹‡à¸ˆà¹à¸¥à¹‰à¸§à¸„à¹ˆà¸­à¸¢à¸ªà¸±à¹ˆà¸‡ Leaflet à¸„à¸³à¸™à¸§à¸“à¹ƒà¸«à¸¡à¹ˆ
+        // รอ�fห�? browser layout �?สร�?�^แล�?ว�"�^อยสั�^�? Leaflet �"ำ�Tว�"�fหม�^
         requestAnimationFrame(() => {
             map.invalidateSize({ pan: false, animate: false });
         });
@@ -1345,7 +1345,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             resizeHandle.releasePointerCapture(event.pointerId);
         }
 
-        // à¹ƒà¸«à¹‰ Leaflet à¸§à¸²à¸” tile à¹ƒà¸«à¸¡à¹ˆà¸«à¸¥à¸±à¸‡à¸ˆà¸šà¸à¸²à¸£à¸¥à¸²à¸
+        // �fห�? Leaflet วา�" tile �fหม�^หลั�?�^�sการลาก
         setTimeout(() => {
             map.invalidateSize({ pan: false, animate: false });
         }, 50);
@@ -1362,7 +1362,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
     });
 
-    // à¸–à¹‰à¸²à¸¡à¸µà¸à¸²à¸£à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸‚à¸™à¸²à¸”à¸ˆà¸²à¸ CSS/à¸«à¸™à¹‰à¸²à¸•à¹ˆà¸²à¸‡ à¹ƒà¸«à¹‰ Leaflet à¸•à¸²à¸¡à¸”à¹‰à¸§à¸¢
+    // �-�?ามีการ�?�>ลี�^ย�T�,�Tา�"�^าก CSS/ห�T�?า�.�^า�? �fห�? Leaflet �.าม�"�?วย
     const mapResizeObserver = new ResizeObserver(() => {
         if(!resizingMap){
             const h = mapHero.getBoundingClientRect().height;
@@ -1433,8 +1433,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
     const shareUrlEl = document.getElementById('share-url');
     const copyShareUrlBtn = document.getElementById('copy-share-url');
 
-    // QR à¸ˆà¸°à¸žà¸ place_key à¸•à¸²à¸¡à¸¥à¸³à¸”à¸±à¸šà¹„à¸›à¸”à¹‰à¸§à¸¢à¹‚à¸”à¸¢à¸•à¸£à¸‡
-    // à¸ˆà¸¶à¸‡à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¡à¸µ trip-share-config.php à¹à¸¥à¸°à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸žà¸¶à¹ˆà¸‡ save-trip.php
+    // QR �^ะ�zก place_key �.ามลำ�"ั�s�"�>�"�?วย�,�"ย�.ร�?
+    // �^ึ�?�"ม�^�.�?อ�?มี trip-share-config.php และ�"ม�^�.�?อ�?�zึ�^�? save-trip.php
     function getShareUrl(){
         const url = new URL('trip-view.php', window.location.href);
         url.searchParams.set('places', trip.filter(id => id.startsWith('place:')).map(id => id.slice(6)).join(','));
@@ -1443,7 +1443,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     function openQrModal(){
         if(trip.length === 0){
-            alert('à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 1 à¹à¸«à¹ˆà¸‡à¸à¹ˆà¸­à¸™à¸ªà¸£à¹‰à¸²à¸‡ QR Code');
+            alert('กรุ�"า�?ลือกส�-า�T�-ี�^อย�^า�?�T�?อย 1 แห�^�?ก�^อ�Tสร�?า�? QR Code');
             return;
         }
 
@@ -1502,13 +1502,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
     copyShareUrlBtn.addEventListener('click', async () => {
         try{
             await navigator.clipboard.writeText(shareUrlEl.value);
-            copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¹à¸¥à¹‰à¸§ âœ“';
-            setTimeout(() => copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œ', 1500);
+            copyShareUrlBtn.textContent = '�"ั�"ลอกแล�?ว �o"';
+            setTimeout(() => copyShareUrlBtn.textContent = '�"ั�"ลอกลิ�?ก�O', 1500);
         }catch(e){
             shareUrlEl.select();
             document.execCommand('copy');
-            copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¹à¸¥à¹‰à¸§ âœ“';
-            setTimeout(() => copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œ', 1500);
+            copyShareUrlBtn.textContent = '�"ั�"ลอกแล�?ว �o"';
+            setTimeout(() => copyShareUrlBtn.textContent = '�"ั�"ลอกลิ�?ก�O', 1500);
         }
     });
 
