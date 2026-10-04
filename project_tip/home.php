@@ -66,7 +66,7 @@ footer{padding:30px 0 45px;border-top:1px solid var(--line);color:#7a847e;font-s
 <div class="container">
 <a href="home.php" class="home-logo">TAK<span>EXPLORE · เที่ยวตาก</span></a>
 <div class="home-links">
-<a href="#destinations">สถานที่เที่ยว</a>
+<a href="places.php">สถานที่เที่ยว</a>
 <a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a>
 <a href="#why">ทำไมต้อง TAK</a>
 <a href="#about">เกี่ยวกับเรา</a>
