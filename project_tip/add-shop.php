@@ -117,6 +117,22 @@ if(!isset($_SESSION['id_account'])){
     }
 
     footer{ border-top: 1px solid var(--line); padding: 2rem 0 2.5rem; color: var(--ink-soft); font-size: 0.85rem; }
+
+/* Profile drawer fallback: keep this page correct even if external CSS is cached */
+.profile-widget{display:flex!important;align-items:center!important;position:relative!important}
+.profile-trigger{display:flex!important;align-items:center!important;gap:.5rem!important;border:1px solid rgba(31,96,68,.15)!important;background:rgba(255,255,255,.9)!important;color:#1f6044!important;border-radius:999px!important;padding:.34rem .7rem .34rem .36rem!important;font:600 .8rem 'Prompt',sans-serif!important;cursor:pointer!important;max-width:190px!important}
+.profile-trigger img{width:32px!important;height:32px!important;border-radius:50%!important;object-fit:cover!important}
+.profile-overlay{position:fixed!important;inset:0!important;z-index:99999!important;background:rgba(8,18,12,.42)!important;backdrop-filter:blur(5px)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+.profile-overlay.is-open{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+.profile-drawer{position:absolute!important;right:0!important;top:0!important;width:min(500px,94vw)!important;height:100%!important;overflow:auto!important;background:#f7f8f3!important;box-shadow:-24px 0 70px rgba(0,0,0,.22)!important;transform:translateX(105%)!important;transition:transform .42s cubic-bezier(.22,1,.36,1)!important}
+.profile-overlay.is-open .profile-drawer{transform:translateX(0)!important}
+.profile-cover{height:185px!important;background:linear-gradient(180deg,rgba(12,38,24,.05),rgba(12,38,24,.75)),url('images/hero-tak.jpeg') center/cover!important;position:relative!important}
+.profile-avatar-large{position:absolute!important;left:28px!important;bottom:-42px!important;width:92px!important;height:92px!important;padding:4px!important;border-radius:50%!important;background:#fff!important}
+.profile-avatar-large img{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important}
+.profile-body{padding:58px 30px 35px!important}
+.profile-form{display:grid!important;gap:.8rem!important;background:#fff!important;padding:1rem!important;border-radius:16px!important}
+.profile-form input{width:100%!important;box-sizing:border-box!important}
+@media(max-width:640px){.profile-drawer{width:100%!important}.profile-body{padding:54px 20px 30px!important}}
 </style>
 </head>
 <body>
