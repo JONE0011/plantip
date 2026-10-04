@@ -34,6 +34,26 @@ if (!mysqli_real_connect(
 
 mysqli_set_charset($connect, 'utf8mb4');
 
+// เพิ่มรายละเอียดสถานที่และเจ้าของสถานที่สำหรับระบบสมาชิก
+$place_desc = mysqli_query($connect, "SHOW COLUMNS FROM place LIKE 'description_place'");
+if (!$place_desc || mysqli_num_rows($place_desc) === 0) {
+    mysqli_query($connect, "ALTER TABLE place ADD COLUMN description_place TEXT NULL AFTER category_place");
+}
+
+// รองรับเจ้าของสถานที่: สมาชิกสามารถแก้ไขได้เฉพาะสถานที่ที่ตัวเองเพิ่ม
+$place_col = mysqli_query($connect, "SHOW COLUMNS FROM place LIKE 'id_account'");
+if (!$place_col || mysqli_num_rows($place_col) === 0) {
+    mysqli_query($connect, "ALTER TABLE place ADD COLUMN id_account INT(11) NULL AFTER id_place");
+}
+$place_idx = mysqli_query($connect, "SHOW INDEX FROM place WHERE Key_name = 'idx_place_account'");
+if (!$place_idx || mysqli_num_rows($place_idx) === 0) {
+    mysqli_query($connect, "ALTER TABLE place ADD KEY idx_place_account (id_account)");
+}
+$place_fk = mysqli_query($connect, "SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'place' AND CONSTRAINT_NAME = 'fk_place_account'");
+if (!$place_fk || mysqli_num_rows($place_fk) === 0) {
+    mysqli_query($connect, "ALTER TABLE place ADD CONSTRAINT fk_place_account FOREIGN KEY (id_account) REFERENCES account(id_account) ON DELETE SET NULL");
+}
+
 // รองรับทริปที่มีทั้งสถานที่เที่ยวและร้านอาหาร/คาเฟ่/ร้านค้า
 // ตรวจสอบก่อนปรับ schema เพื่อไม่ให้ ALTER TABLE เพิ่มคอลัมน์/ดัชนีซ้ำทุกครั้งที่เปิดหน้าเว็บ
 $trip_columns = [];

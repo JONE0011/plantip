@@ -1,9 +1,10 @@
 <?php
-session_start();$open_connect=1;require('connect.php');if(!isset($_SESSION['id_account'])){header('Location: form-login.php');exit;}
-$name=trim($_POST['name_place']??'');$location=trim($_POST['location_place']??'');$category=trim($_POST['category_place']??'');$desc=trim($_POST['description_place']??'');$lat=$_POST['lat_place']??'';$lng=$_POST['lng_place']??'';
+session_start();$open_connect=1;require('connect.php');
+if(!isset($_SESSION['id_account'])){header('Location:form-login.php');exit;}
+$id_account=(int)$_SESSION['id_account'];$name=trim($_POST['name_place']??'');$location=trim($_POST['location_place']??'');$category=trim($_POST['category_place']??'');$desc=trim($_POST['description_place']??'');$lat=$_POST['lat_place']??'';$lng=$_POST['lng_place']??'';
 if($name===''||$location===''||!is_numeric($lat)||!is_numeric($lng)){header('Location:add-place.php?error=missing');exit;}
 $key=preg_replace('/[^a-z0-9]+/i','-',strtolower($name));$key=trim($key,'-');if($key==='')$key='place-'.time();$base=$key;$n=2;while(mysqli_num_rows(mysqli_query($connect,"SELECT id_place FROM place WHERE place_key='".mysqli_real_escape_string($connect,$key)."'"))){$key=$base.'-'.$n++;}
 $image='';if(isset($_FILES['image_place'])&&$_FILES['image_place']['error']===UPLOAD_ERR_OK){$ext=strtolower(pathinfo($_FILES['image_place']['name'],PATHINFO_EXTENSION));if(!in_array($ext,['jpg','jpeg','png'],true)){header('Location:add-place.php?error=upload');exit;}$dir='images/places/';if(!is_dir($dir))mkdir($dir,0755,true);$file=$dir.'user-'.uniqid().'.'.$ext;if(move_uploaded_file($_FILES['image_place']['tmp_name'],$file))$image=$file;}
-$e1=mysqli_real_escape_string($connect,$key);$e2=mysqli_real_escape_string($connect,$name);$e3=mysqli_real_escape_string($connect,$location);$e4=mysqli_real_escape_string($connect,$category);$e5=mysqli_real_escape_string($connect,$image);
-$q="INSERT INTO place (place_key,name_place,location_place,category_place,lat_place,lng_place,image_place) VALUES ('$e1','$e2','$e3','$e4',".(float)$lat.",".(float)$lng.",'$e5')";
+$e1=mysqli_real_escape_string($connect,$key);$e2=mysqli_real_escape_string($connect,$name);$e3=mysqli_real_escape_string($connect,$location);$e4=mysqli_real_escape_string($connect,$category);$e5=mysqli_real_escape_string($connect,$desc);$e6=mysqli_real_escape_string($connect,$image);
+$q="INSERT INTO place (id_account,place_key,name_place,location_place,category_place,description_place,lat_place,lng_place,image_place) VALUES ($id_account,'$e1','$e2','$e3','$e4','$e5',".(float)$lat.",".(float)$lng.",'$e6')";
 if(mysqli_query($connect,$q)){header('Location:places.php?added=1');exit;}header('Location:add-place.php?error=db');
