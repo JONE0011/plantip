@@ -8,582 +8,176 @@ $is_logged_in = isset($_SESSION['id_account']);
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เที่ยวตาก | วางแผนทริปจังหวัดตากของคุณ</title>
+<title>TAK EXPLORE | เที่ยวตากในแบบของคุณ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="modern.css">
 <style>
-    :root{
-        --ink: #1d231d;
-        --ink-soft: #4c554b;
-        --cream: #faf8f3;
-        --panel: #eef1e9;
-        --green: #24593f;
-        --green-deep: #163a28;
-        --green-bright: #3f8f5f;
-        --line: rgba(29,35,29,0.12);
-        --radius: 14px;
-    }
+:root{--ink:#18231e;--muted:#66716b;--cream:#f4f1e8;--paper:#fbfaf6;--green:#183d31;--green2:#285746;--line:rgba(24,35,30,.13);--gold:#d6b875}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Prompt",sans-serif}a{text-decoration:none;color:inherit}img{max-width:100%;display:block}.home{overflow:hidden}.container{width:min(1380px,calc(100% - 48px));margin:auto}
 
-    *{ box-sizing: border-box; }
-    html{ scroll-behavior: smooth; }
-    body{
-        margin: 0;
-        font-family: 'Prompt', sans-serif;
-        color: var(--ink);
-        background: var(--cream);
-    }
+/* NAV */
+.home-nav{position:fixed;z-index:50;top:0;left:0;right:0;padding:18px 0;transition:.3s;background:linear-gradient(180deg,rgba(7,20,15,.42),transparent)}
+.home-nav.scrolled{background:rgba(250,248,243,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.home-nav .container{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.home-logo{color:#fff;font-family:"Playfair Display",serif;font-size:24px;letter-spacing:.06em}.home-logo span{font-family:"Prompt",sans-serif;font-size:10px;letter-spacing:.2em;margin-left:9px;opacity:.8}.scrolled .home-logo{color:var(--green)}
+.home-links{display:flex;gap:28px;align-items:center}.home-links a{font-size:13px;color:rgba(255,255,255,.86);transition:.2s}.home-links a:hover{color:#fff}.scrolled .home-links a{color:var(--muted)}.scrolled .home-links a:hover{color:var(--green)}
+.home-actions{display:flex;align-items:center;gap:10px}.home-plan{padding:11px 18px;border-radius:999px;background:#fff;color:var(--green);font-size:12px;font-weight:600;transition:.2s}.home-plan:hover{transform:translateY(-2px)}.scrolled .home-plan{background:var(--green);color:#fff}
+@media(max-width:850px){.home-links{display:none}.home-logo{font-size:21px}.home-plan{padding:9px 14px}}
 
-    a{ color: inherit; }
-    img{ max-width: 100%; display: block; }
-    .wrap{ max-width: 1440px; margin: 0 auto; padding: 0 1.5rem; }
+/* HERO */
+.hero{min-height:100svh;position:relative;color:#fff;display:flex;align-items:flex-end;background:#17352a}
+.hero-bg{position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(7,22,16,.82),rgba(7,22,16,.28) 62%,rgba(7,22,16,.1)),linear-gradient(0deg,rgba(5,16,11,.78),transparent 55%),url("images/hero-tak.jpeg");background-size:cover;background-position:center;animation:heroZoom 12s ease-out both}
+.hero-bg:after{content:"";position:absolute;inset:0;opacity:.1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hero-word{position:absolute;right:-2vw;top:17vh;font:600 clamp(130px,25vw,390px)/.7 "Playfair Display",serif;letter-spacing:-.08em;color:rgba(255,255,255,.09);user-select:none}
+.hero-inner{position:relative;z-index:2;width:min(1380px,calc(100% - 48px));margin:auto;padding:150px 0 72px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:60px;align-items:end}
+.hero-copy{max-width:800px;animation:rise .9s .15s both}.eyebrow{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-bottom:22px}.eyebrow:before{content:"";width:34px;height:1px;background:var(--gold)}
+.hero h1{font:600 clamp(68px,10vw,148px)/.78 "Playfair Display",serif;letter-spacing:-.06em;margin:0 0 28px}.hero h1 small{display:block;font:500 clamp(12px,1.2vw,16px)/1 "Prompt",sans-serif;letter-spacing:.35em;margin:20px 0 0 8px;color:rgba(255,255,255,.72)}
+.hero-copy p{font-size:16px;line-height:1.9;color:rgba(255,255,255,.78);max-width:610px;margin:0 0 28px}
+.hero-buttons{display:flex;gap:11px;flex-wrap:wrap}.hero-btn{padding:13px 21px;border-radius:999px;font-size:13px;font-weight:500;transition:.25s}.hero-btn.primary{background:#f8f5ed;color:var(--green)}.hero-btn.secondary{border:1px solid rgba(255,255,255,.45);color:#fff;background:rgba(255,255,255,.06);backdrop-filter:blur(10px)}.hero-btn:hover{transform:translateY(-3px)}
+.hero-note{justify-self:end;width:100%;max-width:330px;padding:21px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);backdrop-filter:blur(16px);border-radius:22px;animation:rise 1s .35s both}.hero-note .num{font:600 40px/1 "Playfair Display",serif}.hero-note strong{display:block;font-size:13px;margin:8px 0 4px}.hero-note p{margin:0;color:rgba(255,255,255,.68);font-size:11px;line-height:1.7}
+.scroll-mark{position:absolute;z-index:3;bottom:28px;right:32px;color:rgba(255,255,255,.6);font-size:9px;letter-spacing:.2em;writing-mode:vertical-rl}
+@media(max-width:800px){.hero-inner{grid-template-columns:1fr;padding-top:130px}.hero-note{display:none}.hero h1{font-size:clamp(70px,22vw,120px)}.hero-copy p{font-size:14px}.hero-word{top:25vh}}
 
-    /* ---------- Nav ---------- */
-    .nav{
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        background: rgba(250,248,243,0.92);
-        backdrop-filter: blur(6px);
-        border-bottom: 1px solid var(--line);
-    }
-    .nav .wrap{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 4.5rem;
-    }
-    .logo{
-        display: flex;
-        align-items: baseline;
-        gap: 0.35rem;
-        font-weight: 700;
-        font-size: 1.25rem;
-        text-decoration: none;
-    }
-    .logo b{ color: var(--green); }
-    .logo small{ font-weight: 400; font-size: 0.7rem; color: var(--ink-soft); letter-spacing: 0.08em; }
+/* INTRO */
+.intro{padding:105px 0 90px}.intro-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:8vw;align-items:start}.section-label{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#7b857f}.intro h2{font:600 clamp(38px,5vw,66px)/1 "Playfair Display",serif;letter-spacing:-.04em;margin:12px 0 0}.intro-copy p{font-size:16px;line-height:2;color:var(--muted);max-width:650px;margin:0}.intro-copy .line{width:100%;height:1px;background:var(--line);margin:27px 0}.mini-stats{display:flex;gap:45px}.mini-stat b{display:block;font:600 28px "Playfair Display",serif;color:var(--green)}.mini-stat span{font-size:11px;color:var(--muted)}
+@media(max-width:800px){.intro{padding:75px 0}.intro-grid{grid-template-columns:1fr;gap:28px}.intro-copy p{font-size:14px}.mini-stats{gap:25px}}
 
-    .nav-links{
-        display: flex;
-        gap: 2rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-    .nav-links a{
-        text-decoration: none;
-        font-size: 0.92rem;
-        font-weight: 500;
-        color: var(--ink-soft);
-    }
-    .nav-links a.active, .nav-links a:hover{ color: var(--green); }
+/* DESTINATIONS */
+.dest-section{padding:0 0 105px}.dest-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:30px}.dest-head h2{font:600 clamp(34px,4vw,54px)/1 "Playfair Display",serif;margin:8px 0 0;letter-spacing:-.04em}.dest-head p{max-width:390px;color:var(--muted);font-size:12px;line-height:1.8;margin:0}.dest-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:14px}.dest-card{position:relative;min-height:500px;border-radius:24px;overflow:hidden;background:#1d3329;color:#fff}.dest-card:nth-child(2),.dest-card:nth-child(3){margin-top:48px;min-height:420px}.dest-photo{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .7s}.dest-card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(5,16,11,.84),transparent 62%)}.dest-card:hover .dest-photo{transform:scale(1.06)}.dest-tag{position:absolute;z-index:2;top:16px;left:16px;padding:6px 10px;border-radius:999px;background:rgba(250,248,243,.9);color:var(--green);font-size:10px;font-weight:600}.dest-add{position:absolute;z-index:3;right:16px;top:16px;width:38px;height:38px;border:1px solid rgba(255,255,255,.4);border-radius:50%;background:rgba(9,27,20,.28);color:#fff;font-size:21px;cursor:pointer;backdrop-filter:blur(10px);transition:.25s}.dest-add:hover{transform:scale(1.08);background:var(--green)}.dest-add[aria-pressed="true"]{background:#fff;color:var(--green)}.dest-add[aria-pressed="true"] .plus{display:none}.dest-add[aria-pressed="true"]:after{content:"✓";font-size:15px}.dest-info{position:absolute;z-index:2;left:24px;right:24px;bottom:22px}.dest-info h3{font:600 30px/1.05 "Playfair Display",serif;margin:0 0 8px}.dest-info p{font-size:11px;color:rgba(255,255,255,.72);margin:0;line-height:1.7}.dest-loc{display:inline-flex;gap:5px;align-items:center;margin-top:12px;font-size:10px;color:rgba(255,255,255,.7)}
+.dest-more{display:inline-flex;margin-top:25px;padding:12px 18px;border:1px solid var(--line);border-radius:999px;font-size:12px;transition:.2s}.dest-more:hover{background:var(--green);color:#fff;border-color:var(--green)}
+@media(max-width:850px){.dest-grid{grid-template-columns:1fr 1fr}.dest-card:first-child{grid-column:1/-1}.dest-card:nth-child(2),.dest-card:nth-child(3){margin-top:0;min-height:360px}.dest-card:first-child{min-height:430px}}@media(max-width:560px){.container{width:min(100% - 30px,1380px)}.dest-grid{grid-template-columns:1fr}.dest-card:first-child{grid-column:auto}.dest-card,.dest-card:nth-child(2),.dest-card:nth-child(3){min-height:420px}}
 
-    .nav-actions{ display: flex; align-items: center; gap: 1rem; }
-    .btn-plan{
-        background: var(--green);
-        color: #fff;
-        border: none;
-        border-radius: 999px;
-        padding: 0.65rem 1.4rem;
-        font-family: 'Prompt', sans-serif;
-        font-size: 0.88rem;
-        font-weight: 500;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease;
-    }
-    .btn-plan:hover{ background: var(--green-deep); }
+/* FEATURES */
+.features{background:var(--cream);padding:100px 0}.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:start}.features-title h2{font:600 clamp(38px,4.5vw,62px)/1 "Playfair Display",serif;margin:10px 0 20px;letter-spacing:-.04em}.features-title p{color:var(--muted);line-height:1.9;font-size:14px;max-width:450px}.feature-items{border-top:1px solid var(--line)}.feature-item{display:grid;grid-template-columns:55px 1fr;gap:18px;padding:23px 0;border-bottom:1px solid var(--line)}.feature-num{font:11px;color:#8a938d;padding-top:4px}.feature-item h3{font-size:15px;margin:0 0 6px}.feature-item p{font-size:12px;line-height:1.8;color:var(--muted);margin:0}
+@media(max-width:800px){.features{padding:75px 0}.features-grid{grid-template-columns:1fr;gap:40px}}
 
-    @media (max-width: 900px){
-        .nav-links{ display: none; }
-    }
-
-    /* ---------- Hero ---------- */
-    .hero{
-        position: relative;
-        margin: 1.5rem auto 0;
-        max-width: 1440px;
-        border-radius: 22px;
-        overflow: hidden;
-        aspect-ratio: 16 / 7;
-        max-height: 620px;
-        min-height: 380px;
-        display: flex;
-        align-items: flex-end;
-        background:
-            linear-gradient(180deg, rgba(10,20,12,0.15) 0%, rgba(8,16,10,0.78) 92%),
-            #14261a url('images/hero-tak.jpeg') center / cover no-repeat;
-    }
-    @media (max-width: 640px){
-        .hero{ aspect-ratio: 3 / 4; max-height: none; }
-    }
-    .hero-content{
-        position: relative;
-        padding: 3rem clamp(1.5rem, 5vw, 3.5rem) 3.2rem;
-        color: #fdfbf5;
-        max-width: 46rem;
-    }
-    .hero-content .kicker{
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.8rem;
-        letter-spacing: 0.14em;
-        color: rgba(253,251,245,0.8);
-        margin-bottom: 1rem;
-    }
-    .hero-content .kicker::before{
-        content: "";
-        width: 1.6rem; height: 1px;
-        background: var(--green-bright);
-    }
-    .hero-content h1{
-        font-size: clamp(3.5rem, 9vw, 6.5rem);
-        line-height: 0.92;
-        font-weight: 800;
-        margin: 0 0 1rem;
-        letter-spacing: -0.01em;
-    }
-    .hero-content h1 sup{
-        font-size: 1rem;
-        font-weight: 500;
-        letter-spacing: 0.12em;
-        vertical-align: super;
-        margin-left: 0.5rem;
-        color: rgba(253,251,245,0.7);
-    }
-    .hero-content p{
-        font-size: 1.02rem;
-        line-height: 1.7;
-        color: rgba(253,251,245,0.86);
-        max-width: 32rem;
-        margin: 0 0 1.8rem;
-    }
-    .hero-ctas{ display: flex; gap: 0.9rem; flex-wrap: wrap; }
-    .btn-solid{
-        background: #fdfbf5;
-        color: var(--green-deep);
-        border: none;
-        border-radius: 999px;
-        padding: 0.85rem 1.6rem;
-        font-weight: 600;
-        font-size: 0.92rem;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .btn-outline{
-        border: 1px solid rgba(253,251,245,0.65);
-        color: #fdfbf5;
-        border-radius: 999px;
-        padding: 0.85rem 1.6rem;
-        font-weight: 500;
-        font-size: 0.92rem;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    /* ---------- Why section ---------- */
-    .why{
-        display: grid;
-        grid-template-columns: 1.15fr 1fr;
-        gap: 3rem;
-        padding: 5rem 0 4rem;
-        align-items: start;
-    }
-    .why h2{
-        font-size: clamp(1.6rem, 3vw, 2.1rem);
-        line-height: 1.3;
-        margin: 0 0 1rem;
-        font-weight: 700;
-    }
-    .why > div:first-child p{
-        color: var(--ink-soft);
-        line-height: 1.75;
-        max-width: 34rem;
-        margin: 0;
-        font-size: 0.98rem;
-    }
-    .feature-list{
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .feature{
-        display: flex;
-        gap: 1rem;
-        background: var(--panel);
-        border-radius: var(--radius);
-        padding: 1.1rem 1.3rem;
-    }
-    .feature .icon{
-        flex: none;
-        width: 3rem; height: 3rem;
-        border-radius: 10px;
-        background: var(--green-deep);
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .feature .icon svg{ width: 22px; height: 22px; }
-    .feature h3{ margin: 0 0 0.25rem; font-size: 1rem; font-weight: 600; }
-    .feature p{ margin: 0; font-size: 0.86rem; color: var(--ink-soft); line-height: 1.6; }
-
-    @media (max-width: 860px){
-        .why{ grid-template-columns: 1fr; padding-top: 3rem; }
-    }
-
-    /* ---------- Destinations ---------- */
-    .destinations{
-        background: var(--panel);
-        border-radius: 26px;
-        padding: 3rem clamp(1.25rem, 4vw, 3rem);
-        margin-bottom: 4rem;
-    }
-    .destinations-head{
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        gap: 2rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-    }
-    .destinations-head h2{ margin: 0; font-size: 1.6rem; font-weight: 700; }
-    .destinations-head p{
-        margin: 0.5rem 0 0;
-        color: var(--ink-soft);
-        max-width: 26rem;
-        font-size: 0.92rem;
-        line-height: 1.6;
-    }
-
-    .dest-grid{
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.2rem;
-    }
-    @media (max-width: 1000px){ .dest-grid{ grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 560px){ .dest-grid{ grid-template-columns: 1fr; } }
-
-    .dest-card{
-        position: relative;
-        border-radius: var(--radius);
-        overflow: hidden;
-        background: #fff;
-        box-shadow: 0 1px 2px rgba(29,35,29,0.06);
-    }
-    .dest-card .photo{
-        position: relative;
-        aspect-ratio: 4 / 5;
-        background: #cfd6c8 center / cover no-repeat;
-    }
-    .dest-card .tag{
-        position: absolute;
-        top: 0.7rem; left: 0.7rem;
-        background: rgba(253,251,245,0.92);
-        color: var(--green-deep);
-        font-size: 0.72rem;
-        font-weight: 600;
-        padding: 0.3rem 0.6rem;
-        border-radius: 999px;
-    }
-    .add-btn{
-        position: absolute;
-        top: 0.7rem; right: 0.7rem;
-        width: 2.1rem; height: 2.1rem;
-        border-radius: 50%;
-        border: none;
-        background: var(--green);
-        color: #fff;
-        font-size: 1.1rem;
-        line-height: 1;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .add-btn:hover{ background: var(--green-deep); transform: scale(1.06); }
-    .add-btn[aria-pressed="true"]{ background: var(--ink); }
-    .add-btn[aria-pressed="true"]::after{ content: "✓"; font-size: 0.95rem; }
-    .add-btn[aria-pressed="true"] .plus{ display: none; }
-
-    .dest-card .info{ padding: 0.9rem 1rem 1.1rem; }
-    .dest-card .info h3{ margin: 0 0 0.3rem; font-size: 1rem; font-weight: 600; }
-    .dest-card .info .meta{
-        margin: 0 0 0.4rem;
-        font-size: 0.8rem;
-        color: var(--ink-soft);
-    }
-    .dest-card .info .loc{
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        font-size: 0.78rem;
-        color: var(--ink-soft);
-    }
-    .dest-card .info .loc svg{ width: 12px; height: 12px; flex: none; }
-
-    .view-more{
-        margin-top: 1.6rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-size: 0.86rem;
-        font-weight: 500;
-        text-decoration: none;
-        color: var(--ink);
-    }
-
-    /* ---------- Trip banner ---------- */
-    .trip-banner{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 2rem;
-        background: var(--green-deep);
-        color: #fdfbf5;
-        border-radius: 22px;
-        padding: 2.4rem clamp(1.5rem, 4vw, 3rem);
-        margin-bottom: 5rem;
-        flex-wrap: wrap;
-    }
-    .trip-banner h2{ margin: 0 0 0.4rem; font-size: 1.4rem; font-weight: 700; }
-    .trip-banner p{ margin: 0; color: rgba(253,251,245,0.78); font-size: 0.92rem; max-width: 30rem; }
-    .trip-count{
-        font-size: 0.85rem;
-        color: rgba(253,251,245,0.85);
-        background: rgba(253,251,245,0.12);
-        border-radius: 999px;
-        padding: 0.5rem 1rem;
-    }
-
-    /* ---------- Footer ---------- */
-    footer{
-        border-top: 1px solid var(--line);
-        padding: 2.5rem 0 3rem;
-        color: var(--ink-soft);
-        font-size: 0.85rem;
-    }
+/* CTA */
+.cta{padding:105px 0}.cta-box{position:relative;overflow:hidden;border-radius:30px;background:var(--green);color:#fff;padding:70px clamp(28px,7vw,90px);min-height:370px;display:flex;align-items:center}.cta-box:before{content:"TAK";position:absolute;right:-20px;bottom:-70px;font:600 280px/.7 "Playfair Display",serif;color:rgba(255,255,255,.06);letter-spacing:-.08em}.cta-content{position:relative;z-index:2;max-width:650px}.cta-content h2{font:600 clamp(40px,5vw,68px)/.98 "Playfair Display",serif;margin:12px 0 18px;letter-spacing:-.04em}.cta-content p{font-size:14px;line-height:1.9;color:rgba(255,255,255,.7);max-width:520px}.cta-btn{display:inline-flex;margin-top:15px;background:#f7f3e9;color:var(--green);padding:13px 22px;border-radius:999px;font-size:12px;font-weight:600}
+footer{padding:30px 0 45px;border-top:1px solid var(--line);color:#7a847e;font-size:11px}.footer-row{display:flex;justify-content:space-between;gap:20px}.footer-brand{font:600 19px "Playfair Display",serif;color:var(--green)}
+@keyframes heroZoom{from{transform:scale(1.09)}to{transform:scale(1)}}@keyframes rise{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.hero-bg,.hero-copy,.hero-note{animation:none}.dest-photo{transition:none}}
 </style>
-    <link rel="stylesheet" href="modern.css">
 </head>
 <body>
-
-<nav class="nav">
-    <div class="wrap">
-        <a href="home.php" class="logo">เที่ยว<b>ตาก</b><small>&nbsp;TAK EXPLORE</small></a>
-        <ul class="nav-links">
-            <li><a href="home.php" class="active">หน้าแรก</a></li>
-            <li><a href="#destinations">สถานที่เที่ยว</a></li>
-            <li><a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a></li>
-            <li><a href="#">แพ็กเกจทริป</a></li>
-            <li><a href="#">เกี่ยวกับเรา</a></li>
-        </ul>
-        <div class="nav-actions">
-            <?php include("profile-widget.php"); ?>
-            <a href="trip-planner.php" class="btn-plan">วางแผนทริปของฉัน</a>
-        </div>
-    </div>
+<div class="home">
+<nav class="home-nav" id="home-nav">
+<div class="container">
+<a href="home.php" class="home-logo">TAK<span>EXPLORE · เที่ยวตาก</span></a>
+<div class="home-links">
+<a href="#destinations">สถานที่เที่ยว</a>
+<a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a>
+<a href="#why">ทำไมต้อง TAK</a>
+<a href="#about">เกี่ยวกับเรา</a>
+</div>
+<div class="home-actions">
+<?php include("profile-widget.php"); ?>
+<a class="home-plan" href="trip-planner.php">วางแผนทริป</a>
+</div>
+</div>
 </nav>
 
-<div class="wrap">
-
-    <section class="hero">
-        <div class="hero-content">
-            <span class="kicker">จังหวัดตาก · ภาคเหนือตอนล่าง</span>
-            <h1>ตาก<sup>TAK, THAILAND</sup></h1>
-            <p>ดินแดนแห่งขุนเขา สายหมอก และชายแดนไทย–เมียนมา ตั้งแต่น้ำตกทีลอซูอันยิ่งใหญ่ ไปจนถึงทะเลหมอกยามเช้าที่ดอยมูเซอ เลือกจุดหมายที่ใช่ แล้วให้เราช่วยจัดลำดับทริปของคุณ</p>
-            <div class="hero-ctas">
-                <a href="trip-planner.php" class="btn-solid">เริ่มวางแผนทริป</a>
-                <a href="#destinations" class="btn-outline">ดูสถานที่ทั้งหมด</a>
-            </div>
-        </div>
-    </section>
-
-    <section class="why">
-        <div>
-            <h2>ทำไมนักเดินทางเลือกวางแผนเที่ยวตากที่นี่</h2>
-            <p>จากผืนป่าอุ้มผางสู่ตลาดชายแดนแม่สอด เรารวบรวมสถานที่เที่ยวทั่วจังหวัดตากไว้ในที่เดียว พร้อมระบบช่วยจัดลำดับเส้นทาง เพื่อให้ทริปของคุณราบรื่นตั้งแต่จุดแรกถึงจุดสุดท้าย</p>
-        </div>
-        <div class="feature-list">
-            <div class="feature">
-                <div class="icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-11 4 6 3-5 5 10H3z"/></svg>
-                </div>
-                <div>
-                    <h3>ครบทุกภูมิประเทศ</h3>
-                    <p>น้ำตก ภูเขา ทะเลหมอก และเมืองชายแดน รวมไว้ในจังหวัดเดียว</p>
-                </div>
-            </div>
-            <div class="feature">
-                <div class="icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
-                </div>
-                <div>
-                    <h3>เลือกแล้วจัดลำดับได้เอง</h3>
-                    <p>กดปุ่ม + เพื่อเพิ่มสถานที่เข้าทริป แล้วจัดลำดับก่อน-หลังตามที่คุณต้องการ</p>
-                </div>
-            </div>
-            <div class="feature">
-                <div class="icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-16 4 12 4-8 4 12"/></svg>
-                </div>
-                <div>
-                    <h3>ชุมชนช่วยกันเติมข้อมูล</h3>
-                    <p>สมาชิกทุกคนเพิ่มร้านอาหาร คาเฟ่ และจุดเที่ยวใหม่ ๆ ได้เหมือนแผนที่ของเราเอง</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="destinations" id="destinations">
-        <div class="destinations-head">
-            <div>
-                <h2>สถานที่เที่ยวยอดนิยม</h2>
-                <p>ตั้งแต่น้ำตกกลางป่าลึกไปจนถึงทะเลหมอกบนยอดดอย กดปุ่ม + เพื่อเพิ่มลงในทริปของคุณ</p>
-            </div>
-        </div>
-
-        <div class="dest-grid">
-
-            <article class="dest-card" data-place="thi-lo-su">
-                <div class="photo" style="background-image:url('images/places/thi-lo-su.jpg')">
-                    <span class="tag">ยอดฮิต</span>
-                    <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มน้ำตกทีลอซูลงในทริป">
-                        <span class="plus">+</span>
-                    </button>
-                </div>
-                <div class="info">
-                    <h3>น้ำตกทีลอซู</h3>
-                    <p class="meta">น้ำตกที่ใหญ่ที่สุดในไทย · อุทยานแห่งชาติอุ้มผาง</p>
-                    <span class="loc">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7.6 2 4 5.6 4 10c0 5.4 8 12 8 12s8-6.6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg>
-                        อ.อุ้มผาง
-                    </span>
-                </div>
-            </article>
-
-            <article class="dest-card" data-place="doi-musoe">
-                <div class="photo" style="background-image:url('images/places/doi-musoe.jpg')">
-                    <span class="tag">ทะเลหมอก</span>
-                    <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มดอยมูเซอลงในทริป">
-                        <span class="plus">+</span>
-                    </button>
-                </div>
-                <div class="info">
-                    <h3>ดอยมูเซอ</h3>
-                    <p class="meta">จุดชมทะเลหมอกยามเช้า · อากาศเย็นตลอดปี</p>
-                    <span class="loc">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7.6 2 4 5.6 4 10c0 5.4 8 12 8 12s8-6.6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg>
-                        อ.เมืองตาก
-                    </span>
-                </div>
-            </article>
-
-            <article class="dest-card" data-place="bhumibol-dam">
-                <div class="photo" style="background-image:url('images/places/bhumibol-dam.jpg')">
-                    <span class="tag">ธรรมชาติ</span>
-                    <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มเขื่อนภูมิพลลงในทริป">
-                        <span class="plus">+</span>
-                    </button>
-                </div>
-                <div class="info">
-                    <h3>เขื่อนภูมิพล</h3>
-                    <p class="meta">เขื่อนหินถมแห่งแรกของไทย · ล่องเรือชมทะเลสาบ</p>
-                    <span class="loc">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7.6 2 4 5.6 4 10c0 5.4 8 12 8 12s8-6.6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg>
-                        อ.สามเงา
-                    </span>
-                </div>
-            </article>
-
-            <article class="dest-card" data-place="mae-sot-market">
-                <div class="photo" style="background-image:url('images/places/mae-sot-market.jpg')">
-                    <span class="tag">ชายแดน</span>
-                    <button class="add-btn" type="button" aria-pressed="false" aria-label="เพิ่มตลาดริมเมยลงในทริป">
-                        <span class="plus">+</span>
-                    </button>
-                </div>
-                <div class="info">
-                    <h3>ตลาดริมเมย</h3>
-                    <p class="meta">ตลาดชายแดนไทย–เมียนมา · ของกิน ของฝากหลากหลาย</p>
-                    <span class="loc">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7.6 2 4 5.6 4 10c0 5.4 8 12 8 12s8-6.6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg>
-                        อ.แม่สอด
-                    </span>
-                </div>
-            </article>
-
-        </div>
-
-        <a href="#" class="view-more">ดูสถานที่ทั้งหมด</a>
-    </section>
-
-    <section class="trip-banner">
-        <div>
-            <h2>ทริปของคุณตอนนี้</h2>
-            <p>เพิ่มสถานที่ที่สนใจแล้วไปจัดลำดับเส้นทางต่อได้ที่หน้าวางแผนทริป ระบบจะช่วยเรียงเส้นทางให้อัตโนมัติ</p>
-        </div>
-        <span class="trip-count" id="trip-count">ยังไม่ได้เลือกสถานที่</span>
-    </section>
-
+<header class="hero">
+<div class="hero-bg"></div>
+<div class="hero-word">TAK</div>
+<div class="hero-inner">
+<div class="hero-copy">
+<div class="eyebrow">TAK · NORTHERN THAILAND</div>
+<h1>ตาก<small>TRAVEL IN YOUR OWN WAY</small></h1>
+<p>ออกไปพบตากในแบบของคุณ — จากน้ำตกกลางป่า ทะเลหมอกบนยอดดอย ไปจนถึงเมืองชายแดน เลือกสถานที่ที่อยากไป แล้วสร้างทริปของคุณเอง</p>
+<div class="hero-buttons">
+<a class="hero-btn primary" href="trip-planner.php">เริ่มวางแผนทริป ↗</a>
+<a class="hero-btn secondary" href="#destinations">สำรวจสถานที่</a>
 </div>
+</div>
+<div class="hero-note"><div class="num">01</div><strong>เลือก · จัด · ออกเดินทาง</strong><p>เพิ่มสถานที่ที่สนใจ แล้วไปจัดลำดับเส้นทางต่อในหน้า Trip Planner</p></div>
+</div>
+<div class="scroll-mark">SCROLL TO EXPLORE</div>
+</header>
+
+<main>
+<section class="intro container" id="about">
+<div class="intro-grid">
+<div><div class="section-label">Discover Tak / 01</div><h2>มากกว่าแค่<br>สถานที่ท่องเที่ยว</h2></div>
+<div class="intro-copy">
+<p>TAK EXPLORE ถูกออกแบบให้การเที่ยวตากเริ่มต้นได้ง่ายขึ้น รวบรวมสถานที่ ร้านอาหาร และจุดน่าสนใจไว้ให้คุณเลือก แล้วเปลี่ยนสิ่งที่อยากไปให้กลายเป็นทริปที่เป็นของคุณเอง</p>
+<div class="line"></div>
+<div class="mini-stats">
+<div class="mini-stat"><b>08+</b><span>จุดหมายแนะนำ</span></div>
+<div class="mini-stat"><b>01</b><span>แผนที่สำหรับทริป</span></div>
+<div class="mini-stat"><b>∞</b><span>เส้นทางในแบบคุณ</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dest-section container" id="destinations">
+<div class="dest-head">
+<div><div class="section-label">Selected destinations / 02</div><h2>ไปไหนดีในตาก?</h2></div>
+<p>เลือกจุดหมายที่ชอบ กด + เพื่อเก็บไว้ในทริป แล้วไปจัดลำดับการเดินทางต่อ</p>
+</div>
+<div class="dest-grid">
+<article class="dest-card" data-place="thi-lo-su">
+<div class="dest-photo" style="background-image:url('images/places/thi-lo-su.jpg')"></div><span class="dest-tag">ยอดฮิต</span><button class="dest-add" type="button" aria-pressed="false" aria-label="เพิ่มน้ำตกทีลอซู"><span class="plus">+</span></button>
+<div class="dest-info"><h3>น้ำตกทีลอซู</h3><p>น้ำตกกลางผืนป่าอุ้มผาง จุดหมายธรรมชาติที่ไม่ควรพลาด</p><span class="dest-loc">● อ.อุ้มผาง</span></div>
+</article>
+<article class="dest-card" data-place="doi-musoe">
+<div class="dest-photo" style="background-image:url('images/places/doi-musoe.jpg')"></div><span class="dest-tag">ทะเลหมอก</span><button class="dest-add" type="button" aria-pressed="false" aria-label="เพิ่มดอยมูเซอ"><span class="plus">+</span></button>
+<div class="dest-info"><h3>ดอยมูเซอ</h3><p>อากาศเย็นและวิวภูเขาที่เหมาะกับการเริ่มต้นเช้าวันใหม่</p><span class="dest-loc">● อ.เมืองตาก</span></div>
+</article>
+<article class="dest-card" data-place="bhumibol-dam">
+<div class="dest-photo" style="background-image:url('images/places/bhumibol-dam.jpg')"></div><span class="dest-tag">ธรรมชาติ</span><button class="dest-add" type="button" aria-pressed="false" aria-label="เพิ่มเขื่อนภูมิพล"><span class="plus">+</span></button>
+<div class="dest-info"><h3>เขื่อนภูมิพล</h3><p>ผืนน้ำกว้างและภูเขารอบด้าน เหมาะกับวันพักใจแบบช้า ๆ</p><span class="dest-loc">● อ.สามเงา</span></div>
+</article>
+</div>
+<a class="dest-more" href="trip-planner.php">ดูและเลือกสถานที่เพิ่มเติม →</a>
+</section>
+
+<section class="features" id="why">
+<div class="container features-grid">
+<div class="features-title"><div class="section-label">Why Tak Explore / 03</div><h2>วางแผนให้น้อยลง<br>ออกเดินทางให้มากขึ้น</h2><p>ไม่ต้องเปิดหลายหน้าเพื่อจำว่าที่ไหนอยากไป ระบบของเราช่วยให้คุณเก็บสถานที่ที่สนใจไว้ก่อน แล้วค่อยจัดทริปในจังหวะของคุณ</p></div>
+<div class="feature-items">
+<div class="feature-item"><div class="feature-num">01</div><div><h3>เลือกสถานที่ได้ทันที</h3><p>กด + จากหน้าแรกเพื่อเก็บสถานที่ที่สนใจลงในรายการทริป</p></div></div>
+<div class="feature-item"><div class="feature-num">02</div><div><h3>จัดลำดับเส้นทาง</h3><p>ไปต่อที่ Trip Planner เพื่อจัดลำดับจุดหมายและวางแผนการเดินทาง</p></div></div>
+<div class="feature-item"><div class="feature-num">03</div><div><h3>เก็บประวัติของคุณ</h3><p>เมื่อเข้าสู่ระบบ ระบบสามารถบันทึกสถานที่ที่คุณเลือกไว้กับโปรไฟล์</p></div></div>
+</div>
+</div>
+</section>
+
+<section class="cta container">
+<div class="cta-box">
+<div class="cta-content"><div class="section-label" style="color:rgba(255,255,255,.5)">Your next trip / 04</div><h2>ตากครั้งต่อไป<br>เริ่มจากตรงนี้</h2><p>เลือกสถานที่ที่อยากไป แล้วปล่อยให้การวางแผนกลายเป็นส่วนหนึ่งของการเดินทาง</p><a class="cta-btn" href="trip-planner.php">สร้างทริปของฉัน ↗</a></div>
+</div>
+</section>
+</main>
 
 <footer>
-    <div class="wrap">© <?php echo date('Y'); ?> เที่ยวตาก · แพลตฟอร์มวางแผนท่องเที่ยวจังหวัดตาก</div>
+<div class="container footer-row"><div><div class="footer-brand">TAK EXPLORE</div><div>แพลตฟอร์มวางแผนท่องเที่ยวจังหวัดตาก</div></div><div>© <?php echo date('Y'); ?> TAK EXPLORE</div></div>
 </footer>
+</div>
 
 <script>
-    // Shared trip list: stored in localStorage so trip-planner.php (drag-to-reorder
-    // + Leaflet map) reads and writes the exact same list. Order isn't enforced here;
-    // trip-planner.php owns ordering, this page only adds/removes membership.
-    const STORAGE_KEY = 'takTripPlaces';
-    const countLabel = document.getElementById('trip-count');
-
-    function loadTrip(){
-        try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-        catch(e){ return []; }
-    }
-    function saveTrip(list){
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-        <?php if($is_logged_in): ?>
-        fetch('trip-planner.php?action=save_trip', {
-            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({places:list})
-        }).catch(()=>{});
-        <?php endif; ?>
-    }
-    function updateCount(list){
-        countLabel.textContent = list.length === 0
-            ? 'ยังไม่ได้เลือกสถานที่'
-            : `เลือกไว้ ${list.length} ที่ · ไปจัดลำดับที่หน้าวางแผนทริป`;
-    }
-
-    let trip = loadTrip();
-    updateCount(trip);
-
-    document.querySelectorAll('.add-btn').forEach(btn => {
-        const card = btn.closest('.dest-card');
-        const placeId = card.dataset.place;
-        if(trip.includes(placeId)) btn.setAttribute('aria-pressed', 'true');
-
-        btn.addEventListener('click', () => {
-            const pressed = btn.getAttribute('aria-pressed') === 'true';
-            btn.setAttribute('aria-pressed', String(!pressed));
-            trip = pressed ? trip.filter(id => id !== placeId) : [...trip, placeId];
-            saveTrip(trip);
-            updateCount(trip);
-        });
-    });
+const STORAGE_KEY='takTripPlaces';
+function loadTrip(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return[]}}
+function saveTrip(list){
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(list));
+ <?php if($is_logged_in): ?>
+ fetch('trip-planner.php?action=save_trip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({places:list})}).catch(()=>{});
+ <?php endif; ?>
+}
+let trip=loadTrip();
+document.querySelectorAll('.dest-add').forEach(btn=>{
+ const card=btn.closest('.dest-card'), id=card.dataset.place;
+ if(trip.includes(id))btn.setAttribute('aria-pressed','true');
+ btn.addEventListener('click',()=>{
+  const on=btn.getAttribute('aria-pressed')==='true';
+  trip=on?trip.filter(x=>x!==id):[...trip,id];
+  btn.setAttribute('aria-pressed',String(!on));saveTrip(trip);
+ });
+});
+const nav=document.getElementById('home-nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>40),{passive:true});
 </script>
-
 </body>
 </html>
