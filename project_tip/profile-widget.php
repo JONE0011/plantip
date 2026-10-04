@@ -65,10 +65,31 @@ if($profile_user){
 <?php if($profile_user): ?>
 <script>
 (function(){
- const overlay=document.getElementById('profile-overlay'), open=document.getElementById('profile-trigger'), close=document.getElementById('profile-close');
- function show(){overlay?.classList.add('is-open');overlay?.setAttribute('aria-hidden','false');document.body.classList.add('profile-open')}
- function hide(){overlay?.classList.remove('is-open');overlay?.setAttribute('aria-hidden','true');document.body.classList.remove('profile-open')}
- open?.addEventListener('click',show);close?.addEventListener('click',hide);overlay?.addEventListener('click',e=>{if(e.target===overlay)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
+ const overlay=document.getElementById('profile-overlay'), open=document.getElementById('profile-trigger');
+ if(!overlay || !open) return;
+
+ // Navbar มี backdrop-filter จึงสร้าง containing block ให้ position:fixed
+ // ย้าย Drawer ไปไว้ใต้ body โดยตรง เพื่อให้เต็มจอจริง
+ if(overlay.parentElement !== document.body){
+   document.body.appendChild(overlay);
+ }
+
+ const close=document.getElementById('profile-close');
+ function show(){
+   overlay.classList.add('is-open');
+   overlay.setAttribute('aria-hidden','false');
+   document.body.classList.add('profile-open');
+   setTimeout(()=>document.querySelector('#profile-title')?.focus(),100);
+ }
+ function hide(){
+   overlay.classList.remove('is-open');
+   overlay.setAttribute('aria-hidden','true');
+   document.body.classList.remove('profile-open');
+ }
+ open.addEventListener('click',show);
+ close?.addEventListener('click',hide);
+ overlay.addEventListener('click',e=>{if(e.target===overlay)hide()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape' && overlay.classList.contains('is-open'))hide()});
 })();
 </script>
 <?php endif; ?>
