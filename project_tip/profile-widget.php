@@ -1,6 +1,6 @@
 <?php
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
-$profile_user=null;$profile_history=[];$profile_places=[];
+$profile_user=null;$profile_history=[];$profile_places=[];$profile_shops=[];
 if(isset($_SESSION['id_account'])){
  $profile_id=(int)$_SESSION['id_account'];
  $q=mysqli_query($connect,"SELECT id_account,username_account,email_account,images_account FROM account WHERE id_account=$profile_id LIMIT 1");
@@ -10,6 +10,8 @@ if(isset($_SESSION['id_account'])){
   if($hq)while($h=mysqli_fetch_assoc($hq))$profile_history[]=$h;
   $pq=mysqli_query($connect,"SELECT id_place,name_place,location_place,image_place FROM place WHERE id_account=$profile_id ORDER BY created_at DESC");
   if($pq)while($p=mysqli_fetch_assoc($pq))$profile_places[]=$p;
+  $sq=mysqli_query($connect,"SELECT id_shop,name_shop,category_shop,address_shop,image_shop FROM shop WHERE id_account=$profile_id ORDER BY created_at DESC");
+  if($sq)while($s=mysqli_fetch_assoc($sq))$profile_shops[]=$s;
  }
 }
 if($profile_user){
@@ -22,8 +24,13 @@ if($profile_user){
 <button type="button" class="profile-close" id="profile-close">×</button><div class="profile-cover"><div class="profile-avatar-large"><img src="<?php echo htmlspecialchars($profile_image);?>" alt=""></div></div>
 <div class="profile-body"><span class="profile-kicker">TAK EXPLORE · MY PROFILE</span><h2 id="profile-title"><?php echo htmlspecialchars($profile_user['username_account']);?></h2><p class="profile-email"><?php echo htmlspecialchars($profile_user['email_account']);?></p>
 <form action="profile-update.php" method="POST" enctype="multipart/form-data" class="profile-form"><label>ชื่อที่แสดง<input type="text" name="username_account" value="<?php echo htmlspecialchars($profile_user['username_account']);?>" maxlength="40" required></label><label>รูปโปรไฟล์<input type="file" name="images_account" accept="image/jpeg,image/png,image/webp"></label><button type="submit">บันทึกโปรไฟล์</button></form>
+
 <div class="profile-history-head"><div><strong>สถานที่ที่ฉันเพิ่ม</strong><small>แก้ไขได้เฉพาะข้อมูลของคุณ</small></div><span><?php echo count($profile_places);?> รายการ</span></div>
 <div class="profile-history"><?php if(!$profile_places):?><div class="profile-empty">คุณยังไม่ได้เพิ่มสถานที่</div><?php else:foreach($profile_places as $p):?><div class="profile-history-item"><div class="profile-history-dot">⌖</div><div><strong><?php echo htmlspecialchars($p['name_place']);?></strong><small><?php echo htmlspecialchars($p['location_place']);?></small></div><a href="edit-place.php?id=<?php echo (int)$p['id_place'];?>" style="margin-left:auto">แก้ไข</a></div><?php endforeach;endif;?></div>
+
+<div class="profile-history-head"><div><strong>ร้านที่ฉันเพิ่ม</strong><small>ร้านอาหาร คาเฟ่ และร้านค้า</small></div><span><?php echo count($profile_shops);?> รายการ</span></div>
+<div class="profile-history"><?php if(!$profile_shops):?><div class="profile-empty">คุณยังไม่ได้เพิ่มร้าน</div><?php else:foreach($profile_shops as $s):?><div class="profile-history-item"><div class="profile-history-dot">⌂</div><div><strong><?php echo htmlspecialchars($s['name_shop']);?></strong><small><?php echo htmlspecialchars($s['category_shop'].' · '.($s['address_shop']?:'จังหวัดตาก'));?></small></div><a href="edit-shop.php?id=<?php echo (int)$s['id_shop'];?>" style="margin-left:auto">แก้ไข</a></div><?php endforeach;endif;?></div>
+
 <div class="profile-history-head"><div><strong>ประวัติสถานที่ในทริป</strong><small>สถานที่ที่คุณเคยเพิ่มเข้าทริป</small></div><span><?php echo count($profile_history);?> รายการ</span></div>
 <div class="profile-history"><?php if(!$profile_history):?><div class="profile-empty">ยังไม่มีประวัติ</div><?php else:foreach($profile_history as $history):?><div class="profile-history-item"><div class="profile-history-dot">✓</div><div><strong><?php echo htmlspecialchars($history['name_place']);?></strong><small><?php echo htmlspecialchars($history['location_place']);?></small></div></div><?php endforeach;endif;?></div>
 <a href="profile-update.php?logout=1" class="profile-logout">ออกจากระบบ</a></div></aside></div></div>
