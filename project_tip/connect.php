@@ -34,6 +34,19 @@ if (!mysqli_real_connect(
 
 mysqli_set_charset($connect, 'utf8mb4');
 
+// เก็บประวัติสถานที่ที่สมาชิกเคยเพิ่มเข้าทริป แยกจากทริปปัจจุบัน
+mysqli_query($connect, "CREATE TABLE IF NOT EXISTS place_history (
+    id_history BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_account INT(11) NOT NULL,
+    id_place INT(11) NOT NULL,
+    added_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_history),
+    UNIQUE KEY uniq_account_place_history (id_account, id_place),
+    KEY idx_history_place (id_place),
+    CONSTRAINT fk_history_account FOREIGN KEY (id_account) REFERENCES account(id_account) ON DELETE CASCADE,
+    CONSTRAINT fk_history_place FOREIGN KEY (id_place) REFERENCES place(id_place) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+
 $limit_login_account = 3;
 $time_ban_account = 1;
 

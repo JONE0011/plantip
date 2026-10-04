@@ -50,6 +50,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['act
             $order_no = $index + 1;
             mysqli_stmt_bind_param($ins, 'iii', $id_account, $id_place, $order_no);
             if(!mysqli_stmt_execute($ins)) throw new Exception(mysqli_stmt_error($ins));
+
+            // จำสถานที่นี้ไว้ในประวัติของสมาชิก แม้ภายหลังจะเอาออกจากทริปปัจจุบัน
+            $history = mysqli_prepare($connect, "INSERT IGNORE INTO place_history (id_account, id_place) VALUES (?, ?)");
+            if($history){
+                mysqli_stmt_bind_param($history, 'ii', $id_account, $id_place);
+                mysqli_stmt_execute($history);
+                mysqli_stmt_close($history);
+            }
             $saved++;
         }
 
@@ -982,8 +990,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             </ul>
 
             <div class="nav-actions">
-                <span class="who">สวัสดี <?php echo htmlspecialchars($username_account); ?></span>
-                <a href="trip-planner.php?logout=1" class="logout-link">ออกจากระบบ</a>
+                <?php include("profile-widget.php"); ?>
             </div>
         </div>
     </nav>

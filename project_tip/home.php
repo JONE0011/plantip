@@ -1,3 +1,9 @@
+<?php
+session_start();
+$open_connect = 1;
+require('connect.php');
+$is_logged_in = isset($_SESSION['id_account']);
+?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -383,7 +389,7 @@
             <li><a href="#">เกี่ยวกับเรา</a></li>
         </ul>
         <div class="nav-actions">
-            <a href="form-login.php" class="btn-login-open">เข้าสู่ระบบ</a>
+            <?php include("profile-widget.php"); ?>
             <a href="trip-planner.php" class="btn-plan">วางแผนทริปของฉัน</a>
         </div>
     </div>
@@ -549,6 +555,11 @@
     }
     function saveTrip(list){
         localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        <?php if($is_logged_in): ?>
+        fetch('trip-planner.php?action=save_trip', {
+            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({places:list})
+        }).catch(()=>{});
+        <?php endif; ?>
     }
     function updateCount(list){
         countLabel.textContent = list.length === 0

@@ -129,6 +129,10 @@ if(!isset($_SESSION['id_account'])){
             <li><a href="shops.php" class="active">ร้านอาหาร &amp; คาเฟ่</a></li>
             <li><a href="trip-planner.php">วางแผนทริป</a></li>
         </ul>
+        <div class="nav-actions">
+            <?php include("profile-widget.php"); ?>
+            <a href="trip-planner.php" class="btn-plan">วางแผนทริป</a>
+        </div>
     </div>
 </nav>
 
