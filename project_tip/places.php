@@ -65,7 +65,7 @@ footer{padding:28px 0;color:#7a847e;font-size:11px;border-top:1px solid var(--li
 <a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a>
 <a href="trip-planner.php">วางแผนทริป</a>
 </div>
-<a class="plan" href="contribute.php">+ เพิ่มข้อมูล</a>
+<div style="display:flex;align-items:center;gap:10px"><?php include("profile-widget.php"); ?><a class="plan" href="contribute.php">+ เพิ่มข้อมูล</a></div>
 </div>
 </nav>
 
