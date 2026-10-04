@@ -383,7 +383,7 @@
             <li><a href="#">เกี่ยวกับเรา</a></li>
         </ul>
         <div class="nav-actions">
-            <button type="button" class="btn-login-open" id="open-login">เข้าสู่ระบบ</button>
+            <a href="form-login.php" class="btn-login-open">เข้าสู่ระบบ</a>
             <a href="trip-planner.php" class="btn-plan">วางแผนทริปของฉัน</a>
         </div>
     </div>
@@ -532,27 +532,6 @@
 
 </div>
 
-<!-- Right-side login drawer -->
-<div class="login-overlay" id="login-overlay" aria-hidden="true">
-    <aside class="login-drawer" role="dialog" aria-modal="true" aria-labelledby="login-title">
-        <button type="button" class="login-close" id="close-login" aria-label="ปิดหน้าต่างเข้าสู่ระบบ">×</button>
-        <div class="login-drawer-image" aria-hidden="true"></div>
-        <div class="login-drawer-content">
-            <span class="login-kicker">TAK EXPLORE · TRAVEL PLANNER</span>
-            <h2 id="login-title">ยินดีต้อนรับกลับมา</h2>
-            <p class="login-intro">เข้าสู่ระบบเพื่อเก็บสถานที่ท่องเที่ยวที่คุณสนใจ และวางแผนทริปเที่ยวจังหวัดตากในแบบของคุณ</p>
-            <form action="process-login.php" method="POST" class="login-drawer-form" novalidate>
-                <label class="login-field"><span>อีเมล</span><input name="email_account" type="email" placeholder="you@example.com" autocomplete="email" required></label>
-                <label class="login-field"><span>รหัสผ่าน</span><input name="password_account" type="password" placeholder="••••••••" autocomplete="current-password" required></label>
-                <button type="submit" class="login-submit">เข้าสู่ระบบ <span>→</span></button>
-            </form>
-            <div class="login-divider"><span>หรือ</span></div>
-            <p class="login-register">ยังไม่มีบัญชี? <a href="form-register.php">สร้างบัญชีใหม่</a></p>
-            <p class="login-note">วางแผนเส้นทาง เก็บสถานที่โปรด และกลับมาทริปของคุณได้ทุกเมื่อ</p>
-        </div>
-    </aside>
-</div>
-
 <footer>
     <div class="wrap">© <?php echo date('Y'); ?> เที่ยวตาก · แพลตฟอร์มวางแผนท่องเที่ยวจังหวัดตาก</div>
 </footer>
@@ -579,29 +558,6 @@
 
     let trip = loadTrip();
     updateCount(trip);
-
-    // Right-side login drawer
-    const loginOverlay = document.getElementById('login-overlay');
-    const openLogin = document.getElementById('open-login');
-    const closeLogin = document.getElementById('close-login');
-    let lastLoginFocus = null;
-    function openLoginDrawer(){
-        lastLoginFocus = document.activeElement;
-        loginOverlay.classList.add('is-open');
-        loginOverlay.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('login-open');
-        setTimeout(() => loginOverlay.querySelector('input')?.focus(), 260);
-    }
-    function closeLoginDrawer(){
-        loginOverlay.classList.remove('is-open');
-        loginOverlay.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('login-open');
-        if(lastLoginFocus && typeof lastLoginFocus.focus === 'function') lastLoginFocus.focus();
-    }
-    openLogin?.addEventListener('click', openLoginDrawer);
-    closeLogin?.addEventListener('click', closeLoginDrawer);
-    loginOverlay?.addEventListener('click', e => { if(e.target === loginOverlay) closeLoginDrawer(); });
-    document.addEventListener('keydown', e => { if(e.key === 'Escape' && loginOverlay?.classList.contains('is-open')) closeLoginDrawer(); });
 
     document.querySelectorAll('.add-btn').forEach(btn => {
         const card = btn.closest('.dest-card');
