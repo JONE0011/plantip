@@ -1130,7 +1130,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     if(trip.length === 0){
         try{
             const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            trip = local.filter(id => PLACES_BY_ID[id]);
+            trip = local.map(id => String(id).includes(':') ? String(id) : 'place:' + String(id)).filter(id => PLACES_BY_ID[id]);
             if(trip.length > 0) saveTrip();
         }catch(e){ /* à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸à¹ˆà¸² à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸—à¸³à¸­à¸°à¹„à¸£ */ }
     }
@@ -1437,7 +1437,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     // à¸ˆà¸¶à¸‡à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¡à¸µ trip-share-config.php à¹à¸¥à¸°à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸žà¸¶à¹ˆà¸‡ save-trip.php
     function getShareUrl(){
         const url = new URL('trip-view.php', window.location.href);
-        url.searchParams.set('places', trip.join(','));
+        url.searchParams.set('places', trip.filter(id => id.startsWith('place:')).map(id => id.slice(6)).join(','));
         return url.href;
     }
 
