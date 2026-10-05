@@ -55,7 +55,7 @@ if ($shop_result) {
 
 /* HERO */
 .hero{min-height:100svh;position:relative;color:#fff;display:flex;align-items:flex-end;background:#17352a}
-.hero-bg{position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(7,22,16,.82),rgba(7,22,16,.28) 62%,rgba(7,22,16,.1)),linear-gradient(0deg,rgba(5,16,11,.78),transparent 55%),url("images/hero-tak.jpeg");background-size:cover;background-position:center;animation:heroZoom 12s ease-out both}
+.hero-bg{position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(7,22,16,.82),rgba(7,22,16,.28) 62%,rgba(7,22,16,.1)),linear-gradient(0deg,rgba(5,16,11,.78),transparent 55%),url("images/hero-tak-home.jpg");background-size:cover;background-position:center;animation:heroZoom 12s ease-out both}
 .hero-bg:after{content:"";position:absolute;inset:0;opacity:.1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .hero-word{position:absolute;right:-2vw;top:17vh;font:600 clamp(130px,25vw,390px)/.7 "Playfair Display",serif;letter-spacing:-.08em;color:rgba(255,255,255,.09);user-select:none}
 .hero-inner{position:relative;z-index:2;width:min(1380px,calc(100% - 48px));margin:auto;padding:150px 0 72px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:60px;align-items:end}
