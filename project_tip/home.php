@@ -3,6 +3,32 @@ session_start();
 $open_connect = 1;
 require('connect.php');
 $is_logged_in = isset($_SESSION['id_account']);
+
+$home_place_images = [
+    'thi-lo-su' => 'images/places/thi-lo-su.jpg',
+    'doi-musoe' => 'images/places/doi-musoe.jpg',
+    'bhumibol-dam' => 'images/places/bhumibol-dam.jpg',
+    'mae-sot-market' => 'images/places/mae-sot-market.jpg',
+    'lan-sang' => 'images/places/lan-sang.jpg',
+    'taksin-maharat' => 'images/places/taksin-maharat.jpg',
+    'wat-borommathat' => 'images/places/wat-borommathat.jpg',
+    'friendship-bridge' => 'images/places/friendship-bridge.jpg',
+];
+$home_places = [];
+$place_result = mysqli_query($connect, "SELECT id_place, place_key, name_place, location_place, image_place FROM place ORDER BY id_place LIMIT 3");
+if ($place_result) {
+    while ($row = mysqli_fetch_assoc($place_result)) {
+        $row['image_url'] = $home_place_images[$row['place_key']] ?? ($row['image_place'] ?? '');
+        $home_places[] = $row;
+    }
+}
+$home_shops = [];
+$shop_result = mysqli_query($connect, "SELECT id_shop, name_shop, category_shop, description_shop, address_shop, image_shop FROM shop WHERE status_shop=1 ORDER BY created_at DESC, id_shop DESC LIMIT 3");
+if ($shop_result) {
+    while ($row = mysqli_fetch_assoc($shop_result)) {
+        $home_shops[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -49,6 +75,10 @@ $is_logged_in = isset($_SESSION['id_account']);
 .dest-section{padding:0 0 105px}.dest-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:30px}.dest-head h2{font:600 clamp(34px,4vw,54px)/1 "Playfair Display",serif;margin:8px 0 0;letter-spacing:-.04em}.dest-head p{max-width:390px;color:var(--muted);font-size:12px;line-height:1.8;margin:0}.dest-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:14px}.dest-card{position:relative;min-height:500px;border-radius:24px;overflow:hidden;background:#1d3329;color:#fff}.dest-card:nth-child(2),.dest-card:nth-child(3){margin-top:48px;min-height:420px}.dest-photo{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .7s}.dest-card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(5,16,11,.84),transparent 62%)}.dest-card:hover .dest-photo{transform:scale(1.06)}.dest-tag{position:absolute;z-index:2;top:16px;left:16px;padding:6px 10px;border-radius:999px;background:rgba(250,248,243,.9);color:var(--green);font-size:10px;font-weight:600}.dest-add{position:absolute;z-index:3;right:16px;top:16px;width:38px;height:38px;border:1px solid rgba(255,255,255,.4);border-radius:50%;background:rgba(9,27,20,.28);color:#fff;font-size:21px;cursor:pointer;backdrop-filter:blur(10px);transition:.25s}.dest-add:hover{transform:scale(1.08);background:var(--green)}.dest-add[aria-pressed="true"]{background:#fff;color:var(--green)}.dest-add[aria-pressed="true"] .plus{display:none}.dest-add[aria-pressed="true"]:after{content:"✓";font-size:15px}.dest-info{position:absolute;z-index:2;left:24px;right:24px;bottom:22px}.dest-info h3{font:600 30px/1.05 "Playfair Display",serif;margin:0 0 8px}.dest-info p{font-size:11px;color:rgba(255,255,255,.72);margin:0;line-height:1.7}.dest-loc{display:inline-flex;gap:5px;align-items:center;margin-top:12px;font-size:10px;color:rgba(255,255,255,.7)}
 .dest-more{display:inline-flex;margin-top:25px;padding:12px 18px;border:1px solid var(--line);border-radius:999px;font-size:12px;transition:.2s}.dest-more:hover{background:var(--green);color:#fff;border-color:var(--green)}
 @media(max-width:850px){.dest-grid{grid-template-columns:1fr 1fr}.dest-card:first-child{grid-column:1/-1}.dest-card:nth-child(2),.dest-card:nth-child(3){margin-top:0;min-height:360px}.dest-card:first-child{min-height:430px}}@media(max-width:560px){.container{width:min(100% - 30px,1380px)}.dest-grid{grid-template-columns:1fr}.dest-card:first-child{grid-column:auto}.dest-card,.dest-card:nth-child(2),.dest-card:nth-child(3){min-height:420px}}
+
+/* FOOD & CAFE */
+.food-section{padding:105px 0;background:var(--cream)}.food-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:30px}.food-head h2{font:600 clamp(34px,4vw,54px)/1 "Playfair Display",serif;margin:8px 0 0;letter-spacing:-.04em}.food-head p{max-width:390px;color:var(--muted);font-size:12px;line-height:1.8;margin:0}.food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.food-card{background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;transition:.3s}.food-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(20,40,30,.10)}.food-photo{aspect-ratio:1.35;background:center/cover no-repeat}.food-info{padding:20px}.food-tag{display:inline-flex;padding:5px 9px;border-radius:999px;background:#edf1e9;color:var(--green);font-size:9px;font-weight:600;margin-bottom:10px}.food-info h3{font:600 25px/1.1 "Playfair Display",serif;margin:0 0 8px}.food-info p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}.food-location{display:block;font-size:10px;color:#7b857f;margin-top:10px}.food-more{display:inline-flex;margin-top:28px;padding:12px 20px;border-radius:999px;background:var(--green);color:#fff;font-size:12px;font-weight:500;transition:.2s}.food-more:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(24,61,49,.18)}
+@media(max-width:800px){.food-grid{grid-template-columns:1fr 1fr}.food-card:first-child{grid-column:1/-1}}@media(max-width:560px){.food-head{display:block}.food-head p{margin-top:14px}.food-grid{grid-template-columns:1fr}.food-card:first-child{grid-column:auto}}
 
 /* FEATURES */
 .features{background:var(--cream);padding:100px 0}.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:start}.features-title h2{font:600 clamp(38px,4.5vw,62px)/1 "Playfair Display",serif;margin:10px 0 20px;letter-spacing:-.04em}.features-title p{color:var(--muted);line-height:1.9;font-size:14px;max-width:450px}.feature-items{border-top:1px solid var(--line)}.feature-item{display:grid;grid-template-columns:55px 1fr;gap:18px;padding:23px 0;border-bottom:1px solid var(--line)}.feature-num{font:11px;color:#8a938d;padding-top:4px}.feature-item h3{font-size:15px;margin:0 0 6px}.feature-item p{font-size:12px;line-height:1.8;color:var(--muted);margin:0}
@@ -114,24 +144,43 @@ footer{padding:30px 0 45px;border-top:1px solid var(--line);color:#7a847e;font-s
 
 <section class="dest-section container" id="destinations">
 <div class="dest-head">
-<div><div class="section-label">Selected destinations / 02</div><h2>ไปไหนดีในตาก?</h2></div>
-<p>เลือกจุดหมายที่ชอบ กด + เพื่อเก็บไว้ในทริป แล้วไปจัดลำดับการเดินทางต่อ</p>
+<div><div class="section-label">Selected destinations / 02</div><h2>สถานที่ท่องเที่ยว</h2></div>
+<p>รวมสถานที่น่าสนใจของตากไว้ให้เลือกจากหน้าแรก กด + เพื่อเก็บเข้าทริป หรือกดดูเพิ่มเติมเพื่อชมสถานที่ทั้งหมด</p>
 </div>
 <div class="dest-grid">
-<article class="dest-card" data-place="thi-lo-su">
-<div class="dest-photo" style="background-image:url('images/places/thi-lo-su.jpg')"></div><span class="dest-tag">ยอดฮิต</span><button class="dest-add" type="button" aria-pressed="false" aria-label="เพิ่มน้ำตกทีลอซู"><span class="plus">+</span></button>
-<div class="dest-info"><h3>น้ำตกทีลอซู</h3><p>น้ำตกกลางผืนป่าอุ้มผาง จุดหมายธรรมชาติที่ไม่ควรพลาด</p><span class="dest-loc">● อ.อุ้มผาง</span></div>
+<?php foreach ($home_places as $i => $place): ?>
+<article class="dest-card" data-place="<?php echo htmlspecialchars($place['place_key']); ?>">
+<div class="dest-photo" style="background-image:url('<?php echo htmlspecialchars($place['image_url']); ?>')"></div>
+<span class="dest-tag"><?php echo $i === 0 ? 'ยอดฮิต' : ($i === 1 ? 'ธรรมชาติ' : 'แนะนำ'); ?></span>
+<button class="dest-add" type="button" aria-pressed="false" aria-label="เพิ่ม<?php echo htmlspecialchars($place['name_place']); ?>"><span class="plus">+</span></button>
+<div class="dest-info"><h3><?php echo htmlspecialchars($place['name_place']); ?></h3><p>จุดหมายที่น่าสนใจสำหรับทริปตากของคุณ</p><span class="dest-loc">● <?php echo htmlspecialchars($place['location_place']); ?></span></div>
 </article>
-<article class="dest-card" data-place="doi-musoe">
-<div class="dest-photo" style="background-image:url('images/places/doi-musoe.jpg')"></div><span class="dest-tag">ทะเลหมอก</span><button class="dest-add" type="button" aria-pressed="false" aria-label="เพิ่มดอยมูเซอ"><span class="plus">+</span></button>
-<div class="dest-info"><h3>ดอยมูเซอ</h3><p>อากาศเย็นและวิวภูเขาที่เหมาะกับการเริ่มต้นเช้าวันใหม่</p><span class="dest-loc">● อ.เมืองตาก</span></div>
-</article>
-<article class="dest-card" data-place="bhumibol-dam">
-<div class="dest-photo" style="background-image:url('images/places/bhumibol-dam.jpg')"></div><span class="dest-tag">ธรรมชาติ</span><button class="dest-add" type="button" aria-pressed="false" aria-label="เพิ่มเขื่อนภูมิพล"><span class="plus">+</span></button>
-<div class="dest-info"><h3>เขื่อนภูมิพล</h3><p>ผืนน้ำกว้างและภูเขารอบด้าน เหมาะกับวันพักใจแบบช้า ๆ</p><span class="dest-loc">● อ.สามเงา</span></div>
-</article>
+<?php endforeach; ?>
 </div>
-<a class="dest-more" href="trip-planner.php">ดูและเลือกสถานที่เพิ่มเติม →</a>
+<a class="dest-more" href="places.php">ดูเพิ่มเติม · สถานที่ท่องเที่ยวทั้งหมด →</a>
+</section>
+
+<section class="food-section" id="food">
+<div class="container">
+<div class="food-head">
+<div><div class="section-label">Taste Tak / 03</div><h2>ร้านอาหาร & คาเฟ่</h2></div>
+<p>พักระหว่างทางด้วยร้านอร่อย คาเฟ่น่านั่ง และร้านที่คนในพื้นที่แนะนำ ดูทั้งหมดต่อได้ในหน้าร้านอาหาร & คาเฟ่</p>
+</div>
+<div class="food-grid">
+<?php foreach ($home_shops as $shop): ?>
+<article class="food-card">
+<div class="food-photo" style="background-image:url('<?php echo htmlspecialchars($shop['image_shop'] ?: 'images/hero-tak.jpeg'); ?>')"></div>
+<div class="food-info">
+<span class="food-tag"><?php echo htmlspecialchars($shop['category_shop'] ?: 'ร้านอาหาร & คาเฟ่'); ?></span>
+<h3><?php echo htmlspecialchars($shop['name_shop']); ?></h3>
+<p><?php echo htmlspecialchars($shop['description_shop'] ?: 'ร้านน่าสนใจสำหรับทริปของคุณ'); ?></p>
+<span class="food-location">● <?php echo htmlspecialchars($shop['address_shop'] ?: 'จังหวัดตาก'); ?></span>
+</div>
+</article>
+<?php endforeach; ?>
+</div>
+<a class="food-more" href="shops.php">ดูเพิ่มเติม · ร้านอาหาร & คาเฟ่ทั้งหมด →</a>
+</div>
 </section>
 
 <section class="features" id="why">
