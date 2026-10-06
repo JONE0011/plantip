@@ -25,13 +25,14 @@ $place_gallery = [
 ];
 
 $places = [];
-$result = mysqli_query($connect, "SELECT id_place, place_key, name_place, location_place, image_place FROM place ORDER BY id_place");
+$result = mysqli_query($connect, "SELECT p.id_place, p.place_key, p.name_place, p.location_place, p.image_place, COALESCE(ROUND(AVG(r.rating),1),0) AS review_avg, COUNT(r.id_review) AS review_count FROM place p LEFT JOIN reviews r ON r.item_type='place' AND r.id_place=p.id_place GROUP BY p.id_place, p.place_key, p.name_place, p.location_place, p.image_place ORDER BY p.id_place");
 if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $row['image_url'] = $place_images[$row['place_key']] ?? ($row['image_place'] ?? '');
         $places[] = $row;
     }
 }
+function review_badge($avg,$count){ if($count>=10) return 'ยอดนิยม'; if($count>=3 && $avg>=4.3) return 'แนะนำ'; return ''; }
 $featured_keys = ['thi-lo-su','doi-musoe','bhumibol-dam','lan-sang'];
 $featured = [];
 $others = [];
@@ -92,11 +93,11 @@ footer{padding:28px 0;color:#7a847e;font-size:11px;border-top:1px solid var(--li
 <div class="section-head"><div><div class="section-label">Editor's selection / 01</div><h2>สถานที่ยอดนิยม<br>แนะนำให้ลองไป</h2></div><p>4 จุดหมายเด่นสำหรับคนที่อยากเริ่มเที่ยวตากแบบไม่ต้องคิดนาน</p></div>
 <div class="feature-grid">
 <?php foreach ($featured as $i => $p): ?>
-<article class="card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='ภาพบรรยากาศและมุมที่น่าสนใจของสถานที่นี้ในจังหวัดตาก'>
+<article class="card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='ภาพบรรยากาศและมุมที่น่าสนใจของสถานที่นี้ในจังหวัดตาก' data-review-type='place' data-review-id='<?php echo (int)$p['id_place']; ?>'>
 <div class="photo" style="background-image:url('<?php echo htmlspecialchars($p['image_url']); ?>')"></div>
 <span class="tag"><?php echo $i===0?'ยอดฮิต':($i===1?'ทะเลหมอก':($i===2?'ธรรมชาติ':'ป่า & น้ำตก')); ?></span>
 <button class="add" type="button" data-place="<?php echo htmlspecialchars($p['place_key']); ?>" aria-label="เพิ่ม <?php echo htmlspecialchars($p['name_place']); ?>">+</button>
-<div class="card-body"><h3><?php echo htmlspecialchars($p['name_place']); ?></h3><p>จุดหมายที่น่าสนใจสำหรับทริปตากของคุณ</p><span class="location">● <?php echo htmlspecialchars($p['location_place']); ?></span></div>
+<div class="card-body"><h3><?php echo htmlspecialchars($p['name_place']); ?></h3><?php if($p['review_count']>0): ?><div class="rating-line">★ <?php echo number_format((float)$p['review_avg'],1); ?> <span>(<?php echo (int)$p['review_count']; ?> รีวิว)</span></div><?php endif; ?><?php if($review_badge=review_badge((float)$p['review_avg'],(int)$p['review_count'])): ?><span class="recommend-badge"><?php echo $review_badge; ?></span><?php endif; ?><p>จุดหมายที่น่าสนใจสำหรับทริปตากของคุณ</p><span class="location">● <?php echo htmlspecialchars($p['location_place']); ?></span></div>
 </article>
 <?php endforeach; ?>
 </div>
@@ -108,9 +109,9 @@ footer{padding:28px 0;color:#7a847e;font-size:11px;border-top:1px solid var(--li
 <div class="section-head"><div><div class="section-label">Explore more / 02</div><h2>ยังมีอีกหลายที่ให้ค้นพบ</h2></div><p>สถานที่อื่น ๆ ที่คุณสามารถเลือกเพิ่มเข้าทริปได้</p></div>
 <div class="all-grid">
 <?php foreach ($others as $p): ?>
-<article class="small-card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='เปิดดูรูปสถานที่แบบเต็มจอ แล้วเลื่อนดูภาพอื่นได้'>
+<article class="small-card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='เปิดดูรูปสถานที่แบบเต็มจอ แล้วเลื่อนดูภาพอื่นได้' data-review-type='place' data-review-id='<?php echo (int)$p['id_place']; ?>'>
 <div class="small-photo" style="background-image:url('<?php echo htmlspecialchars($p['image_url']); ?>')"></div>
-<div class="small-info"><h3><?php echo htmlspecialchars($p['name_place']); ?></h3><p><?php echo htmlspecialchars($p['location_place']); ?></p><button class="small-add" type="button" data-place="<?php echo htmlspecialchars($p['place_key']); ?>">+ เพิ่มเข้าทริป</button></div>
+<div class="small-info"><h3><?php echo htmlspecialchars($p['name_place']); ?></h3><?php if($p['review_count']>0): ?><div class="rating-line light">★ <?php echo number_format((float)$p['review_avg'],1); ?> <span>(<?php echo (int)$p['review_count']; ?> รีวิว)</span></div><?php endif; ?><?php if($review_badge=review_badge((float)$p['review_avg'],(int)$p['review_count'])): ?><span class="recommend-badge inline"><?php echo $review_badge; ?></span><?php endif; ?><p><?php echo htmlspecialchars($p['location_place']); ?></p><button class="small-add" type="button" data-place="<?php echo htmlspecialchars($p['place_key']); ?>">+ เพิ่มเข้าทริป</button></div>
 </article>
 <?php endforeach; ?>
 </div>

@@ -1,0 +1,25 @@
+<?php
+session_start();
+$open_connect=1; require('connect.php');
+if(!isset($_SESSION['id_account'])){http_response_code(401);echo json_encode(['ok'=>false,'message'=>'กรุณาเข้าสู่ระบบก่อนรีวิว'],JSON_UNESCAPED_UNICODE);exit;}
+header('Content-Type: application/json; charset=UTF-8');
+$type=$_POST['item_type']??'';
+$id=(int)($_POST['item_id']??0);
+$rating=(int)($_POST['rating']??0);
+$text=trim($_POST['review_text']??'');
+if(!in_array($type,['place','shop'],true)||$id<1||$rating<1||$rating>5){http_response_code(400);echo json_encode(['ok'=>false,'message'=>'ข้อมูลรีวิวไม่ถูกต้อง'],JSON_UNESCAPED_UNICODE);exit;}
+$uid=(int)$_SESSION['id_account'];
+$esc=mysqli_real_escape_string($connect,$text);
+if($type==='place'){
+  $exists=mysqli_query($connect,"SELECT id_place FROM place WHERE id_place=$id LIMIT 1");
+  if(!$exists||!mysqli_num_rows($exists)){http_response_code(404);echo json_encode(['ok'=>false,'message'=>'ไม่พบสถานที่'],JSON_UNESCAPED_UNICODE);exit;}
+  $sql="INSERT INTO reviews (id_account,item_type,id_place,id_shop,rating,review_text) VALUES ($uid,'place',$id,NULL,$rating,'$esc')
+        ON DUPLICATE KEY UPDATE rating=VALUES(rating),review_text=VALUES(review_text),updated_at=CURRENT_TIMESTAMP";
+}else{
+  $exists=mysqli_query($connect,"SELECT id_shop FROM shop WHERE id_shop=$id AND status_shop=1 LIMIT 1");
+  if(!$exists||!mysqli_num_rows($exists)){http_response_code(404);echo json_encode(['ok'=>false,'message'=>'ไม่พบร้าน'],JSON_UNESCAPED_UNICODE);exit;}
+  $sql="INSERT INTO reviews (id_account,item_type,id_place,id_shop,rating,review_text) VALUES ($uid,'shop',NULL,$id,$rating,'$esc')
+        ON DUPLICATE KEY UPDATE rating=VALUES(rating),review_text=VALUES(review_text),updated_at=CURRENT_TIMESTAMP";
+}
+if(!mysqli_query($connect,$sql)){http_response_code(500);echo json_encode(['ok'=>false,'message'=>'บันทึกรีวิวไม่สำเร็จ'],JSON_UNESCAPED_UNICODE);exit;}
+echo json_encode(['ok'=>true,'message'=>'บันทึกรีวิวแล้ว'],JSON_UNESCAPED_UNICODE);

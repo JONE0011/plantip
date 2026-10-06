@@ -33,6 +33,26 @@ if (!mysqli_real_connect(
 }
 
 mysqli_set_charset($connect, 'utf8mb4');
+// Community reviews and 1-5 star ratings
+mysqli_query($connect, "CREATE TABLE IF NOT EXISTS reviews (
+    id_review BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_account INT(11) NOT NULL,
+    item_type ENUM('place','shop') NOT NULL,
+    id_place INT(11) NULL,
+    id_shop INT(11) NULL,
+    rating TINYINT UNSIGNED NOT NULL,
+    review_text TEXT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_review),
+    UNIQUE KEY uniq_account_item (id_account, item_type, id_place, id_shop),
+    KEY idx_review_place (id_place),
+    KEY idx_review_shop (id_shop),
+    KEY idx_review_type_rating (item_type, rating),
+    CONSTRAINT fk_review_account FOREIGN KEY (id_account) REFERENCES account(id_account) ON DELETE CASCADE,
+    CONSTRAINT fk_review_place FOREIGN KEY (id_place) REFERENCES place(id_place) ON DELETE CASCADE,
+    CONSTRAINT fk_review_shop FOREIGN KEY (id_shop) REFERENCES shop(id_shop) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
 
 // เพิ่มรายละเอียดสถานที่และเจ้าของสถานที่สำหรับระบบสมาชิก
 $place_desc = mysqli_query($connect, "SHOW COLUMNS FROM place LIKE 'description_place'");
