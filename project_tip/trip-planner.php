@@ -13,6 +13,36 @@ if(!isset($_SESSION['id_account'])){
 
 $id_account = (int) $_SESSION['id_account'];
 
+// API สำหรับให้ปุ่ม “ทริปของฉัน” ดึงชื่อภาษาไทยของสถานที่/ร้านได้จากทุกหน้า
+// ป้องกันกรณี localStorage เก็บ place_key เช่น thararak แล้วหน้า shops.php แสดง key แทนชื่อจริง
+if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'trip_meta'){
+    header('Content-Type: application/json; charset=utf-8');
+    $meta = [];
+
+    $placesMeta = mysqli_query($connect, "SELECT place_key, name_place, location_place FROM place ORDER BY id_place");
+    if($placesMeta){
+        while($row = mysqli_fetch_assoc($placesMeta)){
+            $meta[$row['place_key']] = [
+                'title' => $row['name_place'],
+                'loc' => $row['location_place']
+            ];
+        }
+    }
+
+    $shopsMeta = mysqli_query($connect, "SELECT id_shop, name_shop, address_shop FROM shop WHERE status_shop = 1 ORDER BY id_shop");
+    if($shopsMeta){
+        while($row = mysqli_fetch_assoc($shopsMeta)){
+            $meta['shop:' . (int)$row['id_shop']] = [
+                'title' => $row['name_shop'],
+                'loc' => $row['address_shop'] ?: 'จังหวัดตาก'
+            ];
+        }
+    }
+
+    echo json_encode(['success'=>true, 'items'=>$meta], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 // บันทึกลำดับทริปในไฟล์นี้เลย ไม่ต้องใช้ save-trip.php
 // รับ JSON: {"places":["place_key1","place_key2",...]}
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_trip'){
