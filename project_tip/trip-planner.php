@@ -1124,13 +1124,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
     // ถ้ายังไม่เคยมีทริปในฐานข้อมูลเลย แต่เคยเลือกไว้ตอนยังไม่ login (เก็บใน localStorage
     // จากหน้า home.php) ให้ดึงมาใช้ครั้งแรก แล้วเซฟเข้าฐานข้อมูลทันทีเพื่อไม่ให้ข้อมูลหาย
     const STORAGE_KEY = 'takTripPlaces';
-    if(trip.length === 0){
-        try{
-            const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            trip = local.filter(id => PLACES_BY_ID[id]);
-            if(trip.length > 0) saveTrip();
-        }catch(e){ /* ไม่มีข้อมูลเก่า ไม่ต้องทำอะไร */ }
-    }
+    try{
+        const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        const validLocal = local.filter(id => PLACES_BY_ID[id]);
+        if(validLocal.length){ trip = [...new Set([...trip, ...validLocal])]; saveTrip(); }
+    }catch(e){ /* ไม่มีข้อมูลเก่า ไม่ต้องทำอะไร */ }
 
     let saveTimer = null;
     function saveTrip(){

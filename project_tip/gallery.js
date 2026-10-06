@@ -146,7 +146,7 @@
   function close(){overlay.classList.remove('is-open');document.body.style.overflow='';}
   function next(step){if(!gallery.length)return;index=(index+step+gallery.length)%gallery.length;render();}
 
-  items.forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('button[data-place]'))return;open(card);}));
+  items.forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('button[data-place],button.trip-add-btn'))return;open(card);}));
   overlay.querySelector('.gallery-close').onclick=close;
   overlay.querySelector('.gallery-prev').onclick=()=>next(-1);
   overlay.querySelector('.gallery-next').onclick=()=>next(1);
