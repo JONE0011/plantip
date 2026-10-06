@@ -39,7 +39,9 @@
     if(!reviewType||!reviewId)return;
     listEl.innerHTML='<div class="review-loading">กำลังโหลดรีวิว...</div>';
     try{
-      const res=await fetch('reviews-api.php?type='+encodeURIComponent(reviewType)+'&id='+encodeURIComponent(reviewId),{cache:'no-store'});
+      const apiUrl=window.location.origin+'/reviews-api.php?type='+encodeURIComponent(reviewType)+'&id='+encodeURIComponent(reviewId);
+      const res=await fetch(apiUrl,{cache:'no-store',credentials:'same-origin'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
       const data=await res.json();
       if(!data.ok)throw new Error();
       avgEl.textContent=Number(data.average||0).toFixed(1);
