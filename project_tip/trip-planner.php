@@ -1160,7 +1160,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             position:relative;
             height:var(--trip-summary-height);
             flex:0 0 auto;
-            min-height:150px;
+            min-height:0;
             max-height:none;
             margin:14px 14px 8px;
             padding:15px;
@@ -2070,7 +2070,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     let resizingTripSummary = false;
     let tripStartY = 0;
     let tripStartHeight = 300;
-    let tripMinHeight = 150;
+    let tripMinHeight = 0;
     let tripResizeTargetHeight = 300;
     let tripResizeFrame = 0;
 
@@ -2093,7 +2093,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function applyTripSummaryHeight(height, save = true){
         // ไม่ผูก minHeight กับค่าที่ค้างจากการลากครั้งก่อน
         // ขั้นต่ำจริงจะถูกคุมตอน pointerdown เท่านั้น
-        const safeHeight = Math.round(Math.max(150, Math.min(5000, height)));
+        const safeHeight = Math.round(Math.max(60, Math.min(10000, height)));
         tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
         tripSummary.style.height = safeHeight + 'px';
         if(save) localStorage.setItem('takPlannerTripHeight', String(safeHeight));
@@ -2105,8 +2105,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
         tripStartY = event.clientY;
         tripStartHeight = tripSummary.getBoundingClientRect().height;
         tripResizeTargetHeight = tripStartHeight;
-        // อ่าน layout หนัก ๆ แค่ครั้งเดียวก่อนเริ่มลาก
-        tripMinHeight = Math.max(150, getTripSummaryRequiredHeight());
+        // ปลดล็อกการลาก: ไม่บังคับความสูงขั้นต่ำตามจำนวนรายการอีกต่อไป
+        tripMinHeight = 60;
 
         tripSummary.classList.add('trip-resizing');
         plannerApp.classList.add('trip-resizing');
@@ -2120,7 +2120,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         if(tripResizeFrame) return;
         tripResizeFrame = requestAnimationFrame(() => {
             tripResizeFrame = 0;
-            const safeHeight = Math.round(Math.max(tripMinHeight, Math.min(5000, tripResizeTargetHeight)));
+            const safeHeight = Math.round(Math.max(60, Math.min(10000, tripResizeTargetHeight)));
             tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
             tripSummary.style.height = safeHeight + 'px';
         });
@@ -2133,7 +2133,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             cancelAnimationFrame(tripResizeFrame);
             tripResizeFrame = 0;
         }
-        const finalSafeHeight = Math.round(Math.max(tripMinHeight, Math.min(5000, tripResizeTargetHeight)));
+        const finalSafeHeight = Math.round(Math.max(60, Math.min(10000, tripResizeTargetHeight)));
         tripSummary.style.setProperty('--trip-summary-height', finalSafeHeight + 'px');
         tripSummary.style.height = finalSafeHeight + 'px';
         localStorage.setItem('takPlannerTripHeight', String(finalSafeHeight));
@@ -2150,7 +2150,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     tripSummaryResizeHandle.addEventListener('pointerup', stopTripSummaryResize);
     tripSummaryResizeHandle.addEventListener('pointercancel', stopTripSummaryResize);
     tripSummaryResizeHandle.addEventListener('dblclick', () => {
-        tripMinHeight = 150;
+        tripMinHeight = 60;
         applyTripSummaryHeight(300);
     });
 
