@@ -1154,13 +1154,26 @@ while($row = mysqli_fetch_assoc($result_trip)){
     // ถ้ายังไม่เคยมีทริปในฐานข้อมูลเลย แต่เคยเลือกไว้ตอนยังไม่ login (เก็บใน localStorage
     // จากหน้า home.php) ให้ดึงมาใช้ครั้งแรก แล้วเซฟเข้าฐานข้อมูลทันทีเพื่อไม่ให้ข้อมูลหาย
     const STORAGE_KEY = 'takTripPlaces_<?php echo (int)$id_account; ?>';
+    let saveTimer = null;
     try{
         const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        const validLocal = local.filter(id => PLACES_BY_ID[id]);
-        if(validLocal.length){ trip = [...new Set([...trip, ...validLocal])]; saveTrip(); }
+        const validLocal = [...new Set(local.filter(id => PLACES_BY_ID[id]))];
+
+        // ถ้ามาจากปุ่ม “สร้างทริป” ในกล่องทริปของฉัน
+        // ให้รายการใน localStorage เป็น source of truth และใช้รายการนั้นแทนทริปเก่าจาก DB
+        // ป้องกันกรณี DB มี 6 รายการ แต่กล่องทริปของฉันมี 4 รายการแล้วหน้า planner กลายเป็น 6
+        const fromDirectory = new URLSearchParams(window.location.search).get('from') === 'directory';
+
+        if(fromDirectory){
+            trip = validLocal;
+            saveTrip();
+        }else if(validLocal.length && trip.length === 0){
+            // เข้า trip-planner โดยตรง: ถ้ามี localStorage แต่ DB ยังไม่มี ให้กู้รายการขึ้นมา
+            trip = validLocal;
+            saveTrip();
+        }
     }catch(e){ /* ไม่มีข้อมูลเก่า ไม่ต้องทำอะไร */ }
 
-    let saveTimer = null;
     function saveTrip(){
         // เก็บสำรองไว้ใน localStorage ด้วย เผื่อ request ไปเซิร์ฟเวอร์ล่ม
         localStorage.setItem(STORAGE_KEY, JSON.stringify(trip));
