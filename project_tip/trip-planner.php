@@ -1168,7 +1168,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
             border:1px solid rgba(32,88,64,.04);
             display:flex;
             flex-direction:column;
-            overflow:visible;
+            overflow:hidden;
+            box-sizing:border-box;
         }
 
         .trip-summary-resize-handle{
