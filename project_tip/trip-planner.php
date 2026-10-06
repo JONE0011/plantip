@@ -1060,8 +1060,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
         html,body{
             width:100%;
-            height:100%;
-            overflow:hidden;
+            min-height:100%;
+            height:auto;
+            overflow-x:hidden;
+            overflow-y:auto;
         }
 
         body{
@@ -1073,8 +1075,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
         .planner-app{
             --side-width:340px;
             width:100vw;
-            height:100vh;
-            min-height:620px;
+            height:auto;
+            min-height:100vh;
             display:grid;
             grid-template-columns:minmax(420px,1fr) 8px minmax(280px,var(--side-width));
             background:var(--planner-bg);
@@ -1102,10 +1104,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
             position:relative;
             z-index:10;
             min-width:0;
-            height:100vh;
-            overflow-y:auto;
-            overflow-x:hidden;
-            overscroll-behavior:contain;
+            height:auto;
+            min-height:100vh;
+            overflow:visible;
+            overscroll-behavior:visible;
             background:#fbfaf6;
             border-left:1px solid #e3e5de;
             display:flex;
@@ -1113,10 +1115,6 @@ while($row = mysqli_fetch_assoc($result_trip)){
             scrollbar-width:thin;
             scrollbar-color:#b8c0b8 transparent;
         }
-
-        .side-pane::-webkit-scrollbar{width:7px}
-        .side-pane::-webkit-scrollbar-track{background:transparent}
-        .side-pane::-webkit-scrollbar-thumb{background:#b8c0b8;border-radius:999px}
 
         .side-resize-handle{
             position:relative;
@@ -1170,7 +1168,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             border:1px solid rgba(32,88,64,.04);
             display:flex;
             flex-direction:column;
-            overflow:hidden;
+            overflow:visible;
         }
 
         .trip-summary-resize-handle{
@@ -1248,19 +1246,12 @@ while($row = mysqli_fetch_assoc($result_trip)){
         .trip-mini-list{
             min-height:36px;
             max-height:none;
-            flex:1 1 auto;
-            overflow-y:auto;
-            overflow-x:hidden;
+            flex:0 0 auto;
+            overflow:visible;
             margin:0 0 8px;
             padding:0 2px 0 0;
             list-style:none;
-            scrollbar-width:thin;
-            scrollbar-color:#b8c0b8 transparent;
         }
-
-        .trip-mini-list::-webkit-scrollbar{width:6px}
-        .trip-mini-list::-webkit-scrollbar-track{background:transparent}
-        .trip-mini-list::-webkit-scrollbar-thumb{background:#b8c0b8;border-radius:999px}
 
         .trip-mini-list .empty-hint{
             padding:10px;
@@ -1384,9 +1375,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
 
         .discover-panel{
-            min-height:0;
-            flex:1;
-            overflow:auto;
+            min-height:520px;
+            flex:0 0 auto;
+            overflow:visible;
             padding:13px 14px 20px;
         }
 
@@ -2043,7 +2034,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     function applyTripSummaryHeight(height){
         const minHeight = 150;
-        const maxHeight = Math.max(minHeight, Math.floor(window.innerHeight * 0.78));
+        // ไม่มีเพดานตามความสูงหน้าจอ: ยืดได้ตามที่ลากจริง และให้หน้าเว็บยาวตามเนื้อหา
+        const maxHeight = 5000;
         const safeHeight = Math.round(Math.max(minHeight, Math.min(maxHeight, height)));
 
         tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
