@@ -1047,42 +1047,454 @@ while($row = mysqli_fetch_assoc($result_trip)){
     }
 </style>
     <link rel="stylesheet" href="modern.css">
+    <style id="planner-redesign">
+        :root{
+            --planner-bg:#f7f6f0;
+            --planner-panel:#f1f2ec;
+            --planner-green:#205840;
+            --planner-green-dark:#143d2b;
+            --planner-line:#dfe3da;
+            --planner-text:#1f2923;
+            --planner-muted:#747d75;
+        }
+
+        html,body{
+            width:100%;
+            height:100%;
+            overflow:hidden;
+        }
+
+        body{
+            margin:0;
+            background:var(--planner-bg);
+            color:var(--planner-text);
+        }
+
+        .planner-app{
+            width:100vw;
+            height:100vh;
+            min-height:620px;
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) 340px;
+            background:var(--planner-bg);
+        }
+
+        .map-pane{
+            position:relative;
+            min-width:0;
+            height:100vh;
+            background:#dce8df;
+            overflow:hidden;
+        }
+
+        .map-pane #map{
+            width:100%;
+            height:100%;
+            border-radius:0;
+        }
+
+        .map-pane .map-resize-handle{
+            display:none;
+        }
+
+        .side-pane{
+            position:relative;
+            z-index:10;
+            min-width:0;
+            height:100vh;
+            overflow:hidden;
+            background:#fbfaf6;
+            border-left:1px solid #e3e5de;
+            display:flex;
+            flex-direction:column;
+        }
+
+        .trip-summary{
+            margin:14px 14px 8px;
+            padding:15px;
+            background:#eef0e9;
+            border-radius:20px;
+            border:1px solid rgba(32,88,64,.04);
+        }
+
+        .trip-summary-head{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:8px;
+        }
+
+        .trip-summary h1{
+            margin:0;
+            font-size:15px;
+            line-height:1.25;
+            font-weight:700;
+        }
+
+        .trip-summary-count{
+            flex:none;
+            min-width:30px;
+            padding:3px 7px;
+            border-radius:999px;
+            background:#dfe9e1;
+            color:var(--planner-green);
+            font-size:10px;
+            font-weight:700;
+            text-align:center;
+        }
+
+        .trip-summary .sub{
+            margin:0 0 9px;
+            color:var(--planner-muted);
+            font-size:10px;
+            line-height:1.45;
+        }
+
+        .trip-mini-list{
+            min-height:36px;
+            max-height:112px;
+            overflow:auto;
+            margin:0 0 8px;
+            padding:0;
+            list-style:none;
+        }
+
+        .trip-mini-list .empty-hint{
+            padding:10px;
+            border:1px dashed #d7dcd4;
+            border-radius:10px;
+            color:#858d86;
+            font-size:9px;
+            text-align:center;
+            line-height:1.5;
+        }
+
+        .trip-mini-list .trip-item{
+            display:flex;
+            align-items:center;
+            gap:7px;
+            min-height:31px;
+            margin-bottom:5px;
+            padding:5px 6px;
+            background:#fff;
+            border:1px solid #e7e9e3;
+            border-radius:10px;
+            box-shadow:none;
+            cursor:grab;
+        }
+
+        .trip-mini-list .trip-item:last-child{margin-bottom:0}
+
+        .trip-mini-list .drag-handle{
+            color:#a4aaa4;
+            font-size:10px;
+        }
+
+        .trip-mini-list .badge{
+            width:21px;
+            height:21px;
+            background:var(--planner-green);
+            font-size:9px;
+        }
+
+        .trip-mini-list .name{
+            font-size:10px;
+            line-height:1.25;
+        }
+
+        .trip-mini-list .loc{
+            font-size:8px;
+            color:#8a918a;
+        }
+
+        .trip-mini-list .remove{
+            font-size:14px;
+            color:#a1a8a1;
+        }
+
+        .trip-actions{
+            display:flex;
+            flex-direction:column;
+            gap:5px;
+            margin:0;
+        }
+
+        .share-trip-btn,
+        .clear-btn{
+            width:100%;
+            min-height:28px;
+            border-radius:999px;
+            font-family:'Prompt',sans-serif;
+            font-size:9px;
+            font-weight:600;
+        }
+
+        .share-trip-btn{
+            border:0;
+            background:var(--planner-green);
+            color:#fff;
+        }
+
+        .clear-btn{
+            border:1px solid #dfe3db;
+            background:#fff;
+            color:#747d75;
+        }
+
+        .side-nav{
+            flex:none;
+            display:flex;
+            align-items:center;
+            justify-content:space-around;
+            min-height:50px;
+            padding:0 8px;
+            border-bottom:1px solid #e5e7e1;
+            background:#fbfaf6;
+        }
+
+        .side-nav a{
+            position:relative;
+            padding:16px 5px 13px;
+            text-decoration:none;
+            color:#707870;
+            font-size:10px;
+            font-weight:500;
+            white-space:nowrap;
+        }
+
+        .side-nav a.active,
+        .side-nav a:hover{
+            color:var(--planner-green);
+        }
+
+        .side-nav a.active::after{
+            content:"";
+            position:absolute;
+            left:8px;
+            right:8px;
+            bottom:0;
+            height:2px;
+            border-radius:2px 2px 0 0;
+            background:var(--planner-green);
+        }
+
+        .discover-panel{
+            min-height:0;
+            flex:1;
+            overflow:auto;
+            padding:13px 14px 20px;
+        }
+
+        .discover-title{
+            display:flex;
+            align-items:end;
+            justify-content:space-between;
+            gap:8px;
+            margin-bottom:8px;
+        }
+
+        .discover-title h2{
+            margin:0;
+            font-size:13px;
+            font-weight:700;
+        }
+
+        .discover-title span{
+            color:#8b928b;
+            font-size:8px;
+        }
+
+        .category-tabs{
+            display:flex;
+            gap:5px;
+            flex-wrap:nowrap;
+            overflow-x:auto;
+            margin:0 -2px 10px;
+            padding:2px;
+            scrollbar-width:none;
+        }
+
+        .category-tabs::-webkit-scrollbar{display:none}
+
+        .category-tab{
+            flex:none;
+            border:1px solid #dfe3db;
+            background:#fff;
+            color:#707870;
+            border-radius:999px;
+            padding:6px 9px;
+            font:500 8px 'Prompt',sans-serif;
+            cursor:pointer;
+        }
+
+        .category-tab.active{
+            background:var(--planner-green);
+            border-color:var(--planner-green);
+            color:#fff;
+            box-shadow:0 4px 10px rgba(32,88,64,.14);
+        }
+
+        .place-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+            overflow:visible;
+            padding:0;
+        }
+
+        .place-card{
+            min-width:0;
+            background:#fff;
+            border:1px solid #e7e9e2;
+            border-radius:13px;
+            overflow:hidden;
+            box-shadow:0 2px 8px rgba(35,45,37,.035);
+        }
+
+        .place-card .photo{
+            aspect-ratio:1.15/1;
+            background:#d9dfd5 center/cover no-repeat;
+        }
+
+        .place-card .info{
+            padding:7px 8px 8px;
+        }
+
+        .place-card .category-badge{
+            display:inline-block;
+            margin-bottom:3px;
+            padding:2px 5px;
+            border-radius:999px;
+            background:#edf2eb;
+            color:var(--planner-green);
+            font-size:7px;
+            font-weight:600;
+        }
+
+        .place-card h3{
+            margin:0 0 2px;
+            font-size:10px;
+            line-height:1.3;
+        }
+
+        .place-card .meta{
+            margin:0 0 7px;
+            font-size:7px;
+            line-height:1.35;
+            color:#858d85;
+        }
+
+        .place-card button{
+            width:100%;
+            min-height:25px;
+            border:0;
+            border-radius:999px;
+            background:var(--planner-green);
+            color:#fff;
+            font:600 8px 'Prompt',sans-serif;
+            cursor:pointer;
+        }
+
+        .place-card button.added{
+            background:#e8eee9;
+            color:var(--planner-green);
+        }
+
+        .place-card button.added::after{content:"✓ อยู่ในทริปแล้ว · เอาออก"}
+        .place-card button:not(.added)::after{content:"+ เพิ่มเข้าทริป"}
+
+        .place-card button{font-size:0}
+        .place-card button::after{font-size:8px}
+
+        .no-results{
+            grid-column:1/-1;
+            padding:25px 8px;
+            text-align:center;
+            color:#858d85;
+            font-size:9px;
+        }
+
+        .leaflet-control-zoom{
+            margin:10px!important;
+            border:0!important;
+            box-shadow:0 3px 12px rgba(0,0,0,.12)!important;
+        }
+
+        .leaflet-control-zoom a{
+            color:var(--planner-green)!important;
+        }
+
+        .leaflet-popup-content-wrapper{
+            border-radius:12px;
+        }
+
+        footer{display:none}
+
+        @media(max-width:900px){
+            html,body{overflow:auto}
+            .planner-app{
+                height:auto;
+                min-height:100vh;
+                grid-template-columns:1fr;
+            }
+            .map-pane{
+                height:48vh;
+                min-height:300px;
+            }
+            .side-pane{
+                height:auto;
+                min-height:52vh;
+                overflow:visible;
+                border-left:0;
+                border-top:1px solid #e3e5de;
+            }
+            .discover-panel{overflow:visible}
+            .trip-summary{margin:10px}
+        }
+
+        @media(max-width:520px){
+            .map-pane{height:42vh;min-height:270px}
+            .side-nav a{font-size:9px}
+            .place-grid{gap:8px}
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Map at the top, matching the reference layout -->
-    <section class="map-hero" id="map-hero">
-        <div id="map"></div>
-        <div
-            class="map-resize-handle"
-            id="map-resize-handle"
-            role="separator"
-            aria-label="ลากเพื่อปรับความสูงแผนที่"
-            title="ลากขึ้นลงเพื่อปรับความสูงแผนที่">
-        </div>
-    </section>
+    <div class="planner-app">
+        <section class="map-pane" id="map-hero">
+            <div id="map"></div>
+            <div class="map-resize-handle" id="map-resize-handle" aria-hidden="true"></div>
+        </section>
 
-    <nav class="nav">
-        <div class="wrap">
-            <ul class="nav-links">
-                <li><a href="home.php">หน้าแรก</a></li>
-                <li><a href="home.php#destinations">สถานที่เที่ยว</a></li>
-                <li><a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a></li>
-                <li><a href="trip-planner.php" class="active">วางแผนทริป</a></li>
-            </ul>
+        <aside class="side-pane">
+            <section class="trip-summary">
+                <div class="trip-summary-head">
+                    <h1>ลำดับทริปของคุณ</h1>
+                    <span class="trip-summary-count" id="trip-count">0</span>
+                </div>
+                <p class="sub" id="trip-summary-status">ลากรายการเพื่อจัดลำดับใหม่</p>
+                <ul id="trip-list" class="trip-mini-list"></ul>
+                <div class="trip-actions">
+                    <button class="share-trip-btn" id="share-trip-btn" type="button">▣ แชร์ทริปด้วย QR Code</button>
+                    <button class="clear-btn" id="clear-trip" type="button">ล้างทริปทั้งหมด</button>
+                </div>
+            </section>
 
-            <div class="nav-actions">
-                <?php include("profile-widget.php"); ?>
-            </div>
-        </div>
-    </nav>
+            <nav class="side-nav" aria-label="เมนูหลัก">
+                <a href="home.php">หน้าแรก</a>
+                <a href="home.php#destinations">สถานที่เที่ยว</a>
+                <a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a>
+                <a href="trip-planner.php" class="active">วางแผนทริป</a>
+            </nav>
 
-    <main class="wrap">
-        <div class="dashboard">
+            <section class="discover-panel">
+                <div class="discover-title">
+                    <h2>สถานที่เที่ยว</h2>
+                    <span id="result-count">เลือกสถานที่ที่อยากไป</span>
+                </div>
 
-            <section class="panel-card places-panel">
-                <h2>สถานที่เที่ยว</h2>
-                <p class="sub">เลือกสถานที่ที่อยากไป แล้วเพิ่มเข้าทริปของคุณ</p>
                 <div class="category-tabs" id="category-tabs">
                     <button type="button" class="category-tab active" data-category="all">ทั้งหมด</button>
                     <button type="button" class="category-tab" data-category="สถานที่เที่ยว">🏞️ สถานที่เที่ยว</button>
@@ -1091,24 +1503,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
                     <button type="button" class="category-tab" data-category="ร้านค้า">🛍️ ร้านค้า</button>
                     <button type="button" class="category-tab" data-category="อื่นๆ">📍 อื่น ๆ</button>
                 </div>
+
                 <div class="place-grid" id="place-grid"></div>
             </section>
-
-            <aside class="panel-card trip-panel">
-                <h2>ลำดับทริปของคุณ</h2>
-                <p class="sub">ลากรายการเพื่อจัดลำดับใหม่</p>
-                <ul id="trip-list"></ul>
-
-                <div class="trip-actions">
-                    <button class="share-trip-btn" id="share-trip-btn" type="button">
-                        ▣ แชร์ทริปด้วย QR Code
-                    </button>
-                    <button class="clear-btn" id="clear-trip">ล้างทริปทั้งหมด</button>
-                </div>
-            </aside>
-
-        </div>
-    </main>
+        </aside>
+    </div>
 
     <!-- QR Code modal -->
     <div class="qr-modal" id="qr-modal" aria-hidden="true">
@@ -1150,6 +1549,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     // ทริปที่บันทึกไว้ในฐานข้อมูลของบัญชีนี้ (เรียงตามลำดับที่จัดไว้แล้ว)
     let trip = <?php echo json_encode($trip_data, JSON_UNESCAPED_UNICODE); ?>;
+    // ป้องกันข้อมูลซ้ำ/ข้อมูลที่ถูกลบไปแล้วหลุดเข้ามาในหน้า Planner
+    trip = [...new Set(trip)].filter(id => PLACES_BY_ID[id]);
 
     // ถ้ายังไม่เคยมีทริปในฐานข้อมูลเลย แต่เคยเลือกไว้ตอนยังไม่ login (เก็บใน localStorage
     // จากหน้า home.php) ให้ดึงมาใช้ครั้งแรก แล้วเซฟเข้าฐานข้อมูลทันทีเพื่อไม่ให้ข้อมูลหาย
@@ -1210,6 +1611,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
             ? PLACES
             : PLACES.filter(place => place.category === activeCategory);
 
+        const resultCount = document.getElementById('result-count');
+        if(resultCount){
+            resultCount.textContent = visible.length
+                ? visible.length + ' รายการ'
+                : 'ยังไม่มีรายการ';
+        }
+
         if(visible.length === 0){
             grid.innerHTML = '<div class="no-results">ยังไม่มีข้อมูลในหมวดนี้</div>';
             return;
@@ -1218,16 +1626,26 @@ while($row = mysqli_fetch_assoc($result_trip)){
         visible.forEach(place => {
             const card = document.createElement('div');
             card.className = 'place-card';
-            const photo = place.img
-                ? '<div class="photo" style="background-image:url(\'' + escapeHtml(place.img) + '\')" role="img" aria-label="' + escapeHtml(place.name) + '"></div>'
-                : '<div class="photo placeholder" role="img" aria-label="' + escapeHtml(place.name) + '">📍</div>';
-            card.innerHTML = photo + `
-                <div class="info">
-                    <span class="category-badge">${escapeHtml(place.category || 'อื่นๆ')}</span>
-                    <h3>${escapeHtml(place.name)}</h3>
-                    <p class="meta">${escapeHtml(place.loc)}</p>
-                    <button type="button" data-id="${escapeHtml(place.id)}"></button>
-                </div>`;
+
+            const photo = document.createElement('div');
+            photo.className = 'photo' + (place.img ? '' : ' placeholder');
+            photo.setAttribute('role','img');
+            photo.setAttribute('aria-label', place.name || 'สถานที่');
+
+            if(place.img){
+                photo.style.backgroundImage = 'url("' + String(place.img).replace(/"/g, '%22') + '")';
+            }else{
+                photo.textContent = '📍';
+            }
+            const info = document.createElement('div');
+            info.className = 'info';
+            info.innerHTML = `
+                <span class="category-badge">${escapeHtml(place.category || 'อื่นๆ')}</span>
+                <h3>${escapeHtml(place.name)}</h3>
+                <p class="meta">${escapeHtml(place.loc)}</p>
+                <button type="button" data-id="${escapeHtml(place.id)}"></button>`;
+            card.appendChild(photo);
+            card.appendChild(info);
             grid.appendChild(card);
         });
         refreshGridButtons();
@@ -1265,8 +1683,19 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     function renderTripList(){
         tripListEl.innerHTML = '';
+
+        const tripCountEl = document.getElementById('trip-count');
+        const tripStatusEl = document.getElementById('trip-summary-status');
+
+        if(tripCountEl) tripCountEl.textContent = trip.length + ' รายการ';
+        if(tripStatusEl){
+            tripStatusEl.textContent = trip.length
+                ? 'ลากรายการเพื่อจัดลำดับใหม่ · แผนที่อัปเดตตามลำดับ'
+                : 'ยังไม่ได้เลือกสถานที่ · เพิ่มจากรายการด้านล่างได้เลย';
+        }
+
         if(trip.length === 0){
-            tripListEl.innerHTML = '<li class="empty-hint">ยังไม่ได้เลือกสถานที่ — เพิ่มจากรายการทางซ้ายได้เลย</li>';
+            tripListEl.innerHTML = '<li class="empty-hint">ยังไม่ได้เลือกสถานที่ — เพิ่มจากรายการด้านล่างได้เลย</li>';
             return;
         }
         trip.forEach((id, index) => {
