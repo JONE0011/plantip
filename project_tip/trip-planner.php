@@ -2044,12 +2044,21 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function getTripSummaryRequiredHeight(){
         // คำนวณความสูงขั้นต่ำจากจำนวนรายการจริง เพื่อไม่ให้รายการไปทับปุ่มด้านล่าง
         // และยังคงไม่มี scrollbar ภายในกรอบ
-        const itemCount = Math.max(1, trip.length);
-        const headerAndText = 74;
-        const itemArea = trip.length === 0 ? 54 : (itemCount * 43) + 3;
-        const actions = 82;
-        const paddingAndHandle = 34;
-        return headerAndText + itemArea + actions + paddingAndHandle;
+        const cs = getComputedStyle(tripSummary);
+        const padding = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+        const borders = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+        const head = tripSummary.querySelector('.trip-summary-head');
+        const sub = tripSummary.querySelector('.trip-summary .sub');
+        const actions = tripSummary.querySelector('.trip-actions');
+
+        const headH = head ? head.getBoundingClientRect().height : 0;
+        const subH = sub ? sub.getBoundingClientRect().height : 0;
+        const listH = tripListEl ? tripListEl.scrollHeight : 0;
+        const listMargin = tripListEl ? (parseFloat(getComputedStyle(tripListEl).marginBottom) || 0) : 0;
+        const actionsH = actions ? actions.getBoundingClientRect().height : 0;
+
+        // ปุ่มต้องอยู่หลังรายการสุดท้ายเสมอ + เผื่อพื้นที่จับด้านล่าง
+        return Math.ceil(padding + borders + headH + subH + listH + listMargin + actionsH + 18);
     }
 
     function applyTripSummaryHeight(height){
