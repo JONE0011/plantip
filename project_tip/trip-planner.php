@@ -1805,6 +1805,14 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function renderTripList(){
         tripListEl.innerHTML = '';
 
+        // ถ้าเพิ่มรายการจนความสูงเดิมไม่พอ ให้ขยายกรอบอัตโนมัติ
+        // เพื่อไม่ให้รายการไปอยู่หลังปุ่มด้านล่าง
+        const currentHeight = tripSummary.getBoundingClientRect().height;
+        const requiredHeight = getTripSummaryRequiredHeight();
+        if(currentHeight < requiredHeight){
+            applyTripSummaryHeight(requiredHeight);
+        }
+
         const tripCountEl = document.getElementById('trip-count');
         const tripStatusEl = document.getElementById('trip-summary-status');
 
@@ -2033,9 +2041,21 @@ while($row = mysqli_fetch_assoc($result_trip)){
     let tripStartY = 0;
     let tripStartHeight = 300;
 
+    function getTripSummaryRequiredHeight(){
+        // คำนวณความสูงขั้นต่ำจากจำนวนรายการจริง เพื่อไม่ให้รายการไปทับปุ่มด้านล่าง
+        // และยังคงไม่มี scrollbar ภายในกรอบ
+        const itemCount = Math.max(1, trip.length);
+        const headerAndText = 74;
+        const itemArea = trip.length === 0 ? 54 : (itemCount * 43) + 3;
+        const actions = 82;
+        const paddingAndHandle = 34;
+        return headerAndText + itemArea + actions + paddingAndHandle;
+    }
+
     function applyTripSummaryHeight(height){
-        const minHeight = 150;
-        // ไม่มีเพดานตามความสูงหน้าจอ: ยืดได้ตามที่ลากจริง และให้หน้าเว็บยาวตามเนื้อหา
+        // กรอบจะหดได้เท่าที่เนื้อหาขั้นต่ำรองรับเท่านั้น
+        // จึงไม่มีรายการทะลุผ่านปุ่มแชร์/ล้างทริป
+        const minHeight = Math.max(150, getTripSummaryRequiredHeight());
         const maxHeight = 5000;
         const safeHeight = Math.round(Math.max(minHeight, Math.min(maxHeight, height)));
 
