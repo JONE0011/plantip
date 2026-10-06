@@ -1103,12 +1103,20 @@ while($row = mysqli_fetch_assoc($result_trip)){
             z-index:10;
             min-width:0;
             height:100vh;
-            overflow:hidden;
+            overflow-y:auto;
+            overflow-x:hidden;
+            overscroll-behavior:contain;
             background:#fbfaf6;
             border-left:1px solid #e3e5de;
             display:flex;
             flex-direction:column;
+            scrollbar-width:thin;
+            scrollbar-color:#b8c0b8 transparent;
         }
+
+        .side-pane::-webkit-scrollbar{width:7px}
+        .side-pane::-webkit-scrollbar-track{background:transparent}
+        .side-pane::-webkit-scrollbar-thumb{background:#b8c0b8;border-radius:999px}
 
         .side-resize-handle{
             position:relative;
@@ -1154,7 +1162,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             position:relative;
             flex:0 0 var(--trip-summary-height);
             min-height:150px;
-            max-height:calc(100vh - 180px);
+            max-height:none;
             margin:14px 14px 8px;
             padding:15px;
             background:#eef0e9;
@@ -1239,12 +1247,20 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
         .trip-mini-list{
             min-height:36px;
-            max-height:112px;
-            overflow:auto;
+            max-height:none;
+            flex:1 1 auto;
+            overflow-y:auto;
+            overflow-x:hidden;
             margin:0 0 8px;
-            padding:0;
+            padding:0 2px 0 0;
             list-style:none;
+            scrollbar-width:thin;
+            scrollbar-color:#b8c0b8 transparent;
         }
+
+        .trip-mini-list::-webkit-scrollbar{width:6px}
+        .trip-mini-list::-webkit-scrollbar-track{background:transparent}
+        .trip-mini-list::-webkit-scrollbar-thumb{background:#b8c0b8;border-radius:999px}
 
         .trip-mini-list .empty-hint{
             padding:10px;
@@ -1300,10 +1316,12 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
 
         .trip-actions{
+            flex:none;
             display:flex;
             flex-direction:column;
             gap:5px;
             margin:0;
+            padding-bottom:18px;
         }
 
         .share-trip-btn,
@@ -1966,6 +1984,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     const sideResizeHandle = document.getElementById('side-resize-handle');
     const tripSummary = document.getElementById('trip-summary');
     const tripSummaryResizeHandle = document.getElementById('trip-summary-resize-handle');
+    const sidePane = document.querySelector('.side-pane');
 
     let resizingSide = false;
     let sideStartX = 0;
@@ -2059,6 +2078,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
         if(event && tripSummaryResizeHandle.hasPointerCapture(event.pointerId)){
             tripSummaryResizeHandle.releasePointerCapture(event.pointerId);
         }
+
+        // ให้ส่วนด้านล่างของ Sidebar ตามลงมาหลังจากยืดกรอบ
+        requestAnimationFrame(() => {
+            if(sidePane && tripSummary.getBoundingClientRect().bottom > sidePane.getBoundingClientRect().bottom){
+                sidePane.scrollTop = sidePane.scrollHeight - sidePane.clientHeight;
+            }
+        });
     }
 
     tripSummaryResizeHandle.addEventListener('pointerup', stopTripSummaryResize);
