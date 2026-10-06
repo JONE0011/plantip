@@ -24,7 +24,7 @@
   });
   const buttons = Array.from(dots.children);
   function setImage(src) {
-    bg.style.backgroundImage = "linear-gradient(90deg,rgba(7,22,16,.82),rgba(7,22,16,.28) 62%,rgba(7,22,16,.1)),linear-gradient(0deg,rgba(5,16,11,.78),transparent 55%),url(\\\"" + src + "\\\")";
+    bg.style.backgroundImage = "linear-gradient(90deg,rgba(7,22,16,.82),rgba(7,22,16,.28) 62%,rgba(7,22,16,.1)),linear-gradient(0deg,rgba(5,16,11,.78),transparent 55%),url(" + src + ")";
   }
   function show(next, manual) {
     index = (next + slides.length) % slides.length;
