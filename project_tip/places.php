@@ -93,7 +93,7 @@ footer{padding:28px 0;color:#7a847e;font-size:11px;border-top:1px solid var(--li
 <div class="section-head"><div><div class="section-label">Editor's selection / 01</div><h2>สถานที่ยอดนิยม<br>แนะนำให้ลองไป</h2></div><p>4 จุดหมายเด่นสำหรับคนที่อยากเริ่มเที่ยวตากแบบไม่ต้องคิดนาน</p></div>
 <div class="feature-grid">
 <?php foreach ($featured as $i => $p): ?>
-<article class="card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='ภาพบรรยากาศและมุมที่น่าสนใจของสถานที่นี้ในจังหวัดตาก' data-review-type='place' data-review-id='<?php echo (int)$p['id_place']; ?>'>
+<article class="card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='ภาพบรรยากาศและมุมที่น่าสนใจของสถานที่นี้ในจังหวัดตาก' data-review-type='place' data-review-id='<?php echo (int)$p['id_place']; ?>' data-review-avg='<?php echo (float)$p['review_avg']; ?>' data-review-count='<?php echo (int)$p['review_count']; ?>' data-review-logged-in='<?php echo isset($_SESSION['id_account']) ? '1' : '0'; ?>'>
 <div class="photo" style="background-image:url('<?php echo htmlspecialchars($p['image_url']); ?>')"></div>
 <span class="tag"><?php echo $i===0?'ยอดฮิต':($i===1?'ทะเลหมอก':($i===2?'ธรรมชาติ':'ป่า & น้ำตก')); ?></span>
 <button class="add" type="button" data-place="<?php echo htmlspecialchars($p['place_key']); ?>" aria-label="เพิ่ม <?php echo htmlspecialchars($p['name_place']); ?>">+</button>
@@ -109,7 +109,7 @@ footer{padding:28px 0;color:#7a847e;font-size:11px;border-top:1px solid var(--li
 <div class="section-head"><div><div class="section-label">Explore more / 02</div><h2>ยังมีอีกหลายที่ให้ค้นพบ</h2></div><p>สถานที่อื่น ๆ ที่คุณสามารถเลือกเพิ่มเข้าทริปได้</p></div>
 <div class="all-grid">
 <?php foreach ($others as $p): ?>
-<article class="small-card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='เปิดดูรูปสถานที่แบบเต็มจอ แล้วเลื่อนดูภาพอื่นได้' data-review-type='place' data-review-id='<?php echo (int)$p['id_place']; ?>'>
+<article class="small-card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='เปิดดูรูปสถานที่แบบเต็มจอ แล้วเลื่อนดูภาพอื่นได้' data-review-type='place' data-review-id='<?php echo (int)$p['id_place']; ?>' data-review-avg='<?php echo (float)$p['review_avg']; ?>' data-review-count='<?php echo (int)$p['review_count']; ?>' data-review-logged-in='<?php echo isset($_SESSION['id_account']) ? '1' : '0'; ?>'>
 <div class="small-photo" style="background-image:url('<?php echo htmlspecialchars($p['image_url']); ?>')"></div>
 <div class="small-info"><h3><?php echo htmlspecialchars($p['name_place']); ?></h3><?php if($p['review_count']>0): ?><div class="rating-line light">★ <?php echo number_format((float)$p['review_avg'],1); ?> <span>(<?php echo (int)$p['review_count']; ?> รีวิว)</span></div><?php endif; ?><?php if($review_badge=review_badge((float)$p['review_avg'],(int)$p['review_count'])): ?><span class="recommend-badge inline"><?php echo $review_badge; ?></span><?php endif; ?><p><?php echo htmlspecialchars($p['location_place']); ?></p><button class="small-add" type="button" data-place="<?php echo htmlspecialchars($p['place_key']); ?>">+ เพิ่มเข้าทริป</button></div>
 </article>
@@ -133,6 +133,6 @@ document.querySelectorAll('[data-place]').forEach(btn=>{
  btn.addEventListener('click',()=>{trip=trip.includes(id)?trip.filter(x=>x!==id):[...trip,id];setTrip(trip);update();});
 });
 </script>
-<script src="gallery.js?v=20261006-review2"></script>
+<script src="gallery.js?v=20261006-review3"></script>
 </body>
 </html>

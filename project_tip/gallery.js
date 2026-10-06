@@ -24,7 +24,7 @@
   const countEl=overlay.querySelector('.review-count'), listEl=overlay.querySelector('.review-list');
   const formWrap=overlay.querySelector('.review-form-wrap'), badgeEl=overlay.querySelector('.review-badge-modal');
 
-  let gallery=[], index=0, touchX=0, reviewType='', reviewId='';
+  let gallery=[], index=0, touchX=0, reviewType='', reviewId='', reviewLoggedIn=false, reviewCard=null;
 
   function render(){
     const item=gallery[index], src=typeof item==='string'?item:item.src;
@@ -74,7 +74,19 @@
       }else{
         formWrap.innerHTML='<a class="review-login" href="form-login.php">เข้าสู่ระบบเพื่อให้คะแนนและเขียนรีวิว →</a>';
       }
-    }catch(e){listEl.innerHTML='<div class="review-empty">โหลดรีวิวไม่สำเร็จ ลองใหม่อีกครั้ง</div>';}
+    }catch(e){
+      listEl.innerHTML=reviewLoggedIn?'':'<div class="review-empty">ยังไม่สามารถโหลดรีวิวได้ แต่คุณสามารถเข้าสู่ระบบเพื่อให้คะแนนและเขียนรีวิวได้</div>';
+      if(reviewLoggedIn){
+        const form=document.createElement('form'); form.className='review-form';
+        form.innerHTML='<div class="form-title">ให้คะแนนสถานที่นี้</div><div class="star-picker"></div><textarea maxlength="500" placeholder="เขียนรีวิวของคุณ"></textarea><button type="submit">บันทึกรีวิว</button>';
+        const picker=form.querySelector('.star-picker'); let selected=0;
+        for(let i=1;i<=5;i++){const b=document.createElement('button');b.type='button';b.textContent='★';b.className='';b.onclick=()=>{selected=i;Array.from(picker.children).forEach((x,n)=>x.classList.toggle('selected',n<i));};picker.appendChild(b);}
+        form.onsubmit=async ev=>{ev.preventDefault();if(!selected){alert('กรุณาเลือกดาว 1–5 ดาว');return;}const fd=new FormData();fd.append('item_type',reviewType);fd.append('item_id',reviewId);fd.append('rating',selected);fd.append('review_text',form.querySelector('textarea').value);try{const res=await fetch(window.location.origin+'/review-submit.php',{method:'POST',body:fd,credentials:'same-origin'});const data=await res.json();if(data.ok)loadReviews();else alert(data.message||'บันทึกรีวิวไม่สำเร็จ');}catch(err){alert('เชื่อมต่อระบบรีวิวไม่สำเร็จ');}};
+        formWrap.innerHTML=''; formWrap.appendChild(form);
+      }else{
+        formWrap.innerHTML='<a class="review-login" href="form-login.php">เข้าสู่ระบบเพื่อให้คะแนนและเขียนรีวิว →</a>';
+      }
+    }
   }
 
   function open(card){
@@ -82,7 +94,10 @@
     if(!gallery.length)return;
     index=0; title.textContent=card.dataset.title||''; loc.textContent=card.dataset.location||'';
     desc.textContent=card.dataset.description||'ค้นพบมุมที่น่าสนใจของตาก';
-    reviewType=card.dataset.reviewType||''; reviewId=card.dataset.reviewId||'';
+    reviewCard=card; reviewType=card.dataset.reviewType||''; reviewId=card.dataset.reviewId||''; reviewLoggedIn=card.dataset.reviewLoggedIn==='1';
+    avgEl.textContent=Number(card.dataset.reviewAvg||0).toFixed(1);
+    starsEl.textContent=stars(Math.round(Number(card.dataset.reviewAvg||0)));
+    countEl.textContent=Number(card.dataset.reviewCount||0)>0?card.dataset.reviewCount+' รีวิว':'ยังไม่มีรีวิว';
     render(); overlay.classList.add('is-open'); document.body.style.overflow='hidden'; loadReviews();
   }
   function close(){overlay.classList.remove('is-open');document.body.style.overflow='';}
