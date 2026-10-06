@@ -5,7 +5,7 @@ const getTrip=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e)
 const setTrip=v=>localStorage.setItem(KEY,JSON.stringify(v));
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const meta={};
-document.querySelectorAll('[data-trip-id]').forEach(card=>{
+document.querySelectorAll('[data-trip-id][data-title]').forEach(card=>{
  const id=card.dataset.tripId;
  meta[id]={title:card.dataset.title||card.querySelector('h3')?.textContent?.trim()||'รายการ',loc:card.dataset.location||card.querySelector('.location,.loc,.meta')?.textContent?.replace(/^●\s*/,'').trim()||''};
 });
