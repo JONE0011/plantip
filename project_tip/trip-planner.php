@@ -1158,7 +1158,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
         .trip-summary{
             --trip-summary-height:300px;
             position:relative;
-            flex:0 0 var(--trip-summary-height);
+            height:var(--trip-summary-height);
+            flex:0 0 auto;
             min-height:150px;
             max-height:none;
             margin:14px 14px 8px;
@@ -1170,6 +1171,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
             flex-direction:column;
             overflow:hidden;
             box-sizing:border-box;
+        }
+
+        .trip-summary.trip-resizing{
+            transition:none !important;
+            will-change:height;
         }
 
         .trip-summary-resize-handle{
@@ -1555,7 +1561,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
             .trip-summary{
                 --trip-summary-height:300px;
-                flex-basis:var(--trip-summary-height);
+                height:var(--trip-summary-height);
+                flex:0 0 auto;
                 margin:10px;
             }
 
@@ -2081,8 +2088,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
     }
 
     function applyTripSummaryHeight(height, save = true){
-        const safeHeight = Math.round(Math.max(tripMinHeight, Math.min(5000, height)));
+        // ไม่ผูก minHeight กับค่าที่ค้างจากการลากครั้งก่อน
+        // ขั้นต่ำจริงจะถูกคุมตอน pointerdown เท่านั้น
+        const safeHeight = Math.round(Math.max(150, Math.min(5000, height)));
         tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
+        tripSummary.style.height = safeHeight + 'px';
         if(save) localStorage.setItem('takPlannerTripHeight', String(safeHeight));
     }
 
@@ -2109,6 +2119,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             tripResizeFrame = 0;
             const safeHeight = Math.round(Math.max(tripMinHeight, Math.min(5000, tripResizeTargetHeight)));
             tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
+            tripSummary.style.height = safeHeight + 'px';
         });
     });
 
@@ -2121,6 +2132,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
         const finalSafeHeight = Math.round(Math.max(tripMinHeight, Math.min(5000, tripResizeTargetHeight)));
         tripSummary.style.setProperty('--trip-summary-height', finalSafeHeight + 'px');
+        tripSummary.style.height = finalSafeHeight + 'px';
         localStorage.setItem('takPlannerTripHeight', String(finalSafeHeight));
         resizingTripSummary = false;
         tripSummary.classList.remove('trip-resizing');
@@ -2134,7 +2146,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     tripSummaryResizeHandle.addEventListener('pointerup', stopTripSummaryResize);
     tripSummaryResizeHandle.addEventListener('pointercancel', stopTripSummaryResize);
-    tripSummaryResizeHandle.addEventListener('dblclick', () => applyTripSummaryHeight(300));
+    tripSummaryResizeHandle.addEventListener('dblclick', () => {
+        tripMinHeight = 150;
+        applyTripSummaryHeight(300);
+    });
 
     // จำขนาดที่ผู้ใช้ปรับไว้ เมื่อกลับเข้าหน้านี้จะไม่ต้องลากใหม่
     try{
