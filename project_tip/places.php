@@ -133,6 +133,6 @@ document.querySelectorAll('[data-place]').forEach(btn=>{
  btn.addEventListener('click',()=>{trip=trip.includes(id)?trip.filter(x=>x!==id):[...trip,id];setTrip(trip);update();});
 });
 </script>
-<script src="gallery.js"></script>
+<script src="gallery.js?v=20261006-review"></script>
 </body>
 </html>
