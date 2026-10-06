@@ -1071,11 +1071,12 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
 
         .planner-app{
+            --side-width:340px;
             width:100vw;
             height:100vh;
             min-height:620px;
             display:grid;
-            grid-template-columns:minmax(0, 1fr) 340px;
+            grid-template-columns:minmax(420px,1fr) 8px minmax(280px,var(--side-width));
             background:var(--planner-bg);
         }
 
@@ -1109,12 +1110,97 @@ while($row = mysqli_fetch_assoc($result_trip)){
             flex-direction:column;
         }
 
+        .side-resize-handle{
+            position:relative;
+            z-index:50;
+            width:8px;
+            height:100%;
+            cursor:ew-resize;
+            background:#eceee8;
+            border-left:1px solid #dfe3db;
+            border-right:1px solid #dfe3db;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            touch-action:none;
+        }
+
+        .side-resize-handle::after{
+            content:"";
+            width:3px;
+            height:54px;
+            border-radius:999px;
+            background:#aeb7ae;
+            transition:.15s ease;
+        }
+
+        .side-resize-handle:hover::after,
+        .planner-app.side-resizing .side-resize-handle::after{
+            height:90px;
+            background:var(--planner-green);
+        }
+
+        .planner-app.side-resizing{
+            cursor:ew-resize;
+            user-select:none;
+        }
+
+        .planner-app.side-resizing *{
+            cursor:ew-resize !important;
+        }
+
         .trip-summary{
+            --trip-summary-height:300px;
+            position:relative;
+            flex:0 0 var(--trip-summary-height);
+            min-height:150px;
+            max-height:calc(100vh - 180px);
             margin:14px 14px 8px;
             padding:15px;
             background:#eef0e9;
             border-radius:20px;
             border:1px solid rgba(32,88,64,.04);
+            display:flex;
+            flex-direction:column;
+            overflow:hidden;
+        }
+
+        .trip-summary-resize-handle{
+            position:absolute;
+            left:18px;
+            right:18px;
+            bottom:4px;
+            height:14px;
+            z-index:20;
+            cursor:ns-resize;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            touch-action:none;
+        }
+
+        .trip-summary-resize-handle::after{
+            content:"";
+            width:58px;
+            height:4px;
+            border-radius:999px;
+            background:#aeb7ae;
+            transition:.15s ease;
+        }
+
+        .trip-summary-resize-handle:hover::after,
+        .trip-summary.trip-resizing .trip-summary-resize-handle::after{
+            width:90px;
+            background:var(--planner-green);
+        }
+
+        .planner-app.trip-resizing{
+            cursor:ns-resize;
+            user-select:none;
+        }
+
+        .planner-app.trip-resizing *{
+            cursor:ns-resize !important;
         }
 
         .trip-summary-head{
@@ -1433,15 +1519,22 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
         @media(max-width:900px){
             html,body{overflow:auto}
+
             .planner-app{
                 height:auto;
                 min-height:100vh;
                 grid-template-columns:1fr;
             }
+
+            .side-resize-handle{
+                display:none;
+            }
+
             .map-pane{
                 height:48vh;
                 min-height:300px;
             }
+
             .side-pane{
                 height:auto;
                 min-height:52vh;
@@ -1449,8 +1542,19 @@ while($row = mysqli_fetch_assoc($result_trip)){
                 border-left:0;
                 border-top:1px solid #e3e5de;
             }
+
+            .trip-summary{
+                --trip-summary-height:300px;
+                flex-basis:var(--trip-summary-height);
+                margin:10px;
+            }
+
             .discover-panel{overflow:visible}
-            .trip-summary{margin:10px}
+
+            .planner-app.side-resizing,
+            .planner-app.trip-resizing{
+                user-select:none;
+            }
         }
 
         @media(max-width:520px){
@@ -1468,8 +1572,15 @@ while($row = mysqli_fetch_assoc($result_trip)){
             <div class="map-resize-handle" id="map-resize-handle" aria-hidden="true"></div>
         </section>
 
+        <div class="side-resize-handle" id="side-resize-handle"
+             role="separator" aria-label="ลากเพื่อปรับความกว้างแถบด้านขวา"
+             title="ลากเพื่อขยายหรือย่อแถบด้านขวา"></div>
+
         <aside class="side-pane">
-            <section class="trip-summary">
+            <section class="trip-summary" id="trip-summary">
+                <div class="trip-summary-resize-handle" id="trip-summary-resize-handle"
+                     role="separator" aria-label="ลากเพื่อปรับความสูงลำดับทริป"
+                     title="ลากเพื่อยืดหรือลดกรอบลำดับทริป"></div>
                 <div class="trip-summary-head">
                     <h1>ลำดับทริปของคุณ</h1>
                     <span class="trip-summary-count" id="trip-count">0</span>
@@ -1847,6 +1958,132 @@ while($row = mysqli_fetch_assoc($result_trip)){
     });
 
     mapResizeObserver.observe(mapHero);
+
+
+    // ---------- Resize sidebar + trip-order box ----------
+    // ลากเส้นกลางเพื่อขยาย/ย่อ Sidebar ด้านขวา
+    const plannerApp = document.querySelector('.planner-app');
+    const sideResizeHandle = document.getElementById('side-resize-handle');
+    const tripSummary = document.getElementById('trip-summary');
+    const tripSummaryResizeHandle = document.getElementById('trip-summary-resize-handle');
+
+    let resizingSide = false;
+    let sideStartX = 0;
+    let sideStartWidth = 340;
+
+    function applySideWidth(width){
+        const minWidth = 280;
+        const maxWidth = Math.min(620, Math.floor(window.innerWidth * 0.48));
+        const safeWidth = Math.round(Math.max(minWidth, Math.min(maxWidth, width)));
+
+        plannerApp.style.setProperty('--side-width', safeWidth + 'px');
+        localStorage.setItem('takPlannerSideWidth', String(safeWidth));
+
+        requestAnimationFrame(() => {
+            map.invalidateSize({ pan:false, animate:false });
+        });
+    }
+
+    sideResizeHandle.addEventListener('pointerdown', event => {
+        if(window.innerWidth <= 900) return;
+        event.preventDefault();
+        resizingSide = true;
+        sideStartX = event.clientX;
+        sideStartWidth = parseFloat(getComputedStyle(plannerApp).getPropertyValue('--side-width')) || 340;
+        plannerApp.classList.add('side-resizing');
+        sideResizeHandle.setPointerCapture(event.pointerId);
+    });
+
+    sideResizeHandle.addEventListener('pointermove', event => {
+        if(!resizingSide) return;
+
+        // ลากไปทางซ้าย = Sidebar กว้างขึ้น
+        applySideWidth(sideStartWidth - (event.clientX - sideStartX));
+    });
+
+    function stopSideResize(event){
+        if(!resizingSide) return;
+        resizingSide = false;
+        plannerApp.classList.remove('side-resizing');
+
+        if(event && sideResizeHandle.hasPointerCapture(event.pointerId)){
+            sideResizeHandle.releasePointerCapture(event.pointerId);
+        }
+
+        setTimeout(() => map.invalidateSize({pan:false, animate:false}), 40);
+    }
+
+    sideResizeHandle.addEventListener('pointerup', stopSideResize);
+    sideResizeHandle.addEventListener('pointercancel', stopSideResize);
+    sideResizeHandle.addEventListener('dblclick', () => applySideWidth(340));
+
+    // ลากแถบด้านล่างของกรอบ “ลำดับทริปของคุณ” เพื่อเพิ่มพื้นที่รายการ
+    let resizingTripSummary = false;
+    let tripStartY = 0;
+    let tripStartHeight = 300;
+
+    function applyTripSummaryHeight(height){
+        const minHeight = 150;
+        const maxHeight = Math.max(minHeight, Math.floor(window.innerHeight * 0.78));
+        const safeHeight = Math.round(Math.max(minHeight, Math.min(maxHeight, height)));
+
+        tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
+        localStorage.setItem('takPlannerTripHeight', String(safeHeight));
+    }
+
+    tripSummaryResizeHandle.addEventListener('pointerdown', event => {
+        event.preventDefault();
+        resizingTripSummary = true;
+        tripStartY = event.clientY;
+        tripStartHeight = tripSummary.getBoundingClientRect().height;
+
+        tripSummary.classList.add('trip-resizing');
+        plannerApp.classList.add('trip-resizing');
+        tripSummaryResizeHandle.setPointerCapture(event.pointerId);
+    });
+
+    tripSummaryResizeHandle.addEventListener('pointermove', event => {
+        if(!resizingTripSummary) return;
+
+        // ลากลง = กรอบลำดับทริปสูงขึ้น
+        applyTripSummaryHeight(tripStartHeight + (event.clientY - tripStartY));
+    });
+
+    function stopTripSummaryResize(event){
+        if(!resizingTripSummary) return;
+
+        resizingTripSummary = false;
+        tripSummary.classList.remove('trip-resizing');
+        plannerApp.classList.remove('trip-resizing');
+
+        if(event && tripSummaryResizeHandle.hasPointerCapture(event.pointerId)){
+            tripSummaryResizeHandle.releasePointerCapture(event.pointerId);
+        }
+    }
+
+    tripSummaryResizeHandle.addEventListener('pointerup', stopTripSummaryResize);
+    tripSummaryResizeHandle.addEventListener('pointercancel', stopTripSummaryResize);
+    tripSummaryResizeHandle.addEventListener('dblclick', () => applyTripSummaryHeight(300));
+
+    // จำขนาดที่ผู้ใช้ปรับไว้ เมื่อกลับเข้าหน้านี้จะไม่ต้องลากใหม่
+    try{
+        const savedSideWidth = parseFloat(localStorage.getItem('takPlannerSideWidth'));
+        const savedTripHeight = parseFloat(localStorage.getItem('takPlannerTripHeight'));
+
+        if(Number.isFinite(savedSideWidth) && window.innerWidth > 900){
+            applySideWidth(savedSideWidth);
+        }
+        if(Number.isFinite(savedTripHeight)){
+            applyTripSummaryHeight(savedTripHeight);
+        }
+    }catch(e){}
+
+    window.addEventListener('resize', () => {
+        if(window.innerWidth <= 900){
+            plannerApp.style.removeProperty('--side-width');
+        }
+        map.invalidateSize({pan:false, animate:false});
+    });
 
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
