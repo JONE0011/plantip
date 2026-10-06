@@ -2040,36 +2040,28 @@ while($row = mysqli_fetch_assoc($result_trip)){
     let resizingTripSummary = false;
     let tripStartY = 0;
     let tripStartHeight = 300;
+    let tripMinHeight = 150;
 
+    // คำนวณขั้นต่ำเฉพาะตอนจำเป็น ไม่ทำซ้ำทุก pointermove
     function getTripSummaryRequiredHeight(){
-        // คำนวณความสูงขั้นต่ำจากจำนวนรายการจริง เพื่อไม่ให้รายการไปทับปุ่มด้านล่าง
-        // และยังคงไม่มี scrollbar ภายในกรอบ
         const cs = getComputedStyle(tripSummary);
         const padding = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
         const borders = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
         const head = tripSummary.querySelector('.trip-summary-head');
         const sub = tripSummary.querySelector('.trip-summary .sub');
         const actions = tripSummary.querySelector('.trip-actions');
-
         const headH = head ? head.getBoundingClientRect().height : 0;
         const subH = sub ? sub.getBoundingClientRect().height : 0;
         const listH = tripListEl ? tripListEl.scrollHeight : 0;
         const listMargin = tripListEl ? (parseFloat(getComputedStyle(tripListEl).marginBottom) || 0) : 0;
         const actionsH = actions ? actions.getBoundingClientRect().height : 0;
-
-        // ปุ่มต้องอยู่หลังรายการสุดท้ายเสมอ + เผื่อพื้นที่จับด้านล่าง
         return Math.ceil(padding + borders + headH + subH + listH + listMargin + actionsH + 18);
     }
 
-    function applyTripSummaryHeight(height){
-        // กรอบจะหดได้เท่าที่เนื้อหาขั้นต่ำรองรับเท่านั้น
-        // จึงไม่มีรายการทะลุผ่านปุ่มแชร์/ล้างทริป
-        const minHeight = Math.max(150, getTripSummaryRequiredHeight());
-        const maxHeight = 5000;
-        const safeHeight = Math.round(Math.max(minHeight, Math.min(maxHeight, height)));
-
+    function applyTripSummaryHeight(height, save = true){
+        const safeHeight = Math.round(Math.max(tripMinHeight, Math.min(5000, height)));
         tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
-        localStorage.setItem('takPlannerTripHeight', String(safeHeight));
+        if(save) localStorage.setItem('takPlannerTripHeight', String(safeHeight));
     }
 
     tripSummaryResizeHandle.addEventListener('pointerdown', event => {
@@ -2077,6 +2069,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
         resizingTripSummary = true;
         tripStartY = event.clientY;
         tripStartHeight = tripSummary.getBoundingClientRect().height;
+        // อ่าน layout หนัก ๆ แค่ครั้งเดียวก่อนเริ่มลาก
+        tripMinHeight = Math.max(150, getTripSummaryRequiredHeight());
 
         tripSummary.classList.add('trip-resizing');
         plannerApp.classList.add('trip-resizing');
@@ -2085,9 +2079,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     tripSummaryResizeHandle.addEventListener('pointermove', event => {
         if(!resizingTripSummary) return;
-
-        // ลากลง = กรอบลำดับทริปสูงขึ้น
-        applyTripSummaryHeight(tripStartHeight + (event.clientY - tripStartY));
+        // ระหว่างลากเปลี่ยนแค่ CSS variable — ไม่อ่าน layout / ไม่เขียน localStorage
+        const height = tripStartHeight + (event.clientY - tripStartY);
+        const safeHeight = Math.round(Math.max(tripMinHeight, Math.min(5000, height)));
+        tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
     });
 
     function stopTripSummaryResize(event){
@@ -2101,12 +2096,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
             tripSummaryResizeHandle.releasePointerCapture(event.pointerId);
         }
 
-        // ให้ส่วนด้านล่างของ Sidebar ตามลงมาหลังจากยืดกรอบ
-        requestAnimationFrame(() => {
-            if(sidePane && tripSummary.getBoundingClientRect().bottom > sidePane.getBoundingClientRect().bottom){
-                sidePane.scrollTop = sidePane.scrollHeight - sidePane.clientHeight;
-            }
-        });
+        // บันทึกครั้งเดียวหลังปล่อยเมาส์ ไม่ทำทุกเฟรม
+        const finalHeight = tripSummary.getBoundingClientRect().height;
+        localStorage.setItem('takPlannerTripHeight', String(Math.round(finalHeight)));
     }
 
     tripSummaryResizeHandle.addEventListener('pointerup', stopTripSummaryResize);
