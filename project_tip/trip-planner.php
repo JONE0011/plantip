@@ -1169,11 +1169,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
             border:1px solid rgba(32,88,64,.04);
             display:flex;
             flex-direction:column;
-            overflow:hidden;
+            overflow:visible;
             box-sizing:border-box;
         }
 
+        /* ให้กรอบลำดับทริปยืดทะลุพื้นที่เดิมได้เหมือนแบบเก่า */
         .trip-summary.trip-resizing{
+            overflow:visible;
             transition:none !important;
             will-change:height;
         }
@@ -1255,6 +1257,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             max-height:none;
             flex:0 0 auto;
             overflow:visible;
+            height:auto;
             margin:0 0 8px;
             padding:0 2px 0 0;
             list-style:none;
