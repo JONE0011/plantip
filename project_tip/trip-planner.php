@@ -1824,7 +1824,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
         if(trip.length === 0){
             tripListEl.innerHTML = '<li class="empty-hint">ยังไม่ได้เลือกสถานที่ — เพิ่มจากรายการด้านล่างได้เลย</li>';
             if(shouldShrinkAfterDelete){
-                applyTripSummaryHeight(getTripSummaryRequiredHeight());
+                // หลังลบจนเหลือ 0 รายการ ต้องรีเซ็ต minHeight ที่เคยค้างจากตอนลาก
+                const requiredHeight = getTripSummaryRequiredHeight();
+                tripMinHeight = Math.max(150, requiredHeight);
+                applyTripSummaryHeight(requiredHeight);
             }
             lastRenderedTripCount = trip.length;
             return;
@@ -1850,6 +1853,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
             applyTripSummaryHeight(requiredHeight);
         // ลบรายการ: หดกลับตามจำนวนรายการใหม่ทันที
         }else if(shouldShrinkAfterDelete && currentHeight > requiredHeight){
+            // หลังลบรายการ ต้องลดเพดานขั้นต่ำที่ค้างจากการลากครั้งก่อนด้วย
+            tripMinHeight = Math.max(150, requiredHeight);
             applyTripSummaryHeight(requiredHeight);
         }
 
