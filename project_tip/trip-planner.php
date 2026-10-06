@@ -1162,10 +1162,15 @@ while($row = mysqli_fetch_assoc($result_trip)){
         // ถ้ามาจากปุ่ม “สร้างทริป” ในกล่องทริปของฉัน
         // ให้รายการใน localStorage เป็น source of truth และใช้รายการนั้นแทนทริปเก่าจาก DB
         // ป้องกันกรณี DB มี 6 รายการ แต่กล่องทริปของฉันมี 4 รายการแล้วหน้า planner กลายเป็น 6
-        const fromDirectory = new URLSearchParams(window.location.search).get('from') === 'directory';
+        const params = new URLSearchParams(window.location.search);
+        const fromDirectory = params.get('from') === 'directory';
+        const selectedItems = params.get('items');
+        const urlTrip = selectedItems ? [...new Set(decodeURIComponent(selectedItems).split(',').map(x => x.trim()).filter(x => PLACES_BY_ID[x]))] : [];
 
         if(fromDirectory){
-            trip = validLocal;
+            // รายการที่กด “สร้างทริป” ส่งมาจากกล่องทริปโดยตรง ใช้รายการนี้เท่านั้น
+            // ไม่รวมกับรายการเก่าที่อยู่ในฐานข้อมูล
+            trip = urlTrip.length ? urlTrip : validLocal;
             saveTrip();
         }else if(validLocal.length && trip.length === 0){
             // เข้า trip-planner โดยตรง: ถ้ามี localStorage แต่ DB ยังไม่มี ให้กู้รายการขึ้นมา
