@@ -1801,17 +1801,15 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     // ---------- Render: trip order list ----------
     const tripListEl = document.getElementById('trip-list');
+    let lastRenderedTripCount = trip.length;
 
     function renderTripList(){
+        const previousTripCount = lastRenderedTripCount;
         tripListEl.innerHTML = '';
 
-        // ถ้าเพิ่มรายการจนความสูงเดิมไม่พอ ให้ขยายกรอบอัตโนมัติ
-        // เพื่อไม่ให้รายการไปอยู่หลังปุ่มด้านล่าง
-        const currentHeight = tripSummary.getBoundingClientRect().height;
-        const requiredHeight = getTripSummaryRequiredHeight();
-        if(currentHeight < requiredHeight){
-            applyTripSummaryHeight(requiredHeight);
-        }
+        // ถ้าลบรายการออก ให้กรอบหดกลับมาตามเนื้อหาทันที
+        // เพื่อไม่ให้เหลือพื้นที่ว่างจากความสูงเดิมที่เคยขยายไว้
+        const shouldShrinkAfterDelete = trip.length < previousTripCount;
 
         const tripCountEl = document.getElementById('trip-count');
         const tripStatusEl = document.getElementById('trip-summary-status');
@@ -1825,6 +1823,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
         if(trip.length === 0){
             tripListEl.innerHTML = '<li class="empty-hint">ยังไม่ได้เลือกสถานที่ — เพิ่มจากรายการด้านล่างได้เลย</li>';
+            if(shouldShrinkAfterDelete){
+                applyTripSummaryHeight(getTripSummaryRequiredHeight());
+            }
+            lastRenderedTripCount = trip.length;
             return;
         }
         trip.forEach((id, index) => {
@@ -1839,6 +1841,19 @@ while($row = mysqli_fetch_assoc($result_trip)){
                 <button class="remove" type="button" aria-label="เอา${place.name}ออกจากทริป">×</button>`;
             tripListEl.appendChild(li);
         });
+
+        const currentHeight = tripSummary.getBoundingClientRect().height;
+        const requiredHeight = getTripSummaryRequiredHeight();
+
+        // เพิ่มรายการ: ขยายเมื่อพื้นที่ไม่พอ
+        if(currentHeight < requiredHeight){
+            applyTripSummaryHeight(requiredHeight);
+        // ลบรายการ: หดกลับตามจำนวนรายการใหม่ทันที
+        }else if(shouldShrinkAfterDelete && currentHeight > requiredHeight){
+            applyTripSummaryHeight(requiredHeight);
+        }
+
+        lastRenderedTripCount = trip.length;
     }
 
     tripListEl.addEventListener('click', e => {
