@@ -2,7 +2,13 @@
 'use strict';
 const loggedIn=document.body.dataset.loggedIn==='1';
 const userId=document.body.dataset.userId||'0';
-if(!loggedIn){document.addEventListener('click',e=>{const b=e.target.closest('.trip-add-btn');if(b){e.preventDefault();e.stopPropagation();alert('กรุณาเข้าสู่ระบบก่อนเพิ่มรายการเข้าทริป');}});return;}
+if(!loggedIn){
+  // ห้ามแสดงทริปของผู้ใช้เดิมเมื่อยังไม่ได้เข้าสู่ระบบ
+  const oldWidget=document.getElementById('tak-trip-widget');
+  if(oldWidget) oldWidget.remove();
+  document.addEventListener('click',e=>{const b=e.target.closest('.trip-add-btn');if(b){e.preventDefault();e.stopPropagation();alert('กรุณาเข้าสู่ระบบก่อนเพิ่มรายการเข้าทริป');}});
+  return;
+}
 const KEY='takTripPlaces_'+userId;
 const getTrip=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}};
 const setTrip=v=>localStorage.setItem(KEY,JSON.stringify(v));
