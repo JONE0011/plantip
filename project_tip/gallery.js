@@ -35,12 +35,35 @@
 
   function stars(n){return '★★★★★'.split('').map((x,i)=>i<n?'★':'☆').join('');}
 
+  function applyReviewResult(data){
+    if(!data || !data.ok) return;
+    avgEl.textContent=Number(data.average||0).toFixed(1);
+    starsEl.textContent=stars(Math.round(Number(data.average||0)));
+    countEl.textContent=Number(data.count||0)>0?data.count+' รีวิว':'ยังไม่มีรีวิว';
+    badgeEl.textContent=data.count>=10?'ยอดนิยม':(data.count>=3&&Number(data.average)>=4.3?'แนะนำ':'');
+    if(data.review){
+      const r=data.review;
+      const el=document.createElement('div'); el.className='review-item review-item-new';
+      const date=new Date(String(r.created_at||'').replace(' ','T'));
+      el.innerHTML='<div class="review-top"><b></b><span></span></div><div class="review-text"></div>';
+      el.querySelector('b').textContent=r.username_account||'คุณ';
+      el.querySelector('span').textContent=stars(Number(r.rating))+' · '+(isNaN(date.getTime())?'เมื่อสักครู่':date.toLocaleDateString('th-TH'));
+      el.querySelector('.review-text').textContent=r.review_text||'ให้คะแนนสถานที่นี้';
+      const first=listEl.querySelector('.review-item');
+      if(first) listEl.insertBefore(el,first); else {listEl.innerHTML='';listEl.appendChild(el);}
+      while(listEl.children.length>5) listEl.removeChild(listEl.lastElementChild);
+    }
+  }
+
   async function loadReviews(){
     if(!reviewType||!reviewId)return;
     listEl.innerHTML='<div class="review-loading">กำลังโหลดรีวิว...</div>';
     try{
       const apiUrl=window.location.origin+'/reviews-api.php?type='+encodeURIComponent(reviewType)+'&id='+encodeURIComponent(reviewId);
-      const res=await fetch(apiUrl,{cache:'no-store',credentials:'same-origin'});
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),5000);
+      const res=await fetch(apiUrl,{cache:'no-store',credentials:'same-origin',signal:controller.signal});
+      clearTimeout(timeout);
       if(!res.ok) throw new Error('HTTP '+res.status);
       const data=await res.json();
       if(!data.ok)throw new Error();
@@ -69,7 +92,7 @@
         let selected=Number(mine.rating||0);
         for(let i=1;i<=5;i++){const b=document.createElement('button');b.type='button';b.textContent='★';b.className=i<=selected?'selected':'';b.onclick=()=>{selected=i;Array.from(picker.children).forEach((x,n)=>x.classList.toggle('selected',n<i))};picker.appendChild(b);}
         form.querySelector('textarea').value=mine.review_text||'';
-        form.onsubmit=async e=>{e.preventDefault();if(!selected){alert('กรุณาเลือก 1-5 ดาว');return;}const fd=new FormData();fd.append('item_type',reviewType);fd.append('item_id',reviewId);fd.append('rating',selected);fd.append('review_text',form.querySelector('textarea').value);const res=await fetch('review-submit.php',{method:'POST',body:fd});const data=await res.json();if(data.ok)loadReviews();else alert(data.message||'บันทึกรีวิวไม่สำเร็จ');};
+        form.onsubmit=async e=>{e.preventDefault();if(!selected){alert('กรุณาเลือก 1-5 ดาว');return;}const btn=form.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent='กำลังบันทึก...';const fd=new FormData();fd.append('item_type',reviewType);fd.append('item_id',reviewId);fd.append('rating',selected);fd.append('review_text',form.querySelector('textarea').value);try{const res=await fetch(window.location.origin+'/review-submit.php',{method:'POST',body:fd,credentials:'same-origin',cache:'no-store'});const data=await res.json();if(data.ok){applyReviewResult(data);form.querySelector('.form-title').textContent='รีวิวของคุณถูกบันทึกแล้ว ✓';form.querySelector('textarea').value=data.review?.review_text||'';btn.disabled=false;btn.textContent='บันทึกรีวิวอีกครั้ง';}else{alert(data.message||'บันทึกรีวิวไม่สำเร็จ');btn.disabled=false;btn.textContent='บันทึกรีวิว';}}catch(err){alert('เชื่อมต่อระบบรีวิวไม่สำเร็จ');btn.disabled=false;btn.textContent='บันทึกรีวิว';}};
         formWrap.appendChild(form);
       }else{
         formWrap.innerHTML='<a class="review-login" href="form-login.php">เข้าสู่ระบบเพื่อให้คะแนนและเขียนรีวิว →</a>';
@@ -81,7 +104,7 @@
         form.innerHTML='<div class="form-title">ให้คะแนนสถานที่นี้</div><div class="star-picker"></div><textarea maxlength="500" placeholder="เขียนรีวิวของคุณ"></textarea><button type="submit">บันทึกรีวิว</button>';
         const picker=form.querySelector('.star-picker'); let selected=0;
         for(let i=1;i<=5;i++){const b=document.createElement('button');b.type='button';b.textContent='★';b.className='';b.onclick=()=>{selected=i;Array.from(picker.children).forEach((x,n)=>x.classList.toggle('selected',n<i));};picker.appendChild(b);}
-        form.onsubmit=async ev=>{ev.preventDefault();if(!selected){alert('กรุณาเลือกดาว 1–5 ดาว');return;}const fd=new FormData();fd.append('item_type',reviewType);fd.append('item_id',reviewId);fd.append('rating',selected);fd.append('review_text',form.querySelector('textarea').value);try{const res=await fetch(window.location.origin+'/review-submit.php',{method:'POST',body:fd,credentials:'same-origin'});const data=await res.json();if(data.ok)loadReviews();else alert(data.message||'บันทึกรีวิวไม่สำเร็จ');}catch(err){alert('เชื่อมต่อระบบรีวิวไม่สำเร็จ');}};
+        form.onsubmit=async ev=>{ev.preventDefault();if(!selected){alert('กรุณาเลือกดาว 1–5 ดาว');return;}const fd=new FormData();fd.append('item_type',reviewType);fd.append('item_id',reviewId);fd.append('rating',selected);fd.append('review_text',form.querySelector('textarea').value);try{const res=await fetch(window.location.origin+'/review-submit.php',{method:'POST',body:fd,credentials:'same-origin'});const data=await res.json();if(data.ok){applyReviewResult(data);form.querySelector('.form-title').textContent='รีวิวของคุณถูกบันทึกแล้ว ✓';form.querySelector('textarea').value=data.review?.review_text||'';}else alert(data.message||'บันทึกรีวิวไม่สำเร็จ');}catch(err){alert('เชื่อมต่อระบบรีวิวไม่สำเร็จ');}};
         formWrap.innerHTML=''; formWrap.appendChild(form);
       }else{
         formWrap.innerHTML='<a class="review-login" href="form-login.php">เข้าสู่ระบบเพื่อให้คะแนนและเขียนรีวิว →</a>';

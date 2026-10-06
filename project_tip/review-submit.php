@@ -22,4 +22,14 @@ if($type==='place'){
         ON DUPLICATE KEY UPDATE rating=VALUES(rating),review_text=VALUES(review_text),updated_at=CURRENT_TIMESTAMP";
 }
 if(!mysqli_query($connect,$sql)){http_response_code(500);echo json_encode(['ok'=>false,'message'=>'บันทึกรีวิวไม่สำเร็จ'],JSON_UNESCAPED_UNICODE);exit;}
-echo json_encode(['ok'=>true,'message'=>'บันทึกรีวิวแล้ว'],JSON_UNESCAPED_UNICODE);
+
+// ส่งข้อมูลรีวิวล่าสุดกลับไปให้หน้า Gallery อัปเดตทันที โดยไม่ต้องรีเฟรชหน้า
+$review_where = $type==='place' ? "r.id_place=$id AND r.item_type='place'" : "r.id_shop=$id AND r.item_type='shop'";
+$stats_where = $type==='place' ? "id_place=$id AND item_type='place'" : "id_shop=$id AND item_type='shop'";
+$review_filter = $type==='place' ? "r.id_place=$id AND r.item_type='place' AND r.id_account=$uid" : "r.id_shop=$id AND r.item_type='shop' AND r.id_account=$uid";
+$review_q = mysqli_query($connect,"SELECT r.id_review,r.rating,r.review_text,r.created_at,a.username_account FROM reviews r JOIN account a ON a.id_account=r.id_account WHERE $review_filter ORDER BY r.id_review DESC LIMIT 1");
+$review = $review_q ? (mysqli_fetch_assoc($review_q) ?: null) : null;
+$stats_q = mysqli_query($connect,"SELECT ROUND(AVG(rating),1) AS average, COUNT(*) AS count FROM reviews WHERE $stats_where");
+$stats = $stats_q ? (mysqli_fetch_assoc($stats_q) ?: ['average'=>0,'count'=>0]) : ['average'=>0,'count'=>0];
+
+echo json_encode(['ok'=>true,'message'=>'บันทึกรีวิวแล้ว','review'=>$review,'average'=>(float)$stats['average'],'count'=>(int)$stats['count']],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
