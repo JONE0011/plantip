@@ -6,13 +6,14 @@ header('Content-Type: application/json; charset=UTF-8');
 $type=$_POST['item_type']??'';
 $id=(int)($_POST['item_id']??0);
 $action=$_POST['action']??'';
+$reviewId=(int)($_POST['review_id']??0);
 $rating=(int)($_POST['rating']??0);
 $uid=(int)$_SESSION['id_account'];
 
 if($action==='delete'){
-  if(!in_array($type,['place','shop'],true)||$id<1){http_response_code(400);echo json_encode(['ok'=>false,'message'=>'ข้อมูลไม่ถูกต้อง'],JSON_UNESCAPED_UNICODE);exit;}
-  if($type==='place') $del=mysqli_query($connect,"DELETE FROM reviews WHERE id_account=$uid AND item_type='place' AND id_place=$id");
-  else $del=mysqli_query($connect,"DELETE FROM reviews WHERE id_account=$uid AND item_type='shop' AND id_shop=$id");
+  if(!in_array($type,['place','shop'],true)||$id<1||$reviewId<1){http_response_code(400);echo json_encode(['ok'=>false,'message'=>'ไม่พบรีวิวที่ต้องการลบ'],JSON_UNESCAPED_UNICODE);exit;}
+  // ลบได้เฉพาะรีวิวรายการที่เลือก และต้องเป็นรีวิวของบัญชีที่กำลังล็อกอินเท่านั้น
+  $del=mysqli_query($connect,"DELETE FROM reviews WHERE id_review=$reviewId AND id_account=$uid LIMIT 1");
   if(!$del){http_response_code(500);echo json_encode(['ok'=>false,'message'=>'ลบรีวิวไม่สำเร็จ'],JSON_UNESCAPED_UNICODE);exit;}
   $statsWhere=$type==='place'?"item_type='place' AND id_place=$id":"item_type='shop' AND id_shop=$id";
   $sq=mysqli_query($connect,"SELECT ROUND(AVG(rating),1) average,COUNT(*) count FROM reviews WHERE $statsWhere");
