@@ -1123,7 +1123,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     // ถ้ายังไม่เคยมีทริปในฐานข้อมูลเลย แต่เคยเลือกไว้ตอนยังไม่ login (เก็บใน localStorage
     // จากหน้า home.php) ให้ดึงมาใช้ครั้งแรก แล้วเซฟเข้าฐานข้อมูลทันทีเพื่อไม่ให้ข้อมูลหาย
-    const STORAGE_KEY = 'takTripPlaces';
+    const STORAGE_KEY = 'takTripPlaces_<?php echo (int)$id_account; ?>';
     try{
         const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         const validLocal = local.filter(id => PLACES_BY_ID[id]);
