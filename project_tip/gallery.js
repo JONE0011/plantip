@@ -87,11 +87,13 @@
       if(data.logged_in){
         const mine=data.mine||{};
         const form=document.createElement('form'); form.className='review-form';
-        form.innerHTML='<div class="form-title">'+(mine.id_review?'แก้ไขรีวิวของคุณ':'เขียนรีวิวของคุณ')+'</div><div class="star-picker"></div><textarea maxlength="500" placeholder="เล่าประสบการณ์ของคุณ (ไม่บังคับ)"></textarea><button type="submit">บันทึกรีวิว</button>';
+        form.innerHTML='<div class="form-title">'+(mine.id_review?'แก้ไขรีวิวของคุณ':'เขียนรีวิวของคุณ')+'</div><div class="star-picker"></div><textarea maxlength="500" placeholder="เล่าประสบการณ์ของคุณ (ไม่บังคับ)"></textarea><button type="submit">บันทึกรีวิว</button>'+(mine.id_review?'<button type="button" class="review-delete">ลบรีวิวของฉัน</button>':'');
         const picker=form.querySelector('.star-picker');
         let selected=Number(mine.rating||0);
         for(let i=1;i<=5;i++){const b=document.createElement('button');b.type='button';b.textContent='★';b.className=i<=selected?'selected':'';b.onclick=()=>{selected=i;Array.from(picker.children).forEach((x,n)=>x.classList.toggle('selected',n<i))};picker.appendChild(b);}
         form.querySelector('textarea').value=mine.review_text||'';
+        const deleteBtn=form.querySelector('.review-delete');
+        if(deleteBtn) deleteBtn.onclick=async()=>{if(!confirm('ต้องการลบรีวิวนี้ใช่ไหม?'))return;deleteBtn.disabled=true;const fd=new FormData();fd.append('action','delete');fd.append('item_type',reviewType);fd.append('item_id',reviewId);try{const res=await fetch(window.location.origin+'/review-submit.php',{method:'POST',body:fd,credentials:'same-origin',cache:'no-store'});const data=await res.json();if(!data.ok)throw new Error(data.message||'delete');await loadReviews();}catch(err){alert('ลบรีวิวไม่สำเร็จ');deleteBtn.disabled=false;}};
         form.onsubmit=async e=>{e.preventDefault();if(!selected){alert('กรุณาเลือก 1-5 ดาว');return;}const btn=form.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent='กำลังบันทึก...';const fd=new FormData();fd.append('item_type',reviewType);fd.append('item_id',reviewId);fd.append('rating',selected);fd.append('review_text',form.querySelector('textarea').value);try{const res=await fetch(window.location.origin+'/review-submit.php',{method:'POST',body:fd,credentials:'same-origin',cache:'no-store'});const data=await res.json();if(data.ok){applyReviewResult(data);form.querySelector('.form-title').textContent='รีวิวของคุณถูกบันทึกแล้ว ✓';form.querySelector('textarea').value=data.review?.review_text||'';btn.disabled=false;btn.textContent='บันทึกรีวิวอีกครั้ง';}else{alert(data.message||'บันทึกรีวิวไม่สำเร็จ');btn.disabled=false;btn.textContent='บันทึกรีวิว';}}catch(err){alert('เชื่อมต่อระบบรีวิวไม่สำเร็จ');btn.disabled=false;btn.textContent='บันทึกรีวิว';}};
         formWrap.appendChild(form);
       }else{

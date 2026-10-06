@@ -5,10 +5,22 @@ if(!isset($_SESSION['id_account'])){http_response_code(401);echo json_encode(['o
 header('Content-Type: application/json; charset=UTF-8');
 $type=$_POST['item_type']??'';
 $id=(int)($_POST['item_id']??0);
+$action=$_POST['action']??'';
 $rating=(int)($_POST['rating']??0);
+$uid=(int)$_SESSION['id_account'];
+
+if($action==='delete'){
+  if(!in_array($type,['place','shop'],true)||$id<1){http_response_code(400);echo json_encode(['ok'=>false,'message'=>'ข้อมูลไม่ถูกต้อง'],JSON_UNESCAPED_UNICODE);exit;}
+  if($type==='place') $del=mysqli_query($connect,"DELETE FROM reviews WHERE id_account=$uid AND item_type='place' AND id_place=$id");
+  else $del=mysqli_query($connect,"DELETE FROM reviews WHERE id_account=$uid AND item_type='shop' AND id_shop=$id");
+  if(!$del){http_response_code(500);echo json_encode(['ok'=>false,'message'=>'ลบรีวิวไม่สำเร็จ'],JSON_UNESCAPED_UNICODE);exit;}
+  $statsWhere=$type==='place'?"item_type='place' AND id_place=$id":"item_type='shop' AND id_shop=$id";
+  $sq=mysqli_query($connect,"SELECT ROUND(AVG(rating),1) average,COUNT(*) count FROM reviews WHERE $statsWhere");
+  $st=$sq?mysqli_fetch_assoc($sq):['average'=>0,'count'=>0];
+  echo json_encode(['ok'=>true,'deleted'=>true,'average'=>(float)($st['average']??0),'count'=>(int)($st['count']??0)],JSON_UNESCAPED_UNICODE);exit;
+}
 $text=trim($_POST['review_text']??'');
 if(!in_array($type,['place','shop'],true)||$id<1||$rating<1||$rating>5){http_response_code(400);echo json_encode(['ok'=>false,'message'=>'ข้อมูลรีวิวไม่ถูกต้อง'],JSON_UNESCAPED_UNICODE);exit;}
-$uid=(int)$_SESSION['id_account'];
 $esc=mysqli_real_escape_string($connect,$text);
 if($type==='place'){
   $exists=mysqli_query($connect,"SELECT id_place FROM place WHERE id_place=$id LIMIT 1");
