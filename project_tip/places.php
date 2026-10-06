@@ -14,6 +14,16 @@ $place_images = [
     'friendship-bridge' => 'images/places/friendship-bridge.jpg',
 ];
 
+$place_gallery = [
+    'thi-lo-su' => ['images/places/thi-lo-su.jpg','https://www.asiakingtravel.com/images/thumbs/2023/12/7437/image_400x400xcrop.webp'],
+    'doi-hua-mot' => ['images/places/doi-hua-mot.jpg','images/places/gallery/doi-hua-mot-2.jpg'],
+    'doi-thule' => ['images/places/doi-thule.jpg','https://s359.kapook.com/pagebuilder/ae823e95-80b2-4f9d-9d49-6aa3ac9d187c.jpg'],
+    'mae-moei' => ['images/places/mae-moei.jpg','https://f.ptcdn.info/807/003/000/1365001557-IMG4973rs-o.jpg'],
+    'pha-charoen' => ['images/places/pha-charoen.jpg','https://jinnyz.com/uploads/places/1675098882_%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9E%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%A3%E0%B8%B4%E0%B8%8D.jpg'],
+    'thararak' => ['images/places/thararak.jpg','https://images.world-of-waterfalls.com/Thararak_010_01012009.jpg'],
+    'wat-thai-wattanaram' => ['images/places/wat-thai-wattanaram.jpg','https://www.gettyimages.com/gi-resources/images/Creative/Creative_Assets/Images/Places/Thailand.jpg'],
+];
+
 $places = [];
 $result = mysqli_query($connect, "SELECT id_place, place_key, name_place, location_place, image_place FROM place ORDER BY id_place");
 if ($result) {
@@ -40,6 +50,7 @@ foreach ($places as $p) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="modern.css">
+<link rel="stylesheet" href="gallery.css">
 <style>
 :root{--ink:#18231e;--muted:#68736c;--paper:#faf9f5;--cream:#f0eee5;--green:#183d31;--line:rgba(24,35,30,.13);--gold:#d6b875}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Prompt",sans-serif}a{text-decoration:none;color:inherit}.container{width:min(1380px,calc(100% - 48px));margin:auto}
@@ -81,7 +92,7 @@ footer{padding:28px 0;color:#7a847e;font-size:11px;border-top:1px solid var(--li
 <div class="section-head"><div><div class="section-label">Editor's selection / 01</div><h2>สถานที่ยอดนิยม<br>แนะนำให้ลองไป</h2></div><p>4 จุดหมายเด่นสำหรับคนที่อยากเริ่มเที่ยวตากแบบไม่ต้องคิดนาน</p></div>
 <div class="feature-grid">
 <?php foreach ($featured as $i => $p): ?>
-<article class="card">
+<article class="card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='ภาพบรรยากาศและมุมที่น่าสนใจของสถานที่นี้ในจังหวัดตาก'>
 <div class="photo" style="background-image:url('<?php echo htmlspecialchars($p['image_url']); ?>')"></div>
 <span class="tag"><?php echo $i===0?'ยอดฮิต':($i===1?'ทะเลหมอก':($i===2?'ธรรมชาติ':'ป่า & น้ำตก')); ?></span>
 <button class="add" type="button" data-place="<?php echo htmlspecialchars($p['place_key']); ?>" aria-label="เพิ่ม <?php echo htmlspecialchars($p['name_place']); ?>">+</button>
@@ -97,7 +108,7 @@ footer{padding:28px 0;color:#7a847e;font-size:11px;border-top:1px solid var(--li
 <div class="section-head"><div><div class="section-label">Explore more / 02</div><h2>ยังมีอีกหลายที่ให้ค้นพบ</h2></div><p>สถานที่อื่น ๆ ที่คุณสามารถเลือกเพิ่มเข้าทริปได้</p></div>
 <div class="all-grid">
 <?php foreach ($others as $p): ?>
-<article class="small-card">
+<article class="small-card" data-gallery='<?php echo htmlspecialchars(json_encode($place_gallery[$p['place_key']] ?? [$p['image_url']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>' data-title='<?php echo htmlspecialchars($p['name_place'], ENT_QUOTES, 'UTF-8'); ?>' data-location='<?php echo htmlspecialchars($p['location_place'], ENT_QUOTES, 'UTF-8'); ?>' data-description='เปิดดูรูปสถานที่แบบเต็มจอ แล้วเลื่อนดูภาพอื่นได้'>
 <div class="small-photo" style="background-image:url('<?php echo htmlspecialchars($p['image_url']); ?>')"></div>
 <div class="small-info"><h3><?php echo htmlspecialchars($p['name_place']); ?></h3><p><?php echo htmlspecialchars($p['location_place']); ?></p><button class="small-add" type="button" data-place="<?php echo htmlspecialchars($p['place_key']); ?>">+ เพิ่มเข้าทริป</button></div>
 </article>
@@ -121,5 +132,6 @@ document.querySelectorAll('[data-place]').forEach(btn=>{
  btn.addEventListener('click',()=>{trip=trip.includes(id)?trip.filter(x=>x!==id):[...trip,id];setTrip(trip);update();});
 });
 </script>
+<script src="gallery.js"></script>
 </body>
 </html>
