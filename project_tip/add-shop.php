@@ -297,6 +297,41 @@ addShopImage.addEventListener('click',()=>{
     shopImageList.appendChild(row); refreshShopImageRemove();
 });
 refreshShopImageRemove();
+
+// ลดขนาดรูปจากมือถือก่อนส่งขึ้นเซิร์ฟเวอร์ ป้องกัน PHP ปฏิเสธไฟล์ใหญ่เกินกำหนด
+async function compressShopImage(input){
+    const file=input.files && input.files[0];
+    if(!file || !file.type.startsWith('image/')) return;
+    if(file.size <= 1800000) return;
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    try{
+        await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});
+        const max=2000, scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+        canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+        canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.82));
+        if(!blob) return;
+        const dt=new DataTransfer();
+        dt.items.add(new File([blob],file.name.replace(/\\.[^.]+$/i,'.jpg'),{type:'image/jpeg'}));
+        input.files=dt.files;
+    }catch(e){ console.warn('image compression failed',e); }
+    finally{ URL.revokeObjectURL(url); }
+}
+shopImageList.addEventListener('change',e=>{if(e.target.matches('input[type=file]')) compressShopImage(e.target)});
+const shopForm=document.getElementById('shop-form');
+let shopSubmitting=false;
+shopForm.addEventListener('submit',async e=>{
+    if(shopSubmitting) return;
+    e.preventDefault();
+    shopSubmitting=true;
+    const submit=shopForm.querySelector('[type="submit"]');
+    if(submit){submit.disabled=true;submit.textContent='กำลังเตรียมรูป...';}
+    await Promise.all([...shopImageList.querySelectorAll('input[type=file]')].map(compressShopImage));
+    shopForm.submit();
+});
 </script>
 </body>
 </html>
