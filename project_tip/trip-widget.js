@@ -36,6 +36,20 @@ const box=document.createElement('aside');box.id='tak-trip-widget';box.innerHTML
 const list=box.querySelector('.tw-list'),count=box.querySelector('.tw-count');
 function refresh(){const trip=getTrip();count.textContent=trip.length+' รายการ';box.classList.toggle('is-open',trip.length>0);list.innerHTML=trip.map((id,i)=>{const m=meta[id]||{title:'กำลังโหลดชื่อสถานที่…',loc:''};return '<li class="tw-item"><span class="tw-num">'+(i+1)+'</span><div class="tw-info"><div class="tw-name">'+esc(m.title)+'</div><div class="tw-loc">'+esc(m.loc)+'</div></div><button class="tw-remove" data-id="'+esc(id)+'" title=ลบ>×</button></li>'}).join('');document.querySelectorAll('.trip-add-btn').forEach(btn=>{const added=trip.includes(btn.dataset.tripId);btn.classList.toggle('is-added',added);btn.textContent=added?'✓ อยู่ในทริปแล้ว':'＋ เพิ่มเข้าทริป';});}
 function toggle(id){let t=getTrip();t=t.includes(id)?t.filter(x=>x!==id):[...t,id];setTrip(t);refresh();window.dispatchEvent(new CustomEvent('takTripChanged',{detail:{trip:t}}));}
-document.addEventListener('click',e=>{const b=e.target.closest('.trip-add-btn');if(b){e.preventDefault();e.stopPropagation();toggle(b.dataset.tripId);return;}const rm=e.target.closest('.tw-remove');if(rm){toggle(rm.dataset.id);return;}if(e.target.closest('.tw-clear')){setTrip([]);refresh();return;}if(e.target.closest('.tw-create')){if(!getTrip().length){alert('กรุณาเพิ่มสถานที่หรือร้านเข้าทริปก่อน');return;}window.location.href='trip-planner.php?from=directory&items='+encodeURIComponent(getTrip().join(','));}});
+document.addEventListener('click',e=>{const b=e.target.closest('.trip-add-btn');if(b){e.preventDefault();e.stopPropagation();toggle(b.dataset.tripId);return;}const rm=e.target.closest('.tw-remove');if(rm){toggle(rm.dataset.id);return;}if(e.target.closest('.tw-clear')){
+  setTrip([]);
+  refresh();
+  // ล้างทั้ง localStorage และรายการที่บันทึกไว้ในฐานข้อมูล
+  // เพื่อไม่ให้กลับเข้า trip-planner.php แล้วทริปเก่ากลับมาอีก
+  fetch('trip-planner.php?action=save_trip',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    credentials:'same-origin',
+    body:JSON.stringify({places:[]})
+  }).then(res=>res.json()).then(data=>{
+    if(!data.success) console.error('ล้างทริปในฐานข้อมูลไม่สำเร็จ:',data.message);
+  }).catch(err=>console.error('ล้างทริปไม่สำเร็จ:',err));
+  return;
+}if(e.target.closest('.tw-create')){if(!getTrip().length){alert('กรุณาเพิ่มสถานที่หรือร้านเข้าทริปก่อน');return;}window.location.href='trip-planner.php?from=directory&items='+encodeURIComponent(getTrip().join(','));}});
 window.addEventListener('storage',refresh);window.addEventListener('takTripChanged',refresh);refresh();loadAllMeta();
 })();
