@@ -1169,13 +1169,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
             border:1px solid rgba(32,88,64,.04);
             display:flex;
             flex-direction:column;
-            overflow:visible;
+            overflow:hidden;
             box-sizing:border-box;
         }
 
-        /* ให้กรอบลำดับทริปยืดทะลุพื้นที่เดิมได้เหมือนแบบเก่า */
+        /* ป้องกันรายการและปุ่มทับกัน แต่ยังลากขยายกรอบได้อิสระ */
         .trip-summary.trip-resizing{
-            overflow:visible;
+            overflow:hidden;
             transition:none !important;
             will-change:height;
         }
@@ -1322,6 +1322,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             flex-direction:column;
             gap:5px;
             margin:0;
+            margin-top:0;
             padding-bottom:18px;
         }
 
@@ -1837,6 +1838,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
                 // หลังลบจนเหลือ 0 รายการ ต้องรีเซ็ต minHeight ที่เคยค้างจากตอนลาก
                 const requiredHeight = getTripSummaryRequiredHeight();
                 tripMinHeight = Math.max(150, requiredHeight);
+                tripSummary.style.minHeight = tripMinHeight + 'px';
                 applyTripSummaryHeight(requiredHeight);
             }
             lastRenderedTripCount = trip.length;
@@ -1857,6 +1859,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
         const currentHeight = tripSummary.getBoundingClientRect().height;
         const requiredHeight = getTripSummaryRequiredHeight();
+
+        // ความสูงขั้นต่ำจะตามเนื้อหาปัจจุบันเท่านั้น ไม่ค้างค่าจากการลากครั้งก่อน
+        tripSummary.style.minHeight = Math.max(150, requiredHeight) + 'px';
+        tripMinHeight = Math.max(150, requiredHeight);
 
         // เพิ่มรายการ: ขยายเมื่อพื้นที่ไม่พอ
         if(currentHeight < requiredHeight){
@@ -2105,8 +2111,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
         tripStartY = event.clientY;
         tripStartHeight = tripSummary.getBoundingClientRect().height;
         tripResizeTargetHeight = tripStartHeight;
-        // ปลดล็อกการลาก: ไม่บังคับความสูงขั้นต่ำตามจำนวนรายการอีกต่อไป
-        tripMinHeight = 60;
+        // ลากได้อิสระ แต่ไม่ให้ย่อจนเนื้อหา/ปุ่มทับกัน
+        tripMinHeight = Math.max(150, getTripSummaryRequiredHeight());
+        tripSummary.style.minHeight = tripMinHeight + 'px';
 
         tripSummary.classList.add('trip-resizing');
         plannerApp.classList.add('trip-resizing');
