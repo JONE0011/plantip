@@ -1845,10 +1845,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
         if(trip.length === 0){
             tripListEl.innerHTML = '<li class="empty-hint">ยังไม่ได้เลือกสถานที่ — เพิ่มจากรายการด้านล่างได้เลย</li>';
             if(shouldShrinkAfterDelete){
-                // หลังลบจนเหลือ 0 รายการ ต้องรีเซ็ต minHeight ที่เคยค้างจากตอนลาก
+                // ล้าง min-height ที่ค้างจากการลากก่อนคำนวณความสูงใหม่
+                tripSummary.style.minHeight = '0px';
                 const requiredHeight = getTripSummaryRequiredHeight();
                 tripMinHeight = Math.max(150, requiredHeight);
-                tripSummary.style.minHeight = tripMinHeight + 'px';
                 applyTripSummaryHeight(requiredHeight);
             }
             lastRenderedTripCount = trip.length;
@@ -1870,8 +1870,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
         const currentHeight = tripSummary.getBoundingClientRect().height;
         const requiredHeight = getTripSummaryRequiredHeight();
 
-        // ความสูงขั้นต่ำจะตามเนื้อหาปัจจุบันเท่านั้น ไม่ค้างค่าจากการลากครั้งก่อน
-        tripSummary.style.minHeight = Math.max(150, requiredHeight) + 'px';
+        // ไม่เก็บ min-height จากการลากไว้ถาวร
+        // เพื่อให้หลังลบรายการแล้วกรอบสามารถหดกลับได้จริง
+        tripSummary.style.minHeight = '0px';
         tripMinHeight = Math.max(150, requiredHeight);
 
         // เพิ่มรายการ: ขยายเมื่อพื้นที่ไม่พอ
@@ -1879,8 +1880,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
             applyTripSummaryHeight(requiredHeight);
         // ลบรายการ: หดกลับตามจำนวนรายการใหม่ทันที
         }else if(shouldShrinkAfterDelete && currentHeight > requiredHeight){
-            // หลังลบรายการ ต้องลดเพดานขั้นต่ำที่ค้างจากการลากครั้งก่อนด้วย
+            // หลังลบรายการ หดกรอบกลับตามเนื้อหาจริง
             tripMinHeight = Math.max(150, requiredHeight);
+            tripSummary.style.minHeight = '0px';
             applyTripSummaryHeight(requiredHeight);
         }
 
@@ -2154,6 +2156,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
         tripSummary.style.setProperty('--trip-summary-height', finalSafeHeight + 'px');
         tripSummary.style.height = finalSafeHeight + 'px';
         localStorage.setItem('takPlannerTripHeight', String(finalSafeHeight));
+        // min-height ใช้เฉพาะระหว่างลากเท่านั้น ไม่ให้ค่าค้างหลังปล่อยเมาส์
+        tripSummary.style.minHeight = '0px';
         resizingTripSummary = false;
         tripSummary.classList.remove('trip-resizing');
         plannerApp.classList.remove('trip-resizing');
@@ -2168,6 +2172,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     tripSummaryResizeHandle.addEventListener('pointercancel', stopTripSummaryResize);
     tripSummaryResizeHandle.addEventListener('dblclick', () => {
         tripMinHeight = 60;
+        tripSummary.style.minHeight = '0px';
         applyTripSummaryHeight(300);
     });
 
