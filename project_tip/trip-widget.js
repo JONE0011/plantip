@@ -10,8 +10,9 @@ if(!loggedIn){
   return;
 }
 const KEY='takTripPlaces_'+userId;
-const getTrip=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}};
-const setTrip=v=>localStorage.setItem(KEY,JSON.stringify(v));
+const normalizeTripId=id=>{id=String(id??'').trim();return id.startsWith('shop-')?'shop:'+id.slice(5):id;};
+const getTrip=()=>{try{return (JSON.parse(localStorage.getItem(KEY))||[]).map(normalizeTripId).filter(Boolean)}catch(e){return[]}};
+const setTrip=v=>localStorage.setItem(KEY,JSON.stringify([...new Set(v.map(normalizeTripId).filter(Boolean))]));
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const meta={};
 document.querySelectorAll('[data-trip-id][data-title]').forEach(card=>{

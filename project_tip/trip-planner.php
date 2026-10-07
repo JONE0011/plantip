@@ -1699,8 +1699,12 @@ while($row = mysqli_fetch_assoc($result_trip)){
     const STORAGE_KEY = 'takTripPlaces_<?php echo (int)$id_account; ?>';
     let saveTimer = null;
     try{
+        const normalizePlannerId = id => {
+            id = String(id ?? '').trim();
+            return id.startsWith('shop-') ? 'shop:' + id.slice(5) : id;
+        };
         const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        const validLocal = [...new Set(local.filter(id => PLACES_BY_ID[id]))];
+        const validLocal = [...new Set(local.map(normalizePlannerId).filter(id => PLACES_BY_ID[id]))];
 
         // ถ้ามาจากปุ่ม “สร้างทริป” ในกล่องทริปของฉัน
         // ให้รายการใน localStorage เป็น source of truth และใช้รายการนั้นแทนทริปเก่าจาก DB
@@ -1708,7 +1712,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         const params = new URLSearchParams(window.location.search);
         const fromDirectory = params.get('from') === 'directory';
         const selectedItems = params.get('items');
-        const urlTrip = selectedItems ? [...new Set(decodeURIComponent(selectedItems).split(',').map(x => x.trim()).filter(x => PLACES_BY_ID[x]))] : [];
+        const urlTrip = selectedItems ? [...new Set(decodeURIComponent(selectedItems).split(',').map(normalizePlannerId).filter(x => PLACES_BY_ID[x]))] : [];
 
         if(fromDirectory){
             // รายการที่กด “สร้างทริป” ส่งมาจากกล่องทริปโดยตรง ใช้รายการนี้เท่านั้น
