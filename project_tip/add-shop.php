@@ -132,6 +132,7 @@ if(!isset($_SESSION['id_account'])){
 .profile-body{padding:58px 30px 35px!important}
 .profile-form{display:grid!important;gap:.8rem!important;background:#fff!important;padding:1rem!important;border-radius:16px!important}
 .profile-form input{width:100%!important;box-sizing:border-box!important}
+.image-upload-list{display:grid;gap:8px}.image-upload-row{display:flex;gap:8px;align-items:center}.image-upload-row input{flex:1;min-width:0}.image-remove{width:42px;height:42px;border:1px solid #d8ded8;background:#fff;border-radius:11px;color:#9a4b4b;font-size:22px;cursor:pointer}.image-remove:disabled{opacity:.35;cursor:not-allowed}.image-add{margin-top:9px;border:1px dashed #9aada2;background:#f7faf6;color:#183d31;border-radius:11px;padding:10px 14px;font:500 13px Prompt;cursor:pointer}
 @media(max-width:640px){.profile-drawer{width:100%!important}.profile-body{padding:54px 20px 30px!important}}
 </style>
 </head>
@@ -206,9 +207,15 @@ if(!isset($_SESSION['id_account'])){
                 </div>
 
                 <div class="field">
-                    <label for="image_shop">รูปร้าน (เลือกได้หลายรูป)</label>
-                    <input type="file" id="image_shop" name="image_shop[]" accept="image/jpeg,image/png" multiple>
-                    <small style="display:block;margin-top:8px;color:#68736c">เลือกได้หลายรูปพร้อมกัน (JPG / PNG)</small>
+                    <label>รูปร้าน (เพิ่มได้หลายรูป)</label>
+                    <div id="shop-image-list" class="image-upload-list">
+                        <div class="image-upload-row">
+                            <input type="file" name="image_shop[]" accept="image/jpeg,image/png">
+                            <button type="button" class="image-remove" aria-label="ลบช่องรูป" disabled>×</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-shop-image" class="image-add">＋ เพิ่มช่องรูป</button>
+                    <small style="display:block;margin-top:8px;color:#68736c">เพิ่มช่องทีละรูป และลบช่องที่ไม่ต้องการได้</small>
                 </div>
             </div>
 
@@ -276,5 +283,20 @@ if(!isset($_SESSION['id_account'])){
     map.on('click', e => dropPin(e.latlng));
 </script>
 
+<script>
+const shopImageList=document.getElementById('shop-image-list');
+const addShopImage=document.getElementById('add-shop-image');
+function refreshShopImageRemove(){
+    const rows=[...shopImageList.querySelectorAll('.image-upload-row')];
+    rows.forEach(row=>row.querySelector('.image-remove').disabled=rows.length===1);
+}
+addShopImage.addEventListener('click',()=>{
+    const row=document.createElement('div'); row.className='image-upload-row';
+    row.innerHTML='<input type="file" name="image_shop[]" accept="image/jpeg,image/png"><button type="button" class="image-remove" aria-label="ลบช่องรูป">×</button>';
+    row.querySelector('.image-remove').addEventListener('click',()=>{row.remove();refreshShopImageRemove()});
+    shopImageList.appendChild(row); refreshShopImageRemove();
+});
+refreshShopImageRemove();
+</script>
 </body>
 </html>
