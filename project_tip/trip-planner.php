@@ -1348,7 +1348,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
 
         .side-nav{
+            order:0;
             flex:none;
+            position:relative;
+            z-index:30;
             display:flex;
             align-items:center;
             justify-content:space-around;
@@ -1605,6 +1608,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
              title="ลากเพื่อขยายหรือย่อแถบด้านขวา"></div>
 
         <aside class="side-pane">
+            <nav class="side-nav" aria-label="เมนูหลัก">
+                <a href="home.php">หน้าแรก</a>
+                <a href="home.php#destinations">สถานที่เที่ยว</a>
+                <a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a>
+                <a href="trip-planner.php" class="active">วางแผนทริป</a>
+            </nav>
+
             <section class="trip-summary" id="trip-summary">
                 <div class="trip-summary-resize-handle" id="trip-summary-resize-handle"
                      role="separator" aria-label="ลากเพื่อปรับความสูงลำดับทริป"
@@ -1620,13 +1630,6 @@ while($row = mysqli_fetch_assoc($result_trip)){
                     <button class="clear-btn" id="clear-trip" type="button">ล้างทริปทั้งหมด</button>
                 </div>
             </section>
-
-            <nav class="side-nav" aria-label="เมนูหลัก">
-                <a href="home.php">หน้าแรก</a>
-                <a href="home.php#destinations">สถานที่เที่ยว</a>
-                <a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a>
-                <a href="trip-planner.php" class="active">วางแผนทริป</a>
-            </nav>
 
             <section class="discover-panel">
                 <div class="discover-title">
