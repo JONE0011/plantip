@@ -171,7 +171,7 @@ while($row = mysqli_fetch_assoc($result_shops)){
         'loc'      => $row['address_shop'] ?: ($row['description_shop'] ?: 'ตาก'),
         'lat'      => (float) $row['lat_shop'],
         'lng'      => (float) $row['lng_shop'],
-        'img'      => $row['image_shop'] ?: '',
+        'img'      => explode('|', $row['image_shop'] ?: '')[0],
         'category' => $row['category_shop'],
         'type'     => 'shop',
     ];

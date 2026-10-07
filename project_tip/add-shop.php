@@ -206,8 +206,9 @@ if(!isset($_SESSION['id_account'])){
                 </div>
 
                 <div class="field">
-                    <label for="image_shop">รูปร้าน (ถ้ามี)</label>
-                    <input type="file" id="image_shop" name="image_shop" accept="image/jpeg,image/png">
+                    <label for="image_shop">รูปร้าน (เลือกได้หลายรูป)</label>
+                    <input type="file" id="image_shop" name="image_shop[]" accept="image/jpeg,image/png" multiple>
+                    <small style="display:block;margin-top:8px;color:#68736c">เลือกได้หลายรูปพร้อมกัน (JPG / PNG)</small>
                 </div>
             </div>
 

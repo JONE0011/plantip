@@ -30,33 +30,39 @@ if(
 $lat_shop = (float) $lat_shop;
 $lng_shop = (float) $lng_shop;
 
-// ---------- อัปโหลดรูป (ถ้ามีแนบมา) ----------
-$image_path = null;
-if(isset($_FILES['image_shop']) && $_FILES['image_shop']['error'] === UPLOAD_ERR_OK){
+// ---------- อัปโหลดรูปหลายรูป (ถ้ามีแนบมา) ----------
+$image_paths = [];
+if(isset($_FILES['image_shop'])){
     $allowed_ext = ['jpg', 'jpeg', 'png'];
-    $ext = strtolower(pathinfo($_FILES['image_shop']['name'], PATHINFO_EXTENSION));
-
-    if(!in_array($ext, $allowed_ext, true)){
-        die(header('Location: add-shop.php?error=upload'));
-    }
-
     $upload_dir = 'images_shop/';
     if(!is_dir($upload_dir)){
         mkdir($upload_dir, 0755, true);
     }
 
-    $filename = uniqid('shop_', true) . '.' . $ext;
-    $target_path = $upload_dir . $filename;
+    $files = $_FILES['image_shop'];
+    $count = is_array($files['name']) ? count($files['name']) : 0;
+    for($i = 0; $i < $count; $i++){
+        if(($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
+        if(($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK){
+            die(header('Location: add-shop.php?error=upload'));
+        }
 
-    if(move_uploaded_file($_FILES['image_shop']['tmp_name'], $target_path)){
-        $image_path = $target_path;
-    }else{
-        die(header('Location: add-shop.php?error=upload'));
+        $ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+        if(!in_array($ext, $allowed_ext, true)){
+            die(header('Location: add-shop.php?error=upload'));
+        }
+
+        $filename = uniqid('shop_', true) . '.' . $ext;
+        $target_path = $upload_dir . $filename;
+        if(!move_uploaded_file($files['tmp_name'][$i], $target_path)){
+            die(header('Location: add-shop.php?error=upload'));
+        }
+        $image_paths[] = $target_path;
     }
-}elseif(isset($_FILES['image_shop']) && $_FILES['image_shop']['error'] !== UPLOAD_ERR_NO_FILE){
-    // มีการแนบไฟล์แต่เกิดข้อผิดพลาดระหว่างอัปโหลด (เช่นไฟล์ใหญ่เกินกำหนด)
-    die(header('Location: add-shop.php?error=upload'));
 }
+
+// เก็บหลายรูปไว้ในช่องเดิม โดยคั่นด้วย | เพื่อไม่ต้องแก้โครงสร้างฐานข้อมูล
+$image_path = !empty($image_paths) ? implode('|', $image_paths) : null;
 
 // ---------- บันทึกลงฐานข้อมูล ----------
 $name_shop_esc        = mysqli_real_escape_string($connect, $name_shop);
