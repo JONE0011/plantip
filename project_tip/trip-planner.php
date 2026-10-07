@@ -1060,10 +1060,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
         html,body{
             width:100%;
-            min-height:100%;
-            height:auto;
-            overflow-x:hidden;
-            overflow-y:auto;
+            height:100%;
+            min-height:0;
+            overflow:hidden;
         }
 
         body{
@@ -1075,8 +1074,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
         .planner-app{
             --side-width:340px;
             width:100vw;
-            height:auto;
-            min-height:100vh;
+            height:100vh;
+            min-height:0;
             display:grid;
             grid-template-columns:minmax(420px,1fr) 8px minmax(280px,var(--side-width));
             background:var(--planner-bg);
@@ -1104,10 +1103,10 @@ while($row = mysqli_fetch_assoc($result_trip)){
             position:relative;
             z-index:10;
             min-width:0;
-            height:auto;
-            min-height:100vh;
-            overflow:visible;
-            overscroll-behavior:visible;
+            height:100vh;
+            min-height:0;
+            overflow:hidden;
+            overscroll-behavior:contain;
             background:#fbfaf6;
             border-left:1px solid #e3e5de;
             display:flex;
@@ -1386,9 +1385,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
 
         .discover-panel{
-            min-height:520px;
-            flex:0 0 auto;
-            overflow:visible;
+            min-height:0;
+            flex:1 1 auto;
+            overflow-y:auto;
+            overflow-x:hidden;
+            overscroll-behavior:contain;
             padding:13px 14px 20px;
         }
 
@@ -1538,11 +1539,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
         footer{display:none}
 
         @media(max-width:900px){
-            html,body{overflow:auto}
+            html,body{overflow:hidden}
 
             .planner-app{
-                height:auto;
-                min-height:100vh;
+                height:100vh;
+                min-height:0;
                 grid-template-columns:1fr;
             }
 
@@ -1556,9 +1557,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
             }
 
             .side-pane{
-                height:auto;
-                min-height:52vh;
-                overflow:visible;
+                height:100vh;
+                min-height:0;
+                overflow:hidden;
                 border-left:0;
                 border-top:1px solid #e3e5de;
             }
@@ -1570,7 +1571,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
                 margin:10px;
             }
 
-            .discover-panel{overflow:visible}
+            .discover-panel{
+                min-height:0;
+                flex:1 1 auto;
+                overflow-y:auto;
+                overflow-x:hidden;
+                overscroll-behavior:contain;
+            }
 
             .planner-app.side-resizing,
             .planner-app.trip-resizing{
