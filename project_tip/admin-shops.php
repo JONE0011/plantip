@@ -3,7 +3,7 @@ session_start();$open_connect=1;require('connect.php');
 if(!isset($_SESSION['id_account']) || ($_SESSION['role_account']??'')!=='admin'){header('Location:form-login.php');exit;}
 $errors=[];
 function esc($v){global $connect;return mysqli_real_escape_string($connect,(string)$v);}
-function images_list($v){return array_values(array_filter(array_map('trim',explode('|',(string)$v)));}
+function images_list($v){return array_values(array_filter(array_map('trim',explode('|',(string)$v))));}
 function delete_uploaded_images($value,$prefixes){foreach(images_list($value) as $img){$path=__DIR__.'/'.ltrim($img,'/');$ok=false;foreach($prefixes as $p){if(strpos($img,$p)===0){$ok=true;break;}}if($ok&&is_file($path))@unlink($path);}}
 function upload_images($field,$dir,$prefix){$out=[];if(!isset($_FILES[$field])||!is_array($_FILES[$field]['name']))return $out;if(!is_dir(__DIR__.'/'.$dir))mkdir(__DIR__.'/'.$dir,0755,true);$f=$_FILES[$field];for($i=0;$i<count($f['name']);$i++){ $err=$f['error'][$i]??UPLOAD_ERR_NO_FILE;if($err===UPLOAD_ERR_NO_FILE)continue;if($err!==UPLOAD_ERR_OK)throw new Exception('อัปโหลดรูปไม่สำเร็จ');$ext=strtolower(pathinfo($f['name'][$i],PATHINFO_EXTENSION));if(!in_array($ext,['jpg','jpeg','png','webp'],true))throw new Exception('รองรับเฉพาะ JPG, PNG และ WEBP');$file=$dir.$prefix.uniqid().'.'.$ext;if(!move_uploaded_file($f['tmp_name'][$i],__DIR__.'/'.$file))throw new Exception('บันทึกไฟล์รูปไม่สำเร็จ');$out[]=$file;}return $out;}
 $allowed=['ร้านอาหาร','คาเฟ่','ร้านค้า','อื่นๆ'];

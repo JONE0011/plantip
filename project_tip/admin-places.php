@@ -5,7 +5,7 @@ if(!isset($_SESSION['id_account']) || ($_SESSION['role_account']??'')!=='admin')
 
 $errors=[];
 function esc($v){global $connect;return mysqli_real_escape_string($connect,(string)$v);}
-function images_list($v){return array_values(array_filter(array_map('trim',explode('|',(string)$v)));}
+function images_list($v){return array_values(array_filter(array_map('trim',explode('|',(string)$v))));}
 function delete_uploaded_images($value,$prefixes){
     foreach(images_list($value) as $img){
         $path=__DIR__.'/'.ltrim($img,'/');
