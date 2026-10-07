@@ -1878,9 +1878,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
         // เพิ่มรายการ: ขยายเมื่อพื้นที่ไม่พอ
         if(currentHeight < requiredHeight){
             applyTripSummaryHeight(requiredHeight);
-        // ลบรายการ: หดกลับตามจำนวนรายการใหม่ทันที
-        }else if(shouldShrinkAfterDelete && currentHeight > requiredHeight){
-            // หลังลบรายการ หดกรอบกลับตามเนื้อหาจริง
+        // ลบรายการ หรือไม่มีความสูงที่ผู้ใช้ปรับเองที่ใช้งานได้:
+        // ให้กรอบหดตามเนื้อหาทันที ไม่ปล่อยค่าความสูงเก่ามาค้าง
+        }else if((shouldShrinkAfterDelete || !restoredManualTripHeight) && currentHeight > requiredHeight){
             tripMinHeight = Math.max(150, requiredHeight);
             tripSummary.style.minHeight = '0px';
             applyTripSummaryHeight(requiredHeight);
@@ -2102,6 +2102,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
     let tripMinHeight = 0;
     let tripResizeTargetHeight = 300;
     let tripResizeFrame = 0;
+    // ความสูงที่บันทึกไว้จะใช้เฉพาะกรณีผู้ใช้ลากปรับเองจริง ๆ
+    // ป้องกันค่าความสูงเก่าจากเวอร์ชันก่อนทำให้กรอบค้างสูงเมื่อเหลือรายการน้อย
+    let restoredManualTripHeight = false;
 
     // คำนวณขั้นต่ำเฉพาะตอนจำเป็น ไม่ทำซ้ำทุก pointermove
     function getTripSummaryRequiredHeight(){
@@ -2168,6 +2171,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
         tripSummary.style.setProperty('--trip-summary-height', finalSafeHeight + 'px');
         tripSummary.style.height = finalSafeHeight + 'px';
         localStorage.setItem('takPlannerTripHeight', String(finalSafeHeight));
+        localStorage.setItem('takPlannerTripHeightManual', '1');
+        localStorage.setItem('takPlannerTripHeightCount', String(trip.length));
+        restoredManualTripHeight = true;
         // min-height ใช้เฉพาะระหว่างลากเท่านั้น ไม่ให้ค่าค้างหลังปล่อยเมาส์
         tripSummary.style.minHeight = '0px';
         resizingTripSummary = false;
@@ -2192,12 +2198,23 @@ while($row = mysqli_fetch_assoc($result_trip)){
     try{
         const savedSideWidth = parseFloat(localStorage.getItem('takPlannerSideWidth'));
         const savedTripHeight = parseFloat(localStorage.getItem('takPlannerTripHeight'));
+        const savedTripHeightManual = localStorage.getItem('takPlannerTripHeightManual') === '1';
+        const savedTripHeightCount = parseInt(localStorage.getItem('takPlannerTripHeightCount') || '', 10);
 
         if(Number.isFinite(savedSideWidth) && window.innerWidth > 900){
             applySideWidth(savedSideWidth);
         }
-        if(Number.isFinite(savedTripHeight)){
-            applyTripSummaryHeight(savedTripHeight);
+
+        // ใช้ความสูงที่บันทึกไว้ต่อเมื่อเป็นค่าที่ผู้ใช้ลากตั้งเอง
+        // และจำนวนรายการยังเท่าเดิมเท่านั้น ถ้ารายการเปลี่ยนให้คำนวณใหม่
+        if(Number.isFinite(savedTripHeight) && savedTripHeightManual && savedTripHeightCount === trip.length){
+            applyTripSummaryHeight(savedTripHeight, false);
+            restoredManualTripHeight = true;
+        }else{
+            // ล้างค่าความสูงเก่าจากเวอร์ชันก่อน เพื่อไม่ให้กรอบค้างสูง
+            localStorage.removeItem('takPlannerTripHeight');
+            localStorage.removeItem('takPlannerTripHeightManual');
+            localStorage.removeItem('takPlannerTripHeightCount');
         }
     }catch(e){}
 
