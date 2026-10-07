@@ -1887,6 +1887,17 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
 
         lastRenderedTripCount = trip.length;
+
+        // กันกรอบเตี้ยกว่ารายการจริง โดยเฉพาะกรณีมีความสูงเก่าค้างใน localStorage
+        // ให้ browser คำนวณ layout ให้เสร็จก่อน แล้วค่อยปรับความสูงอีกครั้ง
+        requestAnimationFrame(() => {
+            if(resizingTripSummary) return;
+            const requiredNow = getTripSummaryRequiredHeight();
+            const currentNow = tripSummary.getBoundingClientRect().height;
+            if(currentNow < requiredNow){
+                applyTripSummaryHeight(requiredNow);
+            }
+        });
     }
 
     tripListEl.addEventListener('click', e => {
@@ -2139,7 +2150,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
         if(tripResizeFrame) return;
         tripResizeFrame = requestAnimationFrame(() => {
             tripResizeFrame = 0;
-            const safeHeight = Math.round(Math.max(60, Math.min(10000, tripResizeTargetHeight)));
+            // ระหว่างลากก็ห้ามต่ำกว่าพื้นที่ที่เนื้อหาต้องใช้จริง
+            const safeHeight = Math.round(Math.max(tripMinHeight, Math.min(10000, tripResizeTargetHeight)));
             tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
             tripSummary.style.height = safeHeight + 'px';
         });
@@ -2152,7 +2164,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             cancelAnimationFrame(tripResizeFrame);
             tripResizeFrame = 0;
         }
-        const finalSafeHeight = Math.round(Math.max(60, Math.min(10000, tripResizeTargetHeight)));
+        const finalSafeHeight = Math.round(Math.max(tripMinHeight, Math.min(10000, tripResizeTargetHeight)));
         tripSummary.style.setProperty('--trip-summary-height', finalSafeHeight + 'px');
         tripSummary.style.height = finalSafeHeight + 'px';
         localStorage.setItem('takPlannerTripHeight', String(finalSafeHeight));
