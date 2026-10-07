@@ -228,5 +228,5 @@ document.querySelectorAll('.dest-add').forEach(btn=>{
 const nav=document.getElementById('home-nav');
 window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>40),{passive:true});
 </script>
-<script src="hero-slideshow.js"></script></body>
+<script src="hero-slideshow.js"></script><?php include("global-search.php"); ?></body>
 </html>

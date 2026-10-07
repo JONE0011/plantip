@@ -33,4 +33,4 @@ const map=L.map('map').setView([lat,lng],13);L.tileLayer('https://{s}.tile.opens
 let marker=L.marker([lat,lng],{draggable:true}).addTo(map);
 function set(p){document.getElementById('lat').value=p.lat.toFixed(7);document.getElementById('lng').value=p.lng.toFixed(7);marker.setLatLng(p)}
 map.on('click',e=>set(e.latlng));marker.on('dragend',()=>set(marker.getLatLng()));
-</script></body></html>
+</script><?php include("global-search.php"); ?></body></html>

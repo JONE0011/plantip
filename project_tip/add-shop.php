@@ -333,5 +333,5 @@ shopForm.addEventListener('submit',async e=>{
     shopForm.submit();
 });
 </script>
-</body>
+<?php include("global-search.php"); ?></body>
 </html>

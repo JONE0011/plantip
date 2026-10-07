@@ -35,4 +35,4 @@ if(!isset($_SESSION['id_account'])){header('Location: form-login.php');exit;}
 </div>
 <div class="tip"><b>TIP</b> · เพิ่มข้อมูลแล้วสามารถกลับไปที่โปรไฟล์เพื่อดูรายการของคุณ และแก้ไขเฉพาะข้อมูลที่คุณเป็นคนเพิ่มได้</div>
 </div></main>
-</body></html>
+<?php include("global-search.php"); ?></body></html>

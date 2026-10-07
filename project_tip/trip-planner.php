@@ -2365,5 +2365,5 @@ while($row = mysqli_fetch_assoc($result_trip)){
     renderAll();
 </script>
 
-</body>
+<?php include("global-search.php"); ?></body>
 </html>

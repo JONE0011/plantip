@@ -15,4 +15,4 @@ const lat=parseFloat(document.getElementById('lat').value),lng=parseFloat(docume
 const shopImageList=document.getElementById('shop-image-list'),addShopImage=document.getElementById('add-shop-image');
 function refreshShopRemove(){const rows=[...shopImageList.querySelectorAll('.image-upload-row')];rows.forEach(r=>r.querySelector('.image-remove').disabled=rows.length===1)}
 addShopImage.addEventListener('click',()=>{const row=document.createElement('div');row.className='image-upload-row';row.innerHTML='<input type="file" name="image_shop[]" accept="image/jpeg,image/png"><button type="button" class="image-remove">×</button>';row.querySelector('.image-remove').addEventListener('click',()=>{row.remove();refreshShopRemove()});shopImageList.appendChild(row);refreshShopRemove()});refreshShopRemove();
-</script></body></html>
+</script><?php include("global-search.php"); ?></body></html>
