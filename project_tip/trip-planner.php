@@ -3,7 +3,7 @@ session_start();
 $open_connect = 1;
 require('connect.php');
 
-// à¸«à¸™à¹‰à¸²à¸™à¸µà¹‰à¸•à¹‰à¸­à¸‡à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¸à¹ˆà¸­à¸™ à¹€à¸žà¸£à¸²à¸°à¸—à¸£à¸´à¸›à¸œà¸¹à¸à¸à¸±à¸š id_account
+// หน้านี้ต้องเข้าสู่ระบบก่อน เพราะทริปผูกกับ id_account
 if(!isset($_SESSION['id_account'])){
     die(header('Location: form-login.php'));
 }elseif(isset($_GET['logout'])){
@@ -13,8 +13,8 @@ if(!isset($_SESSION['id_account'])){
 
 $id_account = (int) $_SESSION['id_account'];
 
-// API à¸ªà¸³à¸«à¸£à¸±à¸šà¹ƒà¸«à¹‰à¸›à¸¸à¹ˆà¸¡ â€œà¸—à¸£à¸´à¸›à¸‚à¸­à¸‡à¸‰à¸±à¸™â€ à¸”à¸¶à¸‡à¸Šà¸·à¹ˆà¸­à¸ à¸²à¸©à¸²à¹„à¸—à¸¢à¸‚à¸­à¸‡à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆ/à¸£à¹‰à¸²à¸™à¹„à¸”à¹‰à¸ˆà¸²à¸à¸—à¸¸à¸à¸«à¸™à¹‰à¸²
-// à¸›à¹‰à¸­à¸‡à¸à¸±à¸™à¸à¸£à¸“à¸µ localStorage à¹€à¸à¹‡à¸š place_key à¹€à¸Šà¹ˆà¸™ thararak à¹à¸¥à¹‰à¸§à¸«à¸™à¹‰à¸² shops.php à¹à¸ªà¸”à¸‡ key à¹à¸—à¸™à¸Šà¸·à¹ˆà¸­à¸ˆà¸£à¸´à¸‡
+// API สำหรับให้ปุ่ม “ทริปของฉัน” ดึงชื่อภาษาไทยของสถานที่/ร้านได้จากทุกหน้า
+// ป้องกันกรณี localStorage เก็บ place_key เช่น thararak แล้วหน้า shops.php แสดง key แทนชื่อจริง
 if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'trip_meta'){
     header('Content-Type: application/json; charset=utf-8');
     $meta = [];
@@ -34,7 +34,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['acti
         while($row = mysqli_fetch_assoc($shopsMeta)){
             $meta['shop:' . (int)$row['id_shop']] = [
                 'title' => $row['name_shop'],
-                'loc' => $row['address_shop'] ?: 'à¸ˆà¸±à¸‡à¸«à¸§à¸±à¸”à¸•à¸²à¸'
+                'loc' => $row['address_shop'] ?: 'จังหวัดตาก'
             ];
         }
     }
@@ -43,14 +43,14 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['acti
     exit;
 }
 
-// à¸šà¸±à¸™à¸—à¸¶à¸à¸¥à¸³à¸”à¸±à¸šà¸—à¸£à¸´à¸›à¹ƒà¸™à¹„à¸Ÿà¸¥à¹Œà¸™à¸µà¹‰à¹€à¸¥à¸¢ à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¹ƒà¸Šà¹‰ save-trip.php
-// à¸£à¸±à¸š JSON: {"places":["place_key1","place_key2",...]}
+// บันทึกลำดับทริปในไฟล์นี้เลย ไม่ต้องใช้ save-trip.php
+// รับ JSON: {"places":["place_key1","place_key2",...]}
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_trip'){
     header('Content-Type: application/json; charset=utf-8');
     $input = json_decode(file_get_contents('php://input'), true);
     $places = isset($input['places']) && is_array($input['places']) ? $input['places'] : [];
 
-    // à¸—à¸³à¸„à¸§à¸²à¸¡à¸ªà¸°à¸­à¸²à¸” id à¹à¸¥à¸°à¸•à¸±à¸”à¸„à¹ˆà¸²à¸‹à¹‰à¸³ à¹‚à¸”à¸¢à¸„à¸‡à¸¥à¸³à¸”à¸±à¸šà¹€à¸”à¸´à¸¡
+    // ทำความสะอาด id และตัดค่าซ้ำ โดยคงลำดับเดิม
     $clean = [];
     foreach($places as $item){
         $item = trim((string)$item);
@@ -129,10 +129,10 @@ $result_who = mysqli_query($connect, $query_who);
 $who = mysqli_fetch_assoc($result_who);
 $username_account = $who['username_account'] ?? '';
 
-// à¸”à¸¶à¸‡à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”à¸ˆà¸²à¸à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ (à¹à¸—à¸™à¸‚à¸­à¸‡à¹€à¸”à¸´à¸¡à¸—à¸µà¹ˆ hardcode à¹„à¸§à¹‰à¹ƒà¸™à¹„à¸Ÿà¸¥à¹Œ)
+// ดึงสถานที่เที่ยวทั้งหมดจากฐานข้อมูล (แทนของเดิมที่ hardcode ไว้ในไฟล์)
 $places_data = [];
 
-// à¹ƒà¸Šà¹‰à¸£à¸¹à¸›à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¹€à¸à¹‡à¸šà¹„à¸§à¹‰à¹ƒà¸™à¹‚à¸›à¸£à¹€à¸ˆà¸à¸•à¹Œ à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰à¸£à¸¹à¸›à¹à¸ªà¸”à¸‡à¸šà¸™ Railway à¹„à¸”à¹‰à¹à¸™à¹ˆà¸™à¸­à¸™
+// ใช้รูปจริงที่เก็บไว้ในโปรเจกต์ เพื่อให้รูปแสดงบน Railway ได้แน่นอน
 $place_images = [
     'thi-lo-su' => '/images/places/thi-lo-su.jpg',
     'doi-musoe' => '/images/places/doi-musoe.jpg',
@@ -154,7 +154,7 @@ while($row = mysqli_fetch_assoc($result_places)){
         'lat'      => (float) $row['lat_place'],
         'lng'      => (float) $row['lng_place'],
         'img'      => $place_images[$row['place_key']] ?? ($row['image_place'] ?? ''),
-        'category' => 'à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§',
+        'category' => 'สถานที่เที่ยว',
         'type'     => 'place',
     ];
 }
@@ -168,7 +168,7 @@ while($row = mysqli_fetch_assoc($result_shops)){
     $places_data[] = [
         'id'       => 'shop:' . (int)$row['id_shop'],
         'name'     => $row['name_shop'],
-        'loc'      => $row['address_shop'] ?: ($row['description_shop'] ?: 'à¸•à¸²à¸'),
+        'loc'      => $row['address_shop'] ?: ($row['description_shop'] ?: 'ตาก'),
         'lat'      => (float) $row['lat_shop'],
         'lng'      => (float) $row['lng_shop'],
         'img'      => $row['image_shop'] ?: '',
@@ -177,7 +177,7 @@ while($row = mysqli_fetch_assoc($result_shops)){
     ];
 }
 
-// à¸”à¸¶à¸‡à¸—à¸£à¸´à¸›à¸—à¸µà¹ˆà¸šà¸±à¸™à¸—à¸¶à¸à¹„à¸§à¹‰à¸‚à¸­à¸‡à¸šà¸±à¸à¸Šà¸µà¸™à¸µà¹‰ à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸¥à¸³à¸”à¸±à¸šà¸—à¸µà¹ˆà¸ˆà¸±à¸”à¹„à¸§à¹‰
+// ดึงทริปที่บันทึกไว้ของบัญชีนี้ เรียงตามลำดับที่จัดไว้
 $trip_data = [];
 $query_trip = "SELECT tp.item_type, p.place_key, s.id_shop
                 FROM trip_place tp
@@ -201,7 +201,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>à¸§à¸²à¸‡à¹à¸œà¸™à¸—à¸£à¸´à¸› | à¹€à¸—à¸µà¹ˆà¸¢à¸§à¸•à¸²à¸</title>
+<title>วางแผนทริป | เที่ยวตาก</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -283,7 +283,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         border-radius: 0;
     }
 
-    /* à¸ˆà¸¸à¸”à¸ªà¸³à¸«à¸£à¸±à¸šà¸¥à¸²à¸à¸›à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¸‚à¸­à¸‡à¹à¸œà¸™à¸—à¸µà¹ˆ */
+    /* จุดสำหรับลากปรับความสูงของแผนที่ */
     .map-resize-handle{
         position: absolute;
         left: 0;
@@ -496,8 +496,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     .place-card button:hover{ background: var(--green-deep); }
     .place-card button.added{ background: var(--ink); }
-    .place-card button.added::after{ content: "à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸—à¸£à¸´à¸›à¹à¸¥à¹‰à¸§ Â· à¹€à¸­à¸²à¸­à¸­à¸"; }
-    .place-card button:not(.added)::after{ content: "+ à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸‚à¹‰à¸²à¸—à¸£à¸´à¸›"; }
+    .place-card button.added::after{ content: "อยู่ในทริปแล้ว · เอาออก"; }
+    .place-card button:not(.added)::after{ content: "+ เพิ่มเข้าทริป"; }
 
     /* Right trip panel */
     .trip-panel{
@@ -1172,7 +1172,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             box-sizing:border-box;
         }
 
-        /* à¸›à¹‰à¸­à¸‡à¸à¸±à¸™à¸£à¸²à¸¢à¸à¸²à¸£à¹à¸¥à¸°à¸›à¸¸à¹ˆà¸¡à¸—à¸±à¸šà¸à¸±à¸™ à¹à¸•à¹ˆà¸¢à¸±à¸‡à¸¥à¸²à¸à¸‚à¸¢à¸²à¸¢à¸à¸£à¸­à¸šà¹„à¸”à¹‰à¸­à¸´à¸ªà¸£à¸° */
+        /* ป้องกันรายการและปุ่มทับกัน แต่ยังลากขยายกรอบได้อิสระ */
         .trip-summary.trip-resizing{
             overflow:hidden;
             transition:none !important;
@@ -1511,8 +1511,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
             color:var(--planner-green);
         }
 
-        .place-card button.added::after{content:"âœ“ à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸—à¸£à¸´à¸›à¹à¸¥à¹‰à¸§ Â· à¹€à¸­à¸²à¸­à¸­à¸"}
-        .place-card button:not(.added)::after{content:"+ à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸‚à¹‰à¸²à¸—à¸£à¸´à¸›"}
+        .place-card button.added::after{content:"✓ อยู่ในทริปแล้ว · เอาออก"}
+        .place-card button:not(.added)::after{content:"+ เพิ่มเข้าทริป"}
 
         .place-card button{font-size:0}
         .place-card button::after{font-size:8px}
@@ -1604,46 +1604,46 @@ while($row = mysqli_fetch_assoc($result_trip)){
         </section>
 
         <div class="side-resize-handle" id="side-resize-handle"
-             role="separator" aria-label="à¸¥à¸²à¸à¹€à¸žà¸·à¹ˆà¸­à¸›à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸à¸§à¹‰à¸²à¸‡à¹à¸–à¸šà¸”à¹‰à¸²à¸™à¸‚à¸§à¸²"
-             title="à¸¥à¸²à¸à¹€à¸žà¸·à¹ˆà¸­à¸‚à¸¢à¸²à¸¢à¸«à¸£à¸·à¸­à¸¢à¹ˆà¸­à¹à¸–à¸šà¸”à¹‰à¸²à¸™à¸‚à¸§à¸²"></div>
+             role="separator" aria-label="ลากเพื่อปรับความกว้างแถบด้านขวา"
+             title="ลากเพื่อขยายหรือย่อแถบด้านขวา"></div>
 
         <aside class="side-pane">
-            <nav class="side-nav" aria-label="à¹€à¸¡à¸™à¸¹à¸«à¸¥à¸±à¸">
-                <a href="home.php">à¸«à¸™à¹‰à¸²à¹à¸£à¸</a>
-                <a href="home.php#destinations">à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§</a>
-                <a href="shops.php">à¸£à¹‰à¸²à¸™à¸­à¸²à¸«à¸²à¸£ &amp; à¸„à¸²à¹€à¸Ÿà¹ˆ</a>
-                <a href="trip-planner.php" class="active">à¸§à¸²à¸‡à¹à¸œà¸™à¸—à¸£à¸´à¸›</a>
+            <nav class="side-nav" aria-label="เมนูหลัก">
+                <a href="home.php">หน้าแรก</a>
+                <a href="home.php#destinations">สถานที่เที่ยว</a>
+                <a href="shops.php">ร้านอาหาร &amp; คาเฟ่</a>
+                <a href="trip-planner.php" class="active">วางแผนทริป</a>
             </nav>
 
             <section class="trip-summary" id="trip-summary">
                 <div class="trip-summary-resize-handle" id="trip-summary-resize-handle"
-                     role="separator" aria-label="à¸¥à¸²à¸à¹€à¸žà¸·à¹ˆà¸­à¸›à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¸¥à¸³à¸”à¸±à¸šà¸—à¸£à¸´à¸›"
-                     title="à¸¥à¸²à¸à¹€à¸žà¸·à¹ˆà¸­à¸¢à¸·à¸”à¸«à¸£à¸·à¸­à¸¥à¸”à¸à¸£à¸­à¸šà¸¥à¸³à¸”à¸±à¸šà¸—à¸£à¸´à¸›"></div>
+                     role="separator" aria-label="ลากเพื่อปรับความสูงลำดับทริป"
+                     title="ลากเพื่อยืดหรือลดกรอบลำดับทริป"></div>
                 <div class="trip-summary-head">
-                    <h1>à¸¥à¸³à¸”à¸±à¸šà¸—à¸£à¸´à¸›à¸‚à¸­à¸‡à¸„à¸¸à¸“</h1>
+                    <h1>ลำดับทริปของคุณ</h1>
                     <span class="trip-summary-count" id="trip-count">0</span>
                 </div>
-                <p class="sub" id="trip-summary-status">à¸¥à¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¹€à¸žà¸·à¹ˆà¸­à¸ˆà¸±à¸”à¸¥à¸³à¸”à¸±à¸šà¹ƒà¸«à¸¡à¹ˆ</p>
+                <p class="sub" id="trip-summary-status">ลากรายการเพื่อจัดลำดับใหม่</p>
                 <ul id="trip-list" class="trip-mini-list"></ul>
                 <div class="trip-actions">
-                    <button class="share-trip-btn" id="share-trip-btn" type="button">â–£ à¹à¸Šà¸£à¹Œà¸—à¸£à¸´à¸›à¸”à¹‰à¸§à¸¢ QR Code</button>
-                    <button class="clear-btn" id="clear-trip" type="button">à¸¥à¹‰à¸²à¸‡à¸—à¸£à¸´à¸›à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</button>
+                    <button class="share-trip-btn" id="share-trip-btn" type="button">▣ แชร์ทริปด้วย QR Code</button>
+                    <button class="clear-btn" id="clear-trip" type="button">ล้างทริปทั้งหมด</button>
                 </div>
             </section>
 
             <section class="discover-panel">
                 <div class="discover-title">
-                    <h2>à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§</h2>
-                    <span id="result-count">à¹€à¸¥à¸·à¸­à¸à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¸—à¸µà¹ˆà¸­à¸¢à¸²à¸à¹„à¸›</span>
+                    <h2>สถานที่เที่ยว</h2>
+                    <span id="result-count">เลือกสถานที่ที่อยากไป</span>
                 </div>
 
                 <div class="category-tabs" id="category-tabs">
-                    <button type="button" class="category-tab active" data-category="all">à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</button>
-                    <button type="button" class="category-tab" data-category="à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§">ðŸžï¸ à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¹€à¸—à¸µà¹ˆà¸¢à¸§</button>
-                    <button type="button" class="category-tab" data-category="à¸£à¹‰à¸²à¸™à¸­à¸²à¸«à¸²à¸£">ðŸœ à¸£à¹‰à¸²à¸™à¸­à¸²à¸«à¸²à¸£</button>
-                    <button type="button" class="category-tab" data-category="à¸„à¸²à¹€à¸Ÿà¹ˆ">â˜• à¸„à¸²à¹€à¸Ÿà¹ˆ</button>
-                    <button type="button" class="category-tab" data-category="à¸£à¹‰à¸²à¸™à¸„à¹‰à¸²">ðŸ›ï¸ à¸£à¹‰à¸²à¸™à¸„à¹‰à¸²</button>
-                    <button type="button" class="category-tab" data-category="à¸­à¸·à¹ˆà¸™à¹†">ðŸ“ à¸­à¸·à¹ˆà¸™ à¹†</button>
+                    <button type="button" class="category-tab active" data-category="all">ทั้งหมด</button>
+                    <button type="button" class="category-tab" data-category="สถานที่เที่ยว">🏞️ สถานที่เที่ยว</button>
+                    <button type="button" class="category-tab" data-category="ร้านอาหาร">🍜 ร้านอาหาร</button>
+                    <button type="button" class="category-tab" data-category="คาเฟ่">☕ คาเฟ่</button>
+                    <button type="button" class="category-tab" data-category="ร้านค้า">🛍️ ร้านค้า</button>
+                    <button type="button" class="category-tab" data-category="อื่นๆ">📍 อื่น ๆ</button>
                 </div>
 
                 <div class="place-grid" id="place-grid"></div>
@@ -1655,9 +1655,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
     <div class="qr-modal" id="qr-modal" aria-hidden="true">
         <div class="qr-backdrop" id="qr-backdrop"></div>
         <div class="qr-dialog" role="dialog" aria-modal="true" aria-labelledby="qr-title">
-            <button class="qr-close" id="qr-close" type="button" aria-label="à¸›à¸´à¸”">Ã—</button>
-            <h2 id="qr-title">à¸ªà¹à¸à¸™à¹€à¸žà¸·à¹ˆà¸­à¸”à¸¹à¸—à¸£à¸´à¸›à¹ƒà¸™à¸¡à¸·à¸­à¸–à¸·à¸­</h2>
-            <p class="qr-subtitle">à¸¥à¸³à¸”à¸±à¸šà¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸ˆà¸°à¸–à¸¹à¸à¹€à¸›à¸´à¸”à¹ƒà¸™à¸¡à¸·à¸­à¸–à¸·à¸­ à¹à¸¥à¸°à¹à¸•à¹ˆà¸¥à¸°à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸à¸”à¹„à¸› Google Maps à¹„à¸”à¹‰</p>
+            <button class="qr-close" id="qr-close" type="button" aria-label="ปิด">×</button>
+            <h2 id="qr-title">สแกนเพื่อดูทริปในมือถือ</h2>
+            <p class="qr-subtitle">ลำดับสถานที่ปัจจุบันของคุณจะถูกเปิดในมือถือ และแต่ละสถานที่สามารถกดไป Google Maps ได้</p>
 
             <div class="qr-box" id="qrcode"></div>
 
@@ -1665,19 +1665,19 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
             <div class="qr-url-wrap">
                 <input id="share-url" type="text" readonly>
-                <button id="copy-share-url" type="button">à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œ</button>
+                <button id="copy-share-url" type="button">คัดลอกลิงก์</button>
             </div>
 
             <p class="qr-note">
-                à¸–à¹‰à¸²à¹€à¸›à¸´à¸”à¹€à¸§à¹‡à¸šà¸”à¹‰à¸§à¸¢ <b>localhost</b> à¹‚à¸—à¸£à¸¨à¸±à¸žà¸—à¹Œà¸ˆà¸°à¹€à¸›à¸´à¸”à¸¥à¸´à¸‡à¸à¹Œà¹„à¸¡à¹ˆà¹„à¸”à¹‰
-                à¹ƒà¸«à¹‰à¹€à¸›à¸´à¸”à¹€à¸§à¹‡à¸šà¸œà¹ˆà¸²à¸™ IP à¸‚à¸­à¸‡à¸„à¸­à¸¡à¹ƒà¸™ Wiâ€‘Fi à¹€à¸”à¸µà¸¢à¸§à¸à¸±à¸™ à¹€à¸Šà¹ˆà¸™
+                ถ้าเปิดเว็บด้วย <b>localhost</b> โทรศัพท์จะเปิดลิงก์ไม่ได้
+                ให้เปิดเว็บผ่าน IP ของคอมใน Wi‑Fi เดียวกัน เช่น
                 <b>192.168.1.xxx/project_tip/trip-planner.php</b>
             </p>
         </div>
     </div>
 
     <footer>
-        <div class="wrap">Â© <?php echo date('Y'); ?> à¹€à¸—à¸µà¹ˆà¸¢à¸§à¸•à¸²à¸ Â· à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡à¸§à¸²à¸‡à¹à¸œà¸™à¸—à¹ˆà¸­à¸‡à¹€à¸—à¸µà¹ˆà¸¢à¸§à¸ˆà¸±à¸‡à¸«à¸§à¸±à¸”à¸•à¸²à¸</div>
+        <div class="wrap">© <?php echo date('Y'); ?> เที่ยวตาก · แพลตฟอร์มวางแผนท่องเที่ยวจังหวัดตาก</div>
     </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1685,48 +1685,48 @@ while($row = mysqli_fetch_assoc($result_trip)){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     // ---------- Master place data ----------
-    // à¸”à¸¶à¸‡à¸¡à¸²à¸ˆà¸²à¸à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸£à¸´à¸‡à¸œà¹ˆà¸²à¸™ PHP à¸”à¹‰à¸²à¸™à¸šà¸™ (à¸•à¸²à¸£à¸²à¸‡ place) à¹à¸—à¸™à¸‚à¸­à¸‡à¹€à¸”à¸´à¸¡à¸—à¸µà¹ˆ hardcode à¹„à¸§à¹‰
+    // ดึงมาจากฐานข้อมูลจริงผ่าน PHP ด้านบน (ตาราง place) แทนของเดิมที่ hardcode ไว้
     const PLACES = <?php echo json_encode($places_data, JSON_UNESCAPED_UNICODE); ?>;
     const PLACES_BY_ID = Object.fromEntries(PLACES.map(p => [p.id, p]));
 
-    // à¸—à¸£à¸´à¸›à¸—à¸µà¹ˆà¸šà¸±à¸™à¸—à¸¶à¸à¹„à¸§à¹‰à¹ƒà¸™à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸‚à¸­à¸‡à¸šà¸±à¸à¸Šà¸µà¸™à¸µà¹‰ (à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸¥à¸³à¸”à¸±à¸šà¸—à¸µà¹ˆà¸ˆà¸±à¸”à¹„à¸§à¹‰à¹à¸¥à¹‰à¸§)
+    // ทริปที่บันทึกไว้ในฐานข้อมูลของบัญชีนี้ (เรียงตามลำดับที่จัดไว้แล้ว)
     let trip = <?php echo json_encode($trip_data, JSON_UNESCAPED_UNICODE); ?>;
-    // à¸›à¹‰à¸­à¸‡à¸à¸±à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸‹à¹‰à¸³/à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸µà¹ˆà¸–à¸¹à¸à¸¥à¸šà¹„à¸›à¹à¸¥à¹‰à¸§à¸«à¸¥à¸¸à¸”à¹€à¸‚à¹‰à¸²à¸¡à¸²à¹ƒà¸™à¸«à¸™à¹‰à¸² Planner
+    // ป้องกันข้อมูลซ้ำ/ข้อมูลที่ถูกลบไปแล้วหลุดเข้ามาในหน้า Planner
     trip = [...new Set(trip)].filter(id => PLACES_BY_ID[id]);
 
-    // à¸–à¹‰à¸²à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸„à¸¢à¸¡à¸µà¸—à¸£à¸´à¸›à¹ƒà¸™à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸¥à¸¢ à¹à¸•à¹ˆà¹€à¸„à¸¢à¹€à¸¥à¸·à¸­à¸à¹„à¸§à¹‰à¸•à¸­à¸™à¸¢à¸±à¸‡à¹„à¸¡à¹ˆ login (à¹€à¸à¹‡à¸šà¹ƒà¸™ localStorage
-    // à¸ˆà¸²à¸à¸«à¸™à¹‰à¸² home.php) à¹ƒà¸«à¹‰à¸”à¸¶à¸‡à¸¡à¸²à¹ƒà¸Šà¹‰à¸„à¸£à¸±à¹‰à¸‡à¹à¸£à¸ à¹à¸¥à¹‰à¸§à¹€à¸‹à¸Ÿà¹€à¸‚à¹‰à¸²à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸±à¸™à¸—à¸µà¹€à¸žà¸·à¹ˆà¸­à¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸«à¸²à¸¢
+    // ถ้ายังไม่เคยมีทริปในฐานข้อมูลเลย แต่เคยเลือกไว้ตอนยังไม่ login (เก็บใน localStorage
+    // จากหน้า home.php) ให้ดึงมาใช้ครั้งแรก แล้วเซฟเข้าฐานข้อมูลทันทีเพื่อไม่ให้ข้อมูลหาย
     const STORAGE_KEY = 'takTripPlaces_<?php echo (int)$id_account; ?>';
     let saveTimer = null;
     try{
         const local = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         const validLocal = [...new Set(local.filter(id => PLACES_BY_ID[id]))];
 
-        // à¸–à¹‰à¸²à¸¡à¸²à¸ˆà¸²à¸à¸›à¸¸à¹ˆà¸¡ â€œà¸ªà¸£à¹‰à¸²à¸‡à¸—à¸£à¸´à¸›â€ à¹ƒà¸™à¸à¸¥à¹ˆà¸­à¸‡à¸—à¸£à¸´à¸›à¸‚à¸­à¸‡à¸‰à¸±à¸™
-        // à¹ƒà¸«à¹‰à¸£à¸²à¸¢à¸à¸²à¸£à¹ƒà¸™ localStorage à¹€à¸›à¹‡à¸™ source of truth à¹à¸¥à¸°à¹ƒà¸Šà¹‰à¸£à¸²à¸¢à¸à¸²à¸£à¸™à¸±à¹‰à¸™à¹à¸—à¸™à¸—à¸£à¸´à¸›à¹€à¸à¹ˆà¸²à¸ˆà¸²à¸ DB
-        // à¸›à¹‰à¸­à¸‡à¸à¸±à¸™à¸à¸£à¸“à¸µ DB à¸¡à¸µ 6 à¸£à¸²à¸¢à¸à¸²à¸£ à¹à¸•à¹ˆà¸à¸¥à¹ˆà¸­à¸‡à¸—à¸£à¸´à¸›à¸‚à¸­à¸‡à¸‰à¸±à¸™à¸¡à¸µ 4 à¸£à¸²à¸¢à¸à¸²à¸£à¹à¸¥à¹‰à¸§à¸«à¸™à¹‰à¸² planner à¸à¸¥à¸²à¸¢à¹€à¸›à¹‡à¸™ 6
+        // ถ้ามาจากปุ่ม “สร้างทริป” ในกล่องทริปของฉัน
+        // ให้รายการใน localStorage เป็น source of truth และใช้รายการนั้นแทนทริปเก่าจาก DB
+        // ป้องกันกรณี DB มี 6 รายการ แต่กล่องทริปของฉันมี 4 รายการแล้วหน้า planner กลายเป็น 6
         const params = new URLSearchParams(window.location.search);
         const fromDirectory = params.get('from') === 'directory';
         const selectedItems = params.get('items');
         const urlTrip = selectedItems ? [...new Set(decodeURIComponent(selectedItems).split(',').map(x => x.trim()).filter(x => PLACES_BY_ID[x]))] : [];
 
         if(fromDirectory){
-            // à¸£à¸²à¸¢à¸à¸²à¸£à¸—à¸µà¹ˆà¸à¸” â€œà¸ªà¸£à¹‰à¸²à¸‡à¸—à¸£à¸´à¸›â€ à¸ªà¹ˆà¸‡à¸¡à¸²à¸ˆà¸²à¸à¸à¸¥à¹ˆà¸­à¸‡à¸—à¸£à¸´à¸›à¹‚à¸”à¸¢à¸•à¸£à¸‡ à¹ƒà¸Šà¹‰à¸£à¸²à¸¢à¸à¸²à¸£à¸™à¸µà¹‰à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™
-            // à¹„à¸¡à¹ˆà¸£à¸§à¸¡à¸à¸±à¸šà¸£à¸²à¸¢à¸à¸²à¸£à¹€à¸à¹ˆà¸²à¸—à¸µà¹ˆà¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥
+            // รายการที่กด “สร้างทริป” ส่งมาจากกล่องทริปโดยตรง ใช้รายการนี้เท่านั้น
+            // ไม่รวมกับรายการเก่าที่อยู่ในฐานข้อมูล
             trip = urlTrip.length ? urlTrip : validLocal;
             saveTrip();
         }else if(validLocal.length && trip.length === 0){
-            // à¹€à¸‚à¹‰à¸² trip-planner à¹‚à¸”à¸¢à¸•à¸£à¸‡: à¸–à¹‰à¸²à¸¡à¸µ localStorage à¹à¸•à¹ˆ DB à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µ à¹ƒà¸«à¹‰à¸à¸¹à¹‰à¸£à¸²à¸¢à¸à¸²à¸£à¸‚à¸¶à¹‰à¸™à¸¡à¸²
+            // เข้า trip-planner โดยตรง: ถ้ามี localStorage แต่ DB ยังไม่มี ให้กู้รายการขึ้นมา
             trip = validLocal;
             saveTrip();
         }
-    }catch(e){ /* à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸à¹ˆà¸² à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸—à¸³à¸­à¸°à¹„à¸£ */ }
+    }catch(e){ /* ไม่มีข้อมูลเก่า ไม่ต้องทำอะไร */ }
 
     function saveTrip(){
-        // à¹€à¸à¹‡à¸šà¸ªà¸³à¸£à¸­à¸‡à¹„à¸§à¹‰à¹ƒà¸™ localStorage à¸”à¹‰à¸§à¸¢ à¹€à¸œà¸·à¹ˆà¸­ request à¹„à¸›à¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œà¸¥à¹ˆà¸¡
+        // เก็บสำรองไว้ใน localStorage ด้วย เผื่อ request ไปเซิร์ฟเวอร์ล่ม
         localStorage.setItem(STORAGE_KEY, JSON.stringify(trip));
 
-        // à¸”à¸µà¸šà¸²à¸§à¸‹à¹Œà¸à¸²à¸£à¸¢à¸´à¸‡ request à¸à¸±à¸™à¸à¸”à¸£à¸±à¸§ à¹† à¸•à¸­à¸™à¸¥à¸²à¸à¸ˆà¸±à¸”à¸¥à¸³à¸”à¸±à¸š
+        // ดีบาวซ์การยิง request กันกดรัว ๆ ตอนลากจัดลำดับ
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
             fetch('trip-planner.php?action=save_trip', {
@@ -1736,9 +1736,9 @@ while($row = mysqli_fetch_assoc($result_trip)){
             })
             .then(res => res.json())
             .then(data => {
-                if(!data.success) console.error('à¸šà¸±à¸™à¸—à¸¶à¸à¸—à¸£à¸´à¸›à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ:', data.message);
+                if(!data.success) console.error('บันทึกทริปไม่สำเร็จ:', data.message);
             })
-            .catch(err => console.error('à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œà¹„à¸¡à¹ˆà¹„à¸”à¹‰:', err));
+            .catch(err => console.error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้:', err));
         }, 400);
     }
 
@@ -1756,12 +1756,12 @@ while($row = mysqli_fetch_assoc($result_trip)){
         const resultCount = document.getElementById('result-count');
         if(resultCount){
             resultCount.textContent = visible.length
-                ? visible.length + ' à¸£à¸²à¸¢à¸à¸²à¸£'
-                : 'à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸£à¸²à¸¢à¸à¸²à¸£';
+                ? visible.length + ' รายการ'
+                : 'ยังไม่มีรายการ';
         }
 
         if(visible.length === 0){
-            grid.innerHTML = '<div class="no-results">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹ƒà¸™à¸«à¸¡à¸§à¸”à¸™à¸µà¹‰</div>';
+            grid.innerHTML = '<div class="no-results">ยังไม่มีข้อมูลในหมวดนี้</div>';
             return;
         }
 
@@ -1772,17 +1772,17 @@ while($row = mysqli_fetch_assoc($result_trip)){
             const photo = document.createElement('div');
             photo.className = 'photo' + (place.img ? '' : ' placeholder');
             photo.setAttribute('role','img');
-            photo.setAttribute('aria-label', place.name || 'à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆ');
+            photo.setAttribute('aria-label', place.name || 'สถานที่');
 
             if(place.img){
                 photo.style.backgroundImage = 'url("' + String(place.img).replace(/"/g, '%22') + '")';
             }else{
-                photo.textContent = 'ðŸ“';
+                photo.textContent = '📍';
             }
             const info = document.createElement('div');
             info.className = 'info';
             info.innerHTML = `
-                <span class="category-badge">${escapeHtml(place.category || 'à¸­à¸·à¹ˆà¸™à¹†')}</span>
+                <span class="category-badge">${escapeHtml(place.category || 'อื่นๆ')}</span>
                 <h3>${escapeHtml(place.name)}</h3>
                 <p class="meta">${escapeHtml(place.loc)}</p>
                 <button type="button" data-id="${escapeHtml(place.id)}"></button>`;
@@ -1828,24 +1828,24 @@ while($row = mysqli_fetch_assoc($result_trip)){
         const previousTripCount = lastRenderedTripCount;
         tripListEl.innerHTML = '';
 
-        // à¸–à¹‰à¸²à¸¥à¸šà¸£à¸²à¸¢à¸à¸²à¸£à¸­à¸­à¸ à¹ƒà¸«à¹‰à¸à¸£à¸­à¸šà¸«à¸”à¸à¸¥à¸±à¸šà¸¡à¸²à¸•à¸²à¸¡à¹€à¸™à¸·à¹‰à¸­à¸«à¸²à¸—à¸±à¸™à¸—à¸µ
-        // à¹€à¸žà¸·à¹ˆà¸­à¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¹€à¸«à¸¥à¸·à¸­à¸žà¸·à¹‰à¸™à¸—à¸µà¹ˆà¸§à¹ˆà¸²à¸‡à¸ˆà¸²à¸à¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹€à¸”à¸´à¸¡à¸—à¸µà¹ˆà¹€à¸„à¸¢à¸‚à¸¢à¸²à¸¢à¹„à¸§à¹‰
+        // ถ้าลบรายการออก ให้กรอบหดกลับมาตามเนื้อหาทันที
+        // เพื่อไม่ให้เหลือพื้นที่ว่างจากความสูงเดิมที่เคยขยายไว้
         const shouldShrinkAfterDelete = trip.length < previousTripCount;
 
         const tripCountEl = document.getElementById('trip-count');
         const tripStatusEl = document.getElementById('trip-summary-status');
 
-        if(tripCountEl) tripCountEl.textContent = trip.length + ' à¸£à¸²à¸¢à¸à¸²à¸£';
+        if(tripCountEl) tripCountEl.textContent = trip.length + ' รายการ';
         if(tripStatusEl){
             tripStatusEl.textContent = trip.length
-                ? 'à¸¥à¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¹€à¸žà¸·à¹ˆà¸­à¸ˆà¸±à¸”à¸¥à¸³à¸”à¸±à¸šà¹ƒà¸«à¸¡à¹ˆ Â· à¹à¸œà¸™à¸—à¸µà¹ˆà¸­à¸±à¸›à¹€à¸”à¸•à¸•à¸²à¸¡à¸¥à¸³à¸”à¸±à¸š'
-                : 'à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸¥à¸·à¸­à¸à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆ Â· à¹€à¸žà¸´à¹ˆà¸¡à¸ˆà¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¸”à¹‰à¸²à¸™à¸¥à¹ˆà¸²à¸‡à¹„à¸”à¹‰à¹€à¸¥à¸¢';
+                ? 'ลากรายการเพื่อจัดลำดับใหม่ · แผนที่อัปเดตตามลำดับ'
+                : 'ยังไม่ได้เลือกสถานที่ · เพิ่มจากรายการด้านล่างได้เลย';
         }
 
         if(trip.length === 0){
-            tripListEl.innerHTML = '<li class="empty-hint">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸¥à¸·à¸­à¸à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆ â€” à¹€à¸žà¸´à¹ˆà¸¡à¸ˆà¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¸”à¹‰à¸²à¸™à¸¥à¹ˆà¸²à¸‡à¹„à¸”à¹‰à¹€à¸¥à¸¢</li>';
+            tripListEl.innerHTML = '<li class="empty-hint">ยังไม่ได้เลือกสถานที่ — เพิ่มจากรายการด้านล่างได้เลย</li>';
             if(shouldShrinkAfterDelete){
-                // à¸¥à¹‰à¸²à¸‡ min-height à¸—à¸µà¹ˆà¸„à¹‰à¸²à¸‡à¸ˆà¸²à¸à¸à¸²à¸£à¸¥à¸²à¸à¸à¹ˆà¸­à¸™à¸„à¸³à¸™à¸§à¸“à¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹ƒà¸«à¸¡à¹ˆ
+                // ล้าง min-height ที่ค้างจากการลากก่อนคำนวณความสูงใหม่
                 tripSummary.style.minHeight = '0px';
                 const requiredHeight = getTripSummaryRequiredHeight();
                 tripMinHeight = Math.max(150, requiredHeight);
@@ -1860,26 +1860,26 @@ while($row = mysqli_fetch_assoc($result_trip)){
             li.className = 'trip-item';
             li.dataset.id = id;
             li.innerHTML = `
-                <span class="drag-handle">â ¿</span>
+                <span class="drag-handle">⠿</span>
                 <span class="badge">${index + 1}</span>
                 <span class="name">${place.name}<br><span class="loc">${place.loc}</span></span>
-                <button class="remove" type="button" aria-label="à¹€à¸­à¸²${place.name}à¸­à¸­à¸à¸ˆà¸²à¸à¸—à¸£à¸´à¸›">Ã—</button>`;
+                <button class="remove" type="button" aria-label="เอา${place.name}ออกจากทริป">×</button>`;
             tripListEl.appendChild(li);
         });
 
         const currentHeight = tripSummary.getBoundingClientRect().height;
         const requiredHeight = getTripSummaryRequiredHeight();
 
-        // à¹„à¸¡à¹ˆà¹€à¸à¹‡à¸š min-height à¸ˆà¸²à¸à¸à¸²à¸£à¸¥à¸²à¸à¹„à¸§à¹‰à¸–à¸²à¸§à¸£
-        // à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰à¸«à¸¥à¸±à¸‡à¸¥à¸šà¸£à¸²à¸¢à¸à¸²à¸£à¹à¸¥à¹‰à¸§à¸à¸£à¸­à¸šà¸ªà¸²à¸¡à¸²à¸£à¸–à¸«à¸”à¸à¸¥à¸±à¸šà¹„à¸”à¹‰à¸ˆà¸£à¸´à¸‡
+        // ไม่เก็บ min-height จากการลากไว้ถาวร
+        // เพื่อให้หลังลบรายการแล้วกรอบสามารถหดกลับได้จริง
         tripSummary.style.minHeight = '0px';
         tripMinHeight = Math.max(150, requiredHeight);
 
-        // à¹€à¸žà¸´à¹ˆà¸¡à¸£à¸²à¸¢à¸à¸²à¸£: à¸‚à¸¢à¸²à¸¢à¹€à¸¡à¸·à¹ˆà¸­à¸žà¸·à¹‰à¸™à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¸žà¸­
+        // เพิ่มรายการ: ขยายเมื่อพื้นที่ไม่พอ
         if(currentHeight < requiredHeight){
             applyTripSummaryHeight(requiredHeight);
-        // à¸¥à¸šà¸£à¸²à¸¢à¸à¸²à¸£ à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆà¸¡à¸µà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¸—à¸µà¹ˆà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸›à¸£à¸±à¸šà¹€à¸­à¸‡à¸—à¸µà¹ˆà¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¹„à¸”à¹‰:
-        // à¹ƒà¸«à¹‰à¸à¸£à¸­à¸šà¸«à¸”à¸•à¸²à¸¡à¹€à¸™à¸·à¹‰à¸­à¸«à¸²à¸—à¸±à¸™à¸—à¸µ à¹„à¸¡à¹ˆà¸›à¸¥à¹ˆà¸­à¸¢à¸„à¹ˆà¸²à¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹€à¸à¹ˆà¸²à¸¡à¸²à¸„à¹‰à¸²à¸‡
+        // ลบรายการ หรือไม่มีความสูงที่ผู้ใช้ปรับเองที่ใช้งานได้:
+        // ให้กรอบหดตามเนื้อหาทันที ไม่ปล่อยค่าความสูงเก่ามาค้าง
         }else if((shouldShrinkAfterDelete || !restoredManualTripHeight) && currentHeight > requiredHeight){
             tripMinHeight = Math.max(150, requiredHeight);
             tripSummary.style.minHeight = '0px';
@@ -1888,8 +1888,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
         lastRenderedTripCount = trip.length;
 
-        // à¸à¸±à¸™à¸à¸£à¸­à¸šà¹€à¸•à¸µà¹‰à¸¢à¸à¸§à¹ˆà¸²à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡ à¹‚à¸”à¸¢à¹€à¸‰à¸žà¸²à¸°à¸à¸£à¸“à¸µà¸¡à¸µà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹€à¸à¹ˆà¸²à¸„à¹‰à¸²à¸‡à¹ƒà¸™ localStorage
-        // à¹ƒà¸«à¹‰ browser à¸„à¸³à¸™à¸§à¸“ layout à¹ƒà¸«à¹‰à¹€à¸ªà¸£à¹‡à¸ˆà¸à¹ˆà¸­à¸™ à¹à¸¥à¹‰à¸§à¸„à¹ˆà¸­à¸¢à¸›à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡
+        // กันกรอบเตี้ยกว่ารายการจริง โดยเฉพาะกรณีมีความสูงเก่าค้างใน localStorage
+        // ให้ browser คำนวณ layout ให้เสร็จก่อน แล้วค่อยปรับความสูงอีกครั้ง
         requestAnimationFrame(() => {
             if(resizingTripSummary) return;
             const requiredNow = getTripSummaryRequiredHeight();
@@ -1938,7 +1938,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
 
     // ---------- Resize map vertically ----------
-    // à¸¥à¸²à¸à¹à¸–à¸šà¸”à¹‰à¸²à¸™à¸¥à¹ˆà¸²à¸‡à¸‚à¸­à¸‡à¹à¸œà¸™à¸—à¸µà¹ˆà¸‚à¸¶à¹‰à¸™/à¸¥à¸‡
+    // ลากแถบด้านล่างของแผนที่ขึ้น/ลง
     const mapHero = document.getElementById('map-hero');
     const mapElement = document.getElementById('map');
     const resizeHandle = document.getElementById('map-resize-handle');
@@ -1950,11 +1950,11 @@ while($row = mysqli_fetch_assoc($result_trip)){
     function applyMapHeight(height){
         const safeHeight = Math.round(height);
 
-        // à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸—à¸±à¹‰à¸‡à¸à¸¥à¹ˆà¸­à¸‡à¹à¸¥à¸° #map à¹‚à¸”à¸¢à¸•à¸£à¸‡ à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰ Leaflet à¹€à¸«à¹‡à¸™à¸‚à¸™à¸²à¸”à¹ƒà¸«à¸¡à¹ˆà¹à¸™à¹ˆà¸™à¸­à¸™
+        // เปลี่ยนทั้งกล่องและ #map โดยตรง เพื่อให้ Leaflet เห็นขนาดใหม่แน่นอน
         mapHero.style.height = safeHeight + 'px';
         mapElement.style.height = safeHeight + 'px';
 
-        // à¸£à¸­à¹ƒà¸«à¹‰ browser layout à¹€à¸ªà¸£à¹‡à¸ˆà¹à¸¥à¹‰à¸§à¸„à¹ˆà¸­à¸¢à¸ªà¸±à¹ˆà¸‡ Leaflet à¸„à¸³à¸™à¸§à¸“à¹ƒà¸«à¸¡à¹ˆ
+        // รอให้ browser layout เสร็จแล้วค่อยสั่ง Leaflet คำนวณใหม่
         requestAnimationFrame(() => {
             map.invalidateSize({ pan: false, animate: false });
         });
@@ -2006,7 +2006,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
             resizeHandle.releasePointerCapture(event.pointerId);
         }
 
-        // à¹ƒà¸«à¹‰ Leaflet à¸§à¸²à¸” tile à¹ƒà¸«à¸¡à¹ˆà¸«à¸¥à¸±à¸‡à¸ˆà¸šà¸à¸²à¸£à¸¥à¸²à¸
+        // ให้ Leaflet วาด tile ใหม่หลังจบการลาก
         setTimeout(() => {
             map.invalidateSize({ pan: false, animate: false });
         }, 50);
@@ -2023,7 +2023,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         }
     });
 
-    // à¸–à¹‰à¸²à¸¡à¸µà¸à¸²à¸£à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸‚à¸™à¸²à¸”à¸ˆà¸²à¸ CSS/à¸«à¸™à¹‰à¸²à¸•à¹ˆà¸²à¸‡ à¹ƒà¸«à¹‰ Leaflet à¸•à¸²à¸¡à¸”à¹‰à¸§à¸¢
+    // ถ้ามีการเปลี่ยนขนาดจาก CSS/หน้าต่าง ให้ Leaflet ตามด้วย
     const mapResizeObserver = new ResizeObserver(() => {
         if(!resizingMap){
             const h = mapHero.getBoundingClientRect().height;
@@ -2038,7 +2038,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
 
     // ---------- Resize sidebar + trip-order box ----------
-    // à¸¥à¸²à¸à¹€à¸ªà¹‰à¸™à¸à¸¥à¸²à¸‡à¹€à¸žà¸·à¹ˆà¸­à¸‚à¸¢à¸²à¸¢/à¸¢à¹ˆà¸­ Sidebar à¸”à¹‰à¸²à¸™à¸‚à¸§à¸²
+    // ลากเส้นกลางเพื่อขยาย/ย่อ Sidebar ด้านขวา
     const plannerApp = document.querySelector('.planner-app');
     const sideResizeHandle = document.getElementById('side-resize-handle');
     const tripSummary = document.getElementById('trip-summary');
@@ -2075,7 +2075,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
     sideResizeHandle.addEventListener('pointermove', event => {
         if(!resizingSide) return;
 
-        // à¸¥à¸²à¸à¹„à¸›à¸—à¸²à¸‡à¸‹à¹‰à¸²à¸¢ = Sidebar à¸à¸§à¹‰à¸²à¸‡à¸‚à¸¶à¹‰à¸™
+        // ลากไปทางซ้าย = Sidebar กว้างขึ้น
         applySideWidth(sideStartWidth - (event.clientX - sideStartX));
     });
 
@@ -2095,18 +2095,18 @@ while($row = mysqli_fetch_assoc($result_trip)){
     sideResizeHandle.addEventListener('pointercancel', stopSideResize);
     sideResizeHandle.addEventListener('dblclick', () => applySideWidth(340));
 
-    // à¸¥à¸²à¸à¹à¸–à¸šà¸”à¹‰à¸²à¸™à¸¥à¹ˆà¸²à¸‡à¸‚à¸­à¸‡à¸à¸£à¸­à¸š â€œà¸¥à¸³à¸”à¸±à¸šà¸—à¸£à¸´à¸›à¸‚à¸­à¸‡à¸„à¸¸à¸“â€ à¹€à¸žà¸·à¹ˆà¸­à¹€à¸žà¸´à¹ˆà¸¡à¸žà¸·à¹‰à¸™à¸—à¸µà¹ˆà¸£à¸²à¸¢à¸à¸²à¸£
+    // ลากแถบด้านล่างของกรอบ “ลำดับทริปของคุณ” เพื่อเพิ่มพื้นที่รายการ
     let resizingTripSummary = false;
     let tripStartY = 0;
     let tripStartHeight = 300;
     let tripMinHeight = 0;
     let tripResizeTargetHeight = 300;
     let tripResizeFrame = 0;
-    // à¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¸—à¸µà¹ˆà¸šà¸±à¸™à¸—à¸¶à¸à¹„à¸§à¹‰à¸ˆà¸°à¹ƒà¸Šà¹‰à¹€à¸‰à¸žà¸²à¸°à¸à¸£à¸“à¸µà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸¥à¸²à¸à¸›à¸£à¸±à¸šà¹€à¸­à¸‡à¸ˆà¸£à¸´à¸‡ à¹†
-    // à¸›à¹‰à¸­à¸‡à¸à¸±à¸™à¸„à¹ˆà¸²à¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹€à¸à¹ˆà¸²à¸ˆà¸²à¸à¹€à¸§à¸­à¸£à¹Œà¸Šà¸±à¸™à¸à¹ˆà¸­à¸™à¸—à¸³à¹ƒà¸«à¹‰à¸à¸£à¸­à¸šà¸„à¹‰à¸²à¸‡à¸ªà¸¹à¸‡à¹€à¸¡à¸·à¹ˆà¸­à¹€à¸«à¸¥à¸·à¸­à¸£à¸²à¸¢à¸à¸²à¸£à¸™à¹‰à¸­à¸¢
+    // ความสูงที่บันทึกไว้จะใช้เฉพาะกรณีผู้ใช้ลากปรับเองจริง ๆ
+    // ป้องกันค่าความสูงเก่าจากเวอร์ชันก่อนทำให้กรอบค้างสูงเมื่อเหลือรายการน้อย
     let restoredManualTripHeight = false;
 
-    // à¸„à¸³à¸™à¸§à¸“à¸‚à¸±à¹‰à¸™à¸•à¹ˆà¸³à¹€à¸‰à¸žà¸²à¸°à¸•à¸­à¸™à¸ˆà¸³à¹€à¸›à¹‡à¸™ à¹„à¸¡à¹ˆà¸—à¸³à¸‹à¹‰à¸³à¸—à¸¸à¸ pointermove
+    // คำนวณขั้นต่ำเฉพาะตอนจำเป็น ไม่ทำซ้ำทุก pointermove
     function getTripSummaryRequiredHeight(){
         const cs = getComputedStyle(tripSummary);
         const padding = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
@@ -2123,8 +2123,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
     }
 
     function applyTripSummaryHeight(height, save = true){
-        // à¹„à¸¡à¹ˆà¸œà¸¹à¸ minHeight à¸à¸±à¸šà¸„à¹ˆà¸²à¸—à¸µà¹ˆà¸„à¹‰à¸²à¸‡à¸ˆà¸²à¸à¸à¸²à¸£à¸¥à¸²à¸à¸„à¸£à¸±à¹‰à¸‡à¸à¹ˆà¸­à¸™
-        // à¸‚à¸±à¹‰à¸™à¸•à¹ˆà¸³à¸ˆà¸£à¸´à¸‡à¸ˆà¸°à¸–à¸¹à¸à¸„à¸¸à¸¡à¸•à¸­à¸™ pointerdown à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™
+        // ไม่ผูก minHeight กับค่าที่ค้างจากการลากครั้งก่อน
+        // ขั้นต่ำจริงจะถูกคุมตอน pointerdown เท่านั้น
         const safeHeight = Math.round(Math.max(60, Math.min(10000, height)));
         tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
         tripSummary.style.height = safeHeight + 'px';
@@ -2137,7 +2137,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         tripStartY = event.clientY;
         tripStartHeight = tripSummary.getBoundingClientRect().height;
         tripResizeTargetHeight = tripStartHeight;
-        // à¸¥à¸²à¸à¹„à¸”à¹‰à¸­à¸´à¸ªà¸£à¸° à¹à¸•à¹ˆà¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¸¢à¹ˆà¸­à¸ˆà¸™à¹€à¸™à¸·à¹‰à¸­à¸«à¸²/à¸›à¸¸à¹ˆà¸¡à¸—à¸±à¸šà¸à¸±à¸™
+        // ลากได้อิสระ แต่ไม่ให้ย่อจนเนื้อหา/ปุ่มทับกัน
         tripMinHeight = 150;
         tripSummary.style.minHeight = '0px';
 
@@ -2148,12 +2148,12 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     tripSummaryResizeHandle.addEventListener('pointermove', event => {
         if(!resizingTripSummary) return;
-        // à¹€à¸à¹‡à¸šà¸•à¸³à¹à¸«à¸™à¹ˆà¸‡à¹„à¸§à¹‰à¸à¹ˆà¸­à¸™ à¹à¸¥à¹‰à¸§à¹ƒà¸«à¹‰ browser à¸§à¸²à¸”à¹à¸„à¹ˆ 1 à¸„à¸£à¸±à¹‰à¸‡à¸•à¹ˆà¸­ frame
+        // เก็บตำแหน่งไว้ก่อน แล้วให้ browser วาดแค่ 1 ครั้งต่อ frame
         tripResizeTargetHeight = tripStartHeight + (event.clientY - tripStartY);
         if(tripResizeFrame) return;
         tripResizeFrame = requestAnimationFrame(() => {
             tripResizeFrame = 0;
-            // à¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡à¸¥à¸²à¸à¸à¹‡à¸«à¹‰à¸²à¸¡à¸•à¹ˆà¸³à¸à¸§à¹ˆà¸²à¸žà¸·à¹‰à¸™à¸—à¸µà¹ˆà¸—à¸µà¹ˆà¹€à¸™à¸·à¹‰à¸­à¸«à¸²à¸•à¹‰à¸­à¸‡à¹ƒà¸Šà¹‰à¸ˆà¸£à¸´à¸‡
+            // ระหว่างลากก็ห้ามต่ำกว่าพื้นที่ที่เนื้อหาต้องใช้จริง
             const safeHeight = Math.round(Math.max(150, Math.min(10000, tripResizeTargetHeight)));
             tripSummary.style.setProperty('--trip-summary-height', safeHeight + 'px');
             tripSummary.style.height = safeHeight + 'px';
@@ -2174,7 +2174,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         localStorage.setItem('takPlannerTripHeightManual', '1');
         localStorage.setItem('takPlannerTripHeightCount', String(trip.length));
         restoredManualTripHeight = true;
-        // min-height à¹ƒà¸Šà¹‰à¹€à¸‰à¸žà¸²à¸°à¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡à¸¥à¸²à¸à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™ à¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¸„à¹ˆà¸²à¸„à¹‰à¸²à¸‡à¸«à¸¥à¸±à¸‡à¸›à¸¥à¹ˆà¸­à¸¢à¹€à¸¡à¸²à¸ªà¹Œ
+        // min-height ใช้เฉพาะระหว่างลากเท่านั้น ไม่ให้ค่าค้างหลังปล่อยเมาส์
         tripSummary.style.minHeight = '0px';
         resizingTripSummary = false;
         tripSummary.classList.remove('trip-resizing');
@@ -2194,7 +2194,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
         applyTripSummaryHeight(300);
     });
 
-    // à¸ˆà¸³à¸‚à¸™à¸²à¸”à¸—à¸µà¹ˆà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸›à¸£à¸±à¸šà¹„à¸§à¹‰ à¹€à¸¡à¸·à¹ˆà¸­à¸à¸¥à¸±à¸šà¹€à¸‚à¹‰à¸²à¸«à¸™à¹‰à¸²à¸™à¸µà¹‰à¸ˆà¸°à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¥à¸²à¸à¹ƒà¸«à¸¡à¹ˆ
+    // จำขนาดที่ผู้ใช้ปรับไว้ เมื่อกลับเข้าหน้านี้จะไม่ต้องลากใหม่
     try{
         const savedSideWidth = parseFloat(localStorage.getItem('takPlannerSideWidth'));
         const savedTripHeight = parseFloat(localStorage.getItem('takPlannerTripHeight'));
@@ -2205,13 +2205,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
             applySideWidth(savedSideWidth);
         }
 
-        // à¹ƒà¸Šà¹‰à¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¸—à¸µà¹ˆà¸šà¸±à¸™à¸—à¸¶à¸à¹„à¸§à¹‰à¸•à¹ˆà¸­à¹€à¸¡à¸·à¹ˆà¸­à¹€à¸›à¹‡à¸™à¸„à¹ˆà¸²à¸—à¸µà¹ˆà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸¥à¸²à¸à¸•à¸±à¹‰à¸‡à¹€à¸­à¸‡
-        // à¹à¸¥à¸°à¸ˆà¸³à¸™à¸§à¸™à¸£à¸²à¸¢à¸à¸²à¸£à¸¢à¸±à¸‡à¹€à¸—à¹ˆà¸²à¹€à¸”à¸´à¸¡à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™ à¸–à¹‰à¸²à¸£à¸²à¸¢à¸à¸²à¸£à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¹ƒà¸«à¹‰à¸„à¸³à¸™à¸§à¸“à¹ƒà¸«à¸¡à¹ˆ
+        // ใช้ความสูงที่บันทึกไว้ต่อเมื่อเป็นค่าที่ผู้ใช้ลากตั้งเอง
+        // และจำนวนรายการยังเท่าเดิมเท่านั้น ถ้ารายการเปลี่ยนให้คำนวณใหม่
         if(Number.isFinite(savedTripHeight) && savedTripHeightManual && savedTripHeightCount === trip.length){
             applyTripSummaryHeight(savedTripHeight, false);
             restoredManualTripHeight = true;
         }else{
-            // à¸¥à¹‰à¸²à¸‡à¸„à¹ˆà¸²à¸„à¸§à¸²à¸¡à¸ªà¸¹à¸‡à¹€à¸à¹ˆà¸²à¸ˆà¸²à¸à¹€à¸§à¸­à¸£à¹Œà¸Šà¸±à¸™à¸à¹ˆà¸­à¸™ à¹€à¸žà¸·à¹ˆà¸­à¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¸à¸£à¸­à¸šà¸„à¹‰à¸²à¸‡à¸ªà¸¹à¸‡
+            // ล้างค่าความสูงเก่าจากเวอร์ชันก่อน เพื่อไม่ให้กรอบค้างสูง
             localStorage.removeItem('takPlannerTripHeight');
             localStorage.removeItem('takPlannerTripHeightManual');
             localStorage.removeItem('takPlannerTripHeightCount');
@@ -2283,8 +2283,8 @@ while($row = mysqli_fetch_assoc($result_trip)){
     const shareUrlEl = document.getElementById('share-url');
     const copyShareUrlBtn = document.getElementById('copy-share-url');
 
-    // QR à¸ˆà¸°à¸žà¸ place_key à¸•à¸²à¸¡à¸¥à¸³à¸”à¸±à¸šà¹„à¸›à¸”à¹‰à¸§à¸¢à¹‚à¸”à¸¢à¸•à¸£à¸‡
-    // à¸ˆà¸¶à¸‡à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¡à¸µ trip-share-config.php à¹à¸¥à¸°à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸žà¸¶à¹ˆà¸‡ save-trip.php
+    // QR จะพก place_key ตามลำดับไปด้วยโดยตรง
+    // จึงไม่ต้องมี trip-share-config.php และไม่ต้องพึ่ง save-trip.php
     function getShareUrl(){
         const url = new URL('trip-view.php', window.location.href);
         url.searchParams.set('places', trip.join(','));
@@ -2293,7 +2293,7 @@ while($row = mysqli_fetch_assoc($result_trip)){
 
     function openQrModal(){
         if(trip.length === 0){
-            alert('à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆà¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 1 à¹à¸«à¹ˆà¸‡à¸à¹ˆà¸­à¸™à¸ªà¸£à¹‰à¸²à¸‡ QR Code');
+            alert('กรุณาเลือกสถานที่อย่างน้อย 1 แห่งก่อนสร้าง QR Code');
             return;
         }
 
@@ -2352,13 +2352,13 @@ while($row = mysqli_fetch_assoc($result_trip)){
     copyShareUrlBtn.addEventListener('click', async () => {
         try{
             await navigator.clipboard.writeText(shareUrlEl.value);
-            copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¹à¸¥à¹‰à¸§ âœ“';
-            setTimeout(() => copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œ', 1500);
+            copyShareUrlBtn.textContent = 'คัดลอกแล้ว ✓';
+            setTimeout(() => copyShareUrlBtn.textContent = 'คัดลอกลิงก์', 1500);
         }catch(e){
             shareUrlEl.select();
             document.execCommand('copy');
-            copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¹à¸¥à¹‰à¸§ âœ“';
-            setTimeout(() => copyShareUrlBtn.textContent = 'à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œ', 1500);
+            copyShareUrlBtn.textContent = 'คัดลอกแล้ว ✓';
+            setTimeout(() => copyShareUrlBtn.textContent = 'คัดลอกลิงก์', 1500);
         }
     });
 
