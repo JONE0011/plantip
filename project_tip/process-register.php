@@ -35,7 +35,10 @@ if(isset($_POST['username_account']) && isset($_POST['email_account']) && isset(
                 'threads' => PASSWORD_ARGON2_DEFAULT_THREADS
              ];
              $password_account =password_hash($password_account1, $algo, $options); //นำรหัสผ่านที่ต่อกับค่าเกลือแล้ว เข้ารหัสด้วยวิธี ARGON2ID
-             $query_create_account = "INSERT INTO account VALUES ('', '$username_account', '$email_account', '$password_account', '$salt_account', 'member', 'default_images_account.jpg', '', '', '')";
+             // ไม่ส่ง id_account เข้าไป เพราะให้ MySQL/MariaDB สร้างเลขอัตโนมัติด้วย AUTO_INCREMENT
+             $query_create_account = "INSERT INTO account
+                 (username_account, email_account, password_account, salt_account, role_account, images_account, login_count_account, lock_account, ban_account)
+                 VALUES ('$username_account', '$email_account', '$password_account', '$salt_account', 'member', 'default_images_account.jpg', 0, 0, NULL)";
              $call_back_create_account = mysqli_query($connect, $query_create_account);
              if($call_back_create_account){
                  die(header('Location: form-login.php')); //สร้างบัญชีสำเร็จ

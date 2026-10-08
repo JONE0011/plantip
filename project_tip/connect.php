@@ -33,6 +33,14 @@ if (!mysqli_real_connect(
 }
 
 mysqli_set_charset($connect, 'utf8mb4');
+
+// บางฐานข้อมูลที่นำเข้า Railway อาจไม่มี AUTO_INCREMENT ที่ id_account
+// ถ้าไม่มี ให้แก้ schema อัตโนมัติเพื่อให้สมัครสมาชิกสร้างเลขสมาชิกได้ตามปกติ
+$account_id_schema = mysqli_query($connect, "SELECT EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'account' AND COLUMN_NAME = 'id_account' LIMIT 1");
+if ($account_id_schema && ($account_id_info = mysqli_fetch_assoc($account_id_schema)) && stripos((string)$account_id_info['EXTRA'], 'auto_increment') === false) {
+    mysqli_query($connect, "ALTER TABLE account MODIFY id_account INT(50) NOT NULL AUTO_INCREMENT");
+}
+
 // Community reviews and 1-5 star ratings
 mysqli_query($connect, "CREATE TABLE IF NOT EXISTS reviews (
     id_review BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
