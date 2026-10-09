@@ -2,37 +2,53 @@
 $open_connect = 1;
 require('connect.php');
 
-// QR ส่ง place_key ตามลำดับที่ผู้ใช้จัดไว้ เช่น ?places=A,B,C
+// QR ส่งรหัสสถานที่/ร้านตามลำดับ เช่น ?places=thi-lo-su,shop:12,shop:27
+// รองรับทั้งสถานที่เที่ยว (place_key) และร้านค้า (shop:id_shop)
 $raw_places = $_GET['places'] ?? '';
-$place_keys = [];
-foreach(explode(',', $raw_places) as $key){
-    $key = trim($key);
-    if($key !== '' && !in_array($key, $place_keys, true)) $place_keys[] = $key;
+$item_ids = [];
+foreach(explode(',', $raw_places) as $item){
+    $item = trim($item);
+    if($item !== '' && !in_array($item, $item_ids, true)) $item_ids[] = $item;
 }
+$item_ids = array_slice($item_ids, 0, 50);
 
 $places = [];
-if(count($place_keys) > 0){
-    $place_keys = array_slice($place_keys, 0, 50);
-    $placeholders = implode(',', array_fill(0, count($place_keys), '?'));
-    $types = str_repeat('s', count($place_keys));
+$findPlace = mysqli_prepare($connect,
+    "SELECT name_place AS name, location_place AS location, lat_place AS lat, lng_place AS lng
+     FROM place WHERE place_key = ? LIMIT 1"
+);
+$findShop = mysqli_prepare($connect,
+    "SELECT name_shop AS name, address_shop AS location, lat_shop AS lat, lng_shop AS lng
+     FROM shop WHERE id_shop = ? AND status_shop = 1 LIMIT 1"
+);
 
-    $stmt = mysqli_prepare($connect,
-        "SELECT place_key, name_place, location_place, lat_place, lng_place, image_place
-         FROM place WHERE place_key IN ($placeholders)"
-    );
-    mysqli_stmt_bind_param($stmt, $types, ...$place_keys);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+foreach($item_ids as $item){
+    if(strpos($item, 'shop:') === 0){
+        $shopId = (int)substr($item, 5);
+        if($shopId <= 0 || !$findShop) continue;
+        mysqli_stmt_bind_param($findShop, 'i', $shopId);
+        if(!mysqli_stmt_execute($findShop)) continue;
+        $result = mysqli_stmt_get_result($findShop);
+    }else{
+        $placeKey = str_starts_with($item, 'place:') ? substr($item, 6) : $item;
+        if($placeKey === '' || !$findPlace) continue;
+        mysqli_stmt_bind_param($findPlace, 's', $placeKey);
+        if(!mysqli_stmt_execute($findPlace)) continue;
+        $result = mysqli_stmt_get_result($findPlace);
+    }
 
-    $byKey = [];
-    while($row = mysqli_fetch_assoc($result)) $byKey[$row['place_key']] = $row;
-    mysqli_stmt_close($stmt);
-
-    // เรียงกลับตามลำดับที่ติดมากับ QR
-    foreach($place_keys as $key){
-        if(isset($byKey[$key])) $places[] = $byKey[$key];
+    $row = $result ? mysqli_fetch_assoc($result) : null;
+    if($row){
+        $places[] = [
+            'name' => $row['name'] ?? '',
+            'location' => $row['location'] ?? '',
+            'lat' => (float)($row['lat'] ?? 0),
+            'lng' => (float)($row['lng'] ?? 0)
+        ];
     }
 }
+if($findPlace) mysqli_stmt_close($findPlace);
+if($findShop) mysqli_stmt_close($findShop);
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -60,9 +76,9 @@ if(count($place_keys) > 0){
 <?php else: ?>
 <div class="hint">แตะปุ่ม <b>ไป Google Maps</b> ของสถานที่ที่ต้องการ เพื่อเปิดตำแหน่งบนมือถือ</div>
 <?php foreach($places as $index=>$place):
-    $lat=(float)$place['lat_place']; $lng=(float)$place['lng_place'];
+    $lat=(float)$place['lat']; $lng=(float)$place['lng'];
     $google_url='https://www.google.com/maps/dir/?api=1&destination='.rawurlencode($lat.','.$lng);
 ?>
-<article class="trip-card"><div class="number"><?php echo $index+1; ?></div><div class="place-info"><h2><?php echo htmlspecialchars($place['name_place']); ?></h2><p><?php echo htmlspecialchars($place['location_place']); ?></p></div><a class="map-btn" href="<?php echo htmlspecialchars($google_url); ?>" target="_blank" rel="noopener noreferrer">🗺️ ไป Google Maps</a></article>
+<article class="trip-card"><div class="number"><?php echo $index+1; ?></div><div class="place-info"><h2><?php echo htmlspecialchars($place['name'], ENT_QUOTES, 'UTF-8'); ?></h2><p><?php echo htmlspecialchars($place['location'], ENT_QUOTES, 'UTF-8'); ?></p></div><a class="map-btn" href="<?php echo htmlspecialchars($google_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">🗺️ ไป Google Maps</a></article>
 <?php endforeach; ?>
 <?php endif; ?><div class="footer">เที่ยวตาก · TAK EXPLORE</div></main></body></html>
